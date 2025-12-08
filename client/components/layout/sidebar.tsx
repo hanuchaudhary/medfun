@@ -79,15 +79,6 @@ export function Sidebar() {
             Create coin
           </Button>
         </Link>
-
-        {connected && (
-          <div className="mt-3 text-center">
-            <div className="text-xs mb-1 flex items-center justify-center gap-1">
-              Creator rewards
-            </div>
-            <div className="text-sm font-bold text-foreground">$0.04</div>
-          </div>
-        )}
       </div>
     </aside>
   );

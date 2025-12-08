@@ -1,17 +1,16 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowDownUp } from "lucide-react";
 import {
   DynamicBondingCurveClient,
   getCurrentPoint,
 } from "@meteora-ag/dynamic-bonding-curve-sdk";
 import { useWallet } from "@/hooks/use-wallet";
+import { useBalance } from "@/hooks/use-balance";
 import {
   useSignAndSendTransaction as useSendTransactionSolana,
   useWallets as useWalletsSolana,
@@ -20,8 +19,6 @@ import { Connection } from "@solana/web3.js";
 import BN from "bn.js";
 import { toast } from "sonner";
 import { TOKEN_POOL_ADDRESS } from "@/app/constant";
-import { useQuery } from "@tanstack/react-query";
-// import { fetchSolBalance } from "@/lib/actions";
 import Image from "next/image";
 
 interface SwapSectionProps {
@@ -88,27 +85,22 @@ export function SwapSection({ tokenId }: SwapSectionProps) {
 
   const wallet = useWallet();
   const { wallets: walletsSolana } = useWalletsSolana();
-  const { signAndSendTransaction: sendTransactionSolana } = useSendTransactionSolana();
+  const { signAndSendTransaction: sendTransactionSolana } =
+    useSendTransactionSolana();
   const connection = new Connection(
     process.env.NEXT_PUBLIC_RPC_URL!,
     "confirmed"
   );
 
+  const { balance: solBalance, isLoading: balanceLoading } = useBalance({
+    publicKey: wallet.publicKey,
+    refetchInterval: 30000,
+  });
+
   const getPrivyWallet = () => {
     if (!wallet.wallet?.address) return null;
     return walletsSolana.find((w) => w.address === wallet.wallet?.address);
   };
-
-  const { data: solBalance, isLoading: balanceLoading } = useQuery({
-    enabled: !!wallet.publicKey,
-    queryKey: ["sol-balance", wallet.publicKey?.toString()],
-    queryFn: async () => {
-      if (!wallet.publicKey) return 0;
-      // return await fetchSolBalance(connection, wallet.publicKey);
-    },
-    staleTime: 15_000,
-    refetchInterval: 30_000,
-  });
 
   const getSwapQuote = async (amount: number, isBuy: boolean) => {
     const client = new DynamicBondingCurveClient(connection, "confirmed");
@@ -269,7 +261,9 @@ export function SwapSection({ tokenId }: SwapSectionProps) {
 
       toast.loading("Awaiting confirmation...", { id: toastId });
 
-      const txBase64 = swapTransaction.serialize({ requireAllSignatures: false, verifySignatures: false }).toString("base64");
+      const txBase64 = swapTransaction
+        .serialize({ requireAllSignatures: false, verifySignatures: false })
+        .toString("base64");
       const result = await sendTransactionSolana({
         transaction: Buffer.from(txBase64, "base64"),
         wallet: privyWallet,
@@ -342,7 +336,9 @@ export function SwapSection({ tokenId }: SwapSectionProps) {
 
       toast.loading("Awaiting confirmation...", { id: toastId });
 
-      const txBase64 = swapTransaction.serialize({ requireAllSignatures: false, verifySignatures: false }).toString("base64");
+      const txBase64 = swapTransaction
+        .serialize({ requireAllSignatures: false, verifySignatures: false })
+        .toString("base64");
       const result = await sendTransactionSolana({
         transaction: Buffer.from(txBase64, "base64"),
         wallet: privyWallet,
@@ -374,18 +370,17 @@ export function SwapSection({ tokenId }: SwapSectionProps) {
   };
 
   return (
-    <Card className="border-b border-x-0 border-t-0 bg-background rounded-none p-0 gap-0">
+    <Card className="border-b border-x-0 border-t-0 bg-background gap-0 border p-4 rounded-xl">
       <CardContent className="p-0 gap-0 relative">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center z-10"></div>
         <Tabs defaultValue="buy" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 h-20 border-b">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger className="" value="buy">
               Buy
             </TabsTrigger>
             <TabsTrigger value="sell">Sell</TabsTrigger>
           </TabsList>
           <TabsContent value="buy">
-            <div className="flex justify-between items-center p-6">
+            <div className="flex justify-between items-center p-3">
               <span className="text-sm text-muted-foreground">balance:</span>
               <span className="text-sm">
                 {balanceLoading
@@ -396,7 +391,7 @@ export function SwapSection({ tokenId }: SwapSectionProps) {
 
             <div className="relative">
               <Input
-                className="w-full border-y pr-20 py-6 text-xl"
+                className="w-full border rounded-xl pr-20 py-3"
                 id="buy-from"
                 type="number"
                 placeholder="0.0"
@@ -408,18 +403,18 @@ export function SwapSection({ tokenId }: SwapSectionProps) {
                   <Image
                     src={"/solana.svg"}
                     alt="Solana"
-                    width={40}
-                    height={40}
+                    width={20}
+                    height={20}
                   />
                 </div>
               </div>
             </div>
 
-            <div className="flex">
+            <div className="flex py-3 gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                className="flex-1 rounded-none py-8 border-0 border-r"
+                className="flex-1 rounded-sm border border-r"
                 onClick={() => {
                   const amount = (solBalance || 0) * 0.25;
                   handleBuyAmountChange(amount.toString());
@@ -430,7 +425,7 @@ export function SwapSection({ tokenId }: SwapSectionProps) {
               <Button
                 variant="outline"
                 size="sm"
-                className="flex-1 rounded-none py-8 border-0 border-r"
+                className="flex-1 rounded-sm border border-r"
                 onClick={() => {
                   const amount = (solBalance || 0) * 0.5;
                   handleBuyAmountChange(amount.toString());
@@ -441,7 +436,7 @@ export function SwapSection({ tokenId }: SwapSectionProps) {
               <Button
                 variant="outline"
                 size="sm"
-                className="flex-1 rounded-none py-8 border-0 border-r"
+                className="flex-1 rounded-sm border border-r"
                 onClick={() => {
                   const amount = (solBalance || 0) * 0.75;
                   handleBuyAmountChange(amount.toString());
@@ -452,7 +447,7 @@ export function SwapSection({ tokenId }: SwapSectionProps) {
               <Button
                 variant="outline"
                 size="sm"
-                className="flex-1 rounded-none py-8 border-0"
+                className="flex-1 rounded-sm border"
                 onClick={() => {
                   const amount = solBalance || 0;
                   handleBuyAmountChange(amount.toString());
@@ -463,7 +458,7 @@ export function SwapSection({ tokenId }: SwapSectionProps) {
             </div>
 
             {buyOutputAmount && (
-              <div className="text-center py-4">
+              <div className="text-center py-2 text-sm">
                 <span className="text-muted-foreground">you receive </span>
                 <span className="font-medium">
                   {buyOutputAmount} {TOKEN_SYMBOL}
@@ -473,7 +468,7 @@ export function SwapSection({ tokenId }: SwapSectionProps) {
 
             <Button
               onClick={handleBuy}
-              className="w-full rounded-none py-8 text-lg"
+              className="w-full text-background"
               size="lg"
               disabled={
                 !wallet.connected ||

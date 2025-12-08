@@ -38,8 +38,8 @@ export function TokenInfoCard() {
   };
 
   return (
-    <div className="w-full h-fit border-t  ">
-      <div className="p-4 space-y-4">
+    <div className="w-full h-fit">
+      <div className="space-y-4">
         <div>
           <h4 className="text-sm font-bold text-muted-foreground mb-2">
             Description

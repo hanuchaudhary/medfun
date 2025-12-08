@@ -1,6 +1,7 @@
 "use client";
 
 import { useWallet } from "@/hooks/use-wallet";
+import { useBalance } from "@/hooks/use-balance";
 import {
   Sheet,
   SheetContent,
@@ -12,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { Copy, ExternalLink, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import React from "react";
-import { Connection, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import Image from "next/image";
 
 interface WalletModalProps {
@@ -27,26 +27,10 @@ export default function WalletModal({
   disconnect,
 }: WalletModalProps) {
   const { publicKey, wallet } = useWallet();
-  const [solanaBalance, setSolanaBalance] = React.useState<number | null>(null);
-  const [loadingBalance, setLoadingBalance] = React.useState(false);
-
-  const connection = new Connection(
-    process.env.NEXT_PUBLIC_RPC_URL!,
-    "confirmed"
-  );
-
-  React.useEffect(() => {
-    if (!publicKey) return;
-    const fetchBalance = async () => {
-      setLoadingBalance(true);
-      const lamports = await connection.getBalance(publicKey!);
-      console.log("lamports", lamports);
-      
-      setSolanaBalance(lamports / LAMPORTS_PER_SOL);
-      setLoadingBalance(false);
-    };
-    fetchBalance();
-  }, [publicKey]);
+  const { balance: solanaBalance, isLoading: loadingBalance } = useBalance({
+    publicKey,
+    refetchInterval: 30000,
+  });
 
   const handleCopyAddress = () => {
     if (publicKey) {
@@ -97,7 +81,10 @@ export default function WalletModal({
           )}
 
           {publicKey && (
-            <div className="space-y-2 cursor-pointer group" onClick={handleCopyAddress}>
+            <div
+              className="space-y-2 cursor-pointer group"
+              onClick={handleCopyAddress}
+            >
               <p className="text-sm font-medium text-muted-foreground">
                 Address
               </p>
@@ -121,9 +108,7 @@ export default function WalletModal({
                 {loadingBalance ? (
                   <span className="text-muted-foreground">Loading...</span>
                 ) : (
-                  <span className="">
-                    {solanaBalance?.toFixed(4)} SOL
-                  </span>
+                  <span className="">{solanaBalance?.toFixed(4)} SOL</span>
                 )}
               </div>
             </div>

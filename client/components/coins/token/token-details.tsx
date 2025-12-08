@@ -33,7 +33,7 @@ export function TokenDetails({ tokenMint }: TokenDetailsProps) {
 
   if (isLoadingCurrentToken) {
     return (
-      <div className="border-b p-2   animate-pulse">
+      <div className="border-b p-2 animate-pulse">
         <div className="h-84 bg-muted"></div>
       </div>
     );
@@ -41,7 +41,7 @@ export function TokenDetails({ tokenMint }: TokenDetailsProps) {
 
   if (!currentToken) {
     return (
-      <div className="border-b   p-8">
+      <div className="border-b p-8">
         <p className="text-destructive">Token not found</p>
       </div>
     );
@@ -50,10 +50,10 @@ export function TokenDetails({ tokenMint }: TokenDetailsProps) {
   const progress = currentToken.bondingCurveProgress ?? 0;
 
   return (
-    <div className="border-b  ">
+    <div className="border p-2 rounded-xl">
       <div className="">
-        <div className="flex items-start gap-4 border-b">
-          <div className="relative w-24 h-24 flex-shrink-0">
+        <div className="flex items-start gap-4">
+          <div className="relative w-24 h-24 flex-shrink-0 rounded-md overflow-hidden bg-muted">
             <Image
               src={
                 currentToken.imageUrl ||
@@ -66,9 +66,9 @@ export function TokenDetails({ tokenMint }: TokenDetailsProps) {
             />
           </div>
           <div className="flex-1">
-            <div className="flex items-center gap-2 mt-2">
-              <h1 className="text-2xl font-bold">{currentToken.name}</h1>
-              <Badge variant="secondary" className="rounded-none">
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-semibold">{currentToken.name}</h1>
+              <Badge variant="secondary" className="rounded-sm text-primary">
                 {currentToken.symbol}
               </Badge>
             </div>
@@ -78,22 +78,22 @@ export function TokenDetails({ tokenMint }: TokenDetailsProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 divide-x divide-y mb-4">
-          <div className="p-4">
-            <p className="text-xs text-muted-foreground mb-1">Price</p>
-            <p className="text-xl">{formatPrice(currentToken.marketCap)}</p>
+        <div className="mb-4 grid grid-cols-2 sm:grid-cols-4 gap-4 py-4 border-b ">
+          <div className="">
+            <p className="text-xs text-muted-foreground">Price</p>
+            <p className="text-sm">{formatPrice(currentToken.marketCap)}</p>
           </div>
-          <div className="p-4">
-            <p className="text-xs text-muted-foreground mb-1">Market Cap</p>
-            <p className="text-xl">{formatNumber(currentToken.marketCap)}</p>
+          <div className="">
+            <p className="text-xs text-muted-foreground">MC</p>
+            <p className="text-sm">{formatNumber(currentToken.marketCap)}</p>
           </div>
-          <div className="p-4">
-            <p className="text-xs text-muted-foreground mb-1">Volume 24h</p>
-            <p className="text-xl">{formatNumber(currentToken.volume)}</p>
+          <div className="">
+            <p className="text-xs text-muted-foreground">Vo. 24h</p>
+            <p className="text-sm">{formatNumber(currentToken.volume)}</p>
           </div>
-          <div className="p-4">
-            <p className="text-xs text-muted-foreground mb-1">Liquidity</p>
-            <p className="text-xl">{formatNumber(currentToken.liquidity)}</p>
+          <div className="">
+            <p className="text-xs text-muted-foreground">Liquidity</p>
+            <p className="text-sm">{formatNumber(currentToken.liquidity)}</p>
           </div>
         </div>
 

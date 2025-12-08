@@ -81,7 +81,7 @@ export function RecentlyOpened({
   if (recentTokens.length === 0) return null;
 
   return (
-    <div className="bg-background border-x border-b">
+    <div className="bg-background border-t absolute bottom-0 left-0 w-full">
       <div className="flex items-center gap-2 px-2">
         <Button
           variant="ghost"

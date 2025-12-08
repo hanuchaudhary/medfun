@@ -1,13 +1,12 @@
 "use client";
 
-//TODO: SOL balance
-
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useWallet } from "@/hooks/use-wallet";
+import { useBalance } from "@/hooks/use-balance";
 import {
   useSignAndSendTransaction as useSendTransactionSolana,
   useWallets as useWalletsSolana,
@@ -40,11 +39,17 @@ export function GraduatedSwapSection({
 
   const wallet = useWallet();
   const { wallets: walletsSolana } = useWalletsSolana();
-  const { signAndSendTransaction: sendTransactionSolana } = useSendTransactionSolana();
+  const { signAndSendTransaction: sendTransactionSolana } =
+    useSendTransactionSolana();
   const connection = new Connection(
     process.env.NEXT_PUBLIC_RPC_URL!,
     "confirmed"
   );
+
+  const { balance: solBalance, isLoading: balanceLoading } = useBalance({
+    publicKey: wallet.publicKey,
+    refetchInterval: 30000,
+  });
 
   const cpAmm = new CpAmm(connection);
 
@@ -125,7 +130,9 @@ export function GraduatedSwapSection({
       id: toastId,
     });
 
-    const txBase64 = swapTx.serialize({ requireAllSignatures: false, verifySignatures: false }).toString("base64");
+    const txBase64 = swapTx
+      .serialize({ requireAllSignatures: false, verifySignatures: false })
+      .toString("base64");
     const result = await sendTransactionSolana({
       transaction: Buffer.from(txBase64, "base64"),
       wallet: privyWallet,
@@ -196,11 +203,11 @@ export function GraduatedSwapSection({
           <TabsContent value="buy" className="space-y-4 p-6">
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">balance:</span>
-              {/* <span className="text-sm">
+              <span className="text-sm">
                 {balanceLoading
                   ? "Loading..."
                   : `${solBalance?.toFixed(6) || "0"} SOL`}
-              </span> */}
+              </span>
             </div>
 
             <div className="relative">
@@ -224,10 +231,10 @@ export function GraduatedSwapSection({
                 variant="outline"
                 size="sm"
                 className="flex-1 rounded-lg"
-                // onClick={() => {
-                //   const amount = (solBalance || 0) * 0.25;
-                //   setBuyAmount(amount.toString());
-                // }}
+                onClick={() => {
+                  const amount = (solBalance || 0) * 0.25;
+                  setBuyAmount(amount.toString());
+                }}
               >
                 25%
               </Button>
@@ -235,10 +242,10 @@ export function GraduatedSwapSection({
                 variant="outline"
                 size="sm"
                 className="flex-1 rounded-lg"
-                // onClick={() => {
-                //   const amount = (solBalance || 0) * 0.5;
-                //   setBuyAmount(amount.toString());
-                // }}
+                onClick={() => {
+                  const amount = (solBalance || 0) * 0.5;
+                  setBuyAmount(amount.toString());
+                }}
               >
                 50%
               </Button>
@@ -246,10 +253,10 @@ export function GraduatedSwapSection({
                 variant="outline"
                 size="sm"
                 className="flex-1 rounded-lg"
-                // onClick={() => {
-                //   const amount = (solBalance || 0) * 0.75;
-                //   setBuyAmount(amount.toString());
-                // }}
+                onClick={() => {
+                  const amount = (solBalance || 0) * 0.75;
+                  setBuyAmount(amount.toString());
+                }}
               >
                 75%
               </Button>
@@ -257,10 +264,10 @@ export function GraduatedSwapSection({
                 variant="outline"
                 size="sm"
                 className="flex-1 rounded-lg"
-                // onClick={() => {
-                //   const amount = solBalance || 0;
-                //   setBuyAmount(amount.toString());
-                // }}
+                onClick={() => {
+                  const amount = solBalance || 0;
+                  setBuyAmount(amount.toString());
+                }}
               >
                 100%
               </Button>

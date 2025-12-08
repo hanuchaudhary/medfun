@@ -1,11 +1,13 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ImageUpload } from "./image-upload";
 import { SocialLinksInput } from "./social-links-input";
+import { TokenCard } from "@/components/coins/token-card";
+import { Token } from "@/types/token";
 import axios from "axios";
 import { useWallet } from "@/hooks/use-wallet";
 import {
@@ -195,97 +197,150 @@ export function TokenCreationForm({
   ) => {
     setFormData({ ...formData, socialLinks });
   };
+
+  // Create preview token data
+  const previewToken: Token = useMemo(
+    () => ({
+      name: formData.name || "Your Token Name",
+      symbol: formData.symbol || "SYMBOL",
+      description:
+        formData.description || "Your token description will appear here...",
+      imageUrl: formData.image || null,
+      mintAddress: "Preview",
+      poolAddress: "Preview",
+      creatorAddress: wallet.publicKey?.toString() || "",
+      website: formData.socialLinks.website || null,
+      twitter: formData.socialLinks.twitter || null,
+      telegram: formData.socialLinks.telegram || null,
+      metadataUrl: null,
+      bondingCurveProgress: 15.5,
+      volume: 12500,
+      liquidity: 8500,
+      marketCap: 45000,
+      holderCount: 128,
+      stats5m: null,
+      stats1h: null,
+      stats6h: null,
+      stats24h: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }),
+    [formData, wallet.publicKey]
+  );
+
   return (
     <>
-      <form onSubmit={handleSubmit} className=" ">
-        <Card className="border-y border-x-0 rounded-none p-0 bg-background">
-          <CardContent className="pt-6 p-0 divide-y">
-            <div className="flex md:flex-row flex-col">
-              <div>
-                <ImageUpload
-                  value={formData.image}
-                  onChange={handleImageChange}
-                />
-              </div>
-              <div className="flex-1 divide-y">
-                <div className="grid grid-cols-1 md:grid-cols-2 border-b md:divide-y-0 divide-y">
-                  <div>
-                    <Input
-                      id="name"
-                      autoFocus
-                      placeholder="Doge Moon"
-                      value={formData.name}
-                      className="md:border-r"
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
-                      required
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                  <div>
-                    <Input
-                      id="symbol"
-                      placeholder="DOGEM"
-                      value={formData.symbol}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          symbol: e.target.value.to(),
-                        })
-                      }
-                      required
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Textarea
-                    id="description"
-                    placeholder="Describe your token..."
-                    className="min-h-60 border-0 rounded-none resize-none"
-                    rows={4}
-                    value={formData.description}
-                    onChange={(e) =>
-                      setFormData({ ...formData, description: e.target.value })
-                    }
-                    disabled={isSubmitting}
-                  />
-                </div>
-                <div>
-                  <SocialLinksInput
-                    value={formData.socialLinks}
-                    onChange={handleSocialLinksChange}
-                  />
-                </div>
-                <div className="flex">
-                  <Button
-                    type="submit"
-                    size="lg"
-                    className="flex-1 border-none rounded-none py-8 md:py-12"
-                    disabled={isSubmitting || !wallet.connected}
-                  >
-                    {!wallet.connected
-                      ? "Connect Wallet"
-                      : isSubmitting
-                      ? "Creating Token..."
-                      : "Create Token"}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="border-none px-12 rounded-none py-8 md:py-12"
-                    size="lg"
-                    onClick={resetForm}
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? "Cancel" : "Reset"}
-                  </Button>
-                </div>
+      <form onSubmit={handleSubmit} className="max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-8 p-6">
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold mb-2">Create new coin</h2>
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Coin details</p>
+                <p className="text-sm text-muted-foreground">
+                  Choose carefully, these can't be changed once the coin is
+                  created
+                </p>
               </div>
             </div>
-          </CardContent>
-        </Card>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label htmlFor="name" className="text-sm font-medium">
+                  Coin name
+                </label>
+                <Input
+                  id="name"
+                  autoFocus
+                  placeholder="Name your coin"
+                  value={formData.name}
+                  className="rounded-lg"
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  required
+                  disabled={isSubmitting}
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="symbol" className="text-sm font-medium">
+                  Ticker
+                </label>
+                <Input
+                  id="symbol"
+                  placeholder="Add a coin ticker (e.g. DOGE)"
+                  value={formData.symbol}
+                  className="rounded-lg"
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      symbol: e.target.value.toUpperCase(),
+                    })
+                  }
+                  required
+                  disabled={isSubmitting}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="description" className="text-sm font-medium">
+                Description{" "}
+                <span className="text-muted-foreground">(Optional)</span>
+              </label>
+              <Textarea
+                id="description"
+                placeholder="Write a short description"
+                className="min-h-32 rounded-lg resize-none"
+                rows={4}
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+                disabled={isSubmitting}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <SocialLinksInput
+                value={formData.socialLinks}
+                onChange={handleSocialLinksChange}
+              />
+            </div>
+
+            <div className="space-y-4">
+              <ImageUpload
+                value={formData.image}
+                onChange={handleImageChange}
+              />
+            </div>
+
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full rounded-lg py-6 text-background font-semibold bg-primary hover:bg-primary/90"
+              disabled={isSubmitting || !wallet.connected}
+            >
+              {!wallet.connected
+                ? "Connect Wallet"
+                : isSubmitting
+                ? "Creating coin..."
+                : "Create coin"}
+            </Button>
+          </div>
+
+          <div className="hidden md:block">
+            <div className="sticky top-6 space-y-4">
+              <h3 className="text-xl font-semibold">Preview</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                A preview of how the coin will look like
+              </p>
+              <div className="border rounded-lg p-4 bg-card">
+                <TokenCard token={previewToken} href="#" />
+              </div>
+            </div>
+          </div>
+        </div>
       </form>
       <Dialog open={showSuccessDialog} onOpenChange={closeSuccessDialog}>
         <DialogContent className="sm:max-w-xl bg-transparent rounded-[32px] backdrop-blur-sm border border-primary/10 p-2">

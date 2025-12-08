@@ -174,9 +174,9 @@ export function HoldersTradesTable({ tokenId }: HoldersTradesTableProps) {
   ];
 
   return (
-    <div className="w-full border-t  ">
+    <div className="w-full">
       <Tabs defaultValue="holders" className="w-full">
-        <div className="border-b flex items-center justify-between">
+        <div className="flex items-center justify-between">
           <TabsList className="">
             <TabsTrigger value="holders">
               Top Holders({holders.length})
@@ -213,7 +213,7 @@ export function HoldersTradesTable({ tokenId }: HoldersTradesTableProps) {
                         <Link
                           href={`https://solscan.io/account/${holder.address}`}
                           target="_blank"
-                          className="inline-flex items-center gap-1 hover:text-primary transition-colors font-mono"
+                          className="inline-flex text-xs items-center gap-1 hover:text-primary transition-colors font-mono"
                         >
                           {holder.address}
                           <ExternalLink className="w-3 h-3" />

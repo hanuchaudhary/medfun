@@ -46,7 +46,7 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
   };
 
   return (
-    <div className="space-y-4 w-full h-full md:w-68 ">
+    <div className="space-y-2 w-full">
       <input
         ref={fileInputRef}
         type="file"
@@ -56,18 +56,18 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
         required={!preview}
       />
       {preview ? (
-        <div className="relative w-full h-full min-h-[300px] md:min-h-[400px]">
+        <div className="relative w-full aspect-square rounded-lg overflow-hidden border">
           <Image
             src={preview}
             alt="Token preview"
             fill
-            className="rounded-none object-cover border-r"
+            className="object-cover"
           />
           <Button
             type="button"
             variant="destructive"
             size="icon"
-            className="absolute top-2 right-2 md:-top-2 md:-right-2 rounded-none z-10"
+            className="absolute top-2 right-2 rounded-lg z-10"
             onClick={handleRemove}
           >
             <X className="w-4 h-4" />
@@ -76,9 +76,19 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
       ) : (
         <div
           onClick={handleBoxClick}
-          className="w-full h-full min-h-[300px] md:min-h-[400px] border-2 border-dashed rounded-none flex items-center justify-center cursor-pointer border-primary transition-colors"
+          className="w-full aspect-square border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 transition-colors gap-4"
         >
-          <Upload className="w-12 h-12 text-muted-foreground" />
+          <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center">
+            <Upload className="w-8 h-8 text-muted-foreground" />
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-medium">
+              Select image to upload
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              or drag and drop it here
+            </p>
+          </div>
         </div>
       )}
     </div>

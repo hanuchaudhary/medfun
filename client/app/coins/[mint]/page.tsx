@@ -22,26 +22,12 @@ export default async function TokenDetailPage({
   const { mint } = await params;
   return (
     <TokenPageWrapper tokenMint={mint}>
-      <RecentlyOpened currentTokenId={mint} />
-      <div className="relative  ">
+      <div className="relative p-4">
         <div className="lg:hidden pb-24">
           <div className="border-b">
             <TokenDetails tokenMint={mint} />
           </div>
           <div className="relative">
-            {/* <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center z-10">
-              <span className="text-white text-2xl font-semibold mb-4">
-                COMING SOON
-              </span>
-              <a
-                className="px-8 py-6 bg-primary text-background font-medium"
-                href={"https://jup.ag/coins/" + mint}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Trade on Jupiter
-              </a>
-            </div> */}
             <div className="border-b relative">
               <TokenChart mintAddress={mint} />
             </div>
@@ -53,47 +39,33 @@ export default async function TokenDetailPage({
             </div>
           </div>
         </div>
-        <div className="hidden lg:grid lg:grid-cols-4 lg:divide-x h-[calc(100vh-7.5rem)] overflow-hidden">
-          <div className="flex col-span-1 flex-col border-l border-t overflow-auto hide-scrollbar">
+        <div className="hidden lg:grid lg:grid-cols-4 gap-4">
+          <div className="flex col-span-1 flex-col overflow-auto hide-scrollbar">
             <TokenDetails tokenMint={mint} />
-            <TokenInfoCard />
+            <TokenStats />
           </div>
-          <div className="col-span-2 flex flex-col overflow-hidden relative">
-            <ResizablePanelGroup direction="vertical">
-              <ResizablePanel defaultSize={65} minSize={30}>
-                <div className="h-full overflow-auto hide-scrollbar">
-                  {/* <TokenChart mintAddress={mint} /> */}
+          <div className="col-span-2 flex flex-col overflow-hidden relative space-y-4">
+            {/* <ResizablePanelGroup direction="vertical"> */}
+              {/* <ResizablePanel defaultSize={65} minSize={30}> */}
+                <div className="h-full overflow-auto hide-scrollbar border rounded-xl">
                   <ChartLiveWrapper mintAddress={mint} />
                 </div>
-              </ResizablePanel>
-              <ResizableHandle />
-              <ResizablePanel defaultSize={35} minSize={30}>
-                <div className="h-full overflow-auto hide-scrollbar">
+              {/* </ResizablePanel> */}
+              {/* <ResizableHandle /> */}
+              {/* <ResizablePanel defaultSize={35} minSize={30}> */}
+                <div className="h-full overflow-auto border rounded-xl hide-scrollbar">
                   <HoldersTradesTable tokenId={mint} />
                 </div>
-              </ResizablePanel>
-            </ResizablePanelGroup>
-            {/* <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center z-10">
-              <span className="text-white text-2xl font-semibold mb-4">
-                COMING SOON
-              </span>
-              <a
-                className="px-8 py-6 bg-primary text-background font-medium"
-                href={"https://jup.ag/coins/" + mint}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Trade on Jupiter
-              </a>
-            </div> */}
+              {/* </ResizablePanel> */}
+            {/* </ResizablePanelGroup> */}
           </div>
-          <div className="col-span-1 overflow-auto relative hide-scrollbar">
+          <div className="col-span-1 overflow-auto relative hide-scrollbar space-y-4">
             <SwapContainer mint={mint} />
-            <TokenStats />
-            {/* <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center z-10"></div> */}
+            <TokenInfoCard />
           </div>
         </div>
-        {/* <MobileSwapModal tokenName={"tokenName"} tokenId={mint} /> */}
+        <MobileSwapModal tokenName={"tokenName"} tokenId={mint} />
+        {/* <RecentlyOpened currentTokenId={mint} /> */}
       </div>
     </TokenPageWrapper>
   );

@@ -115,8 +115,8 @@ export function TokenChart({ mintAddress }: TokenChartProps) {
   }, [mintAddress]);
 
   return (
-    <div className="w-full border-t  ">
-      <div ref={chartContainerRef} className="w-full p-4" />
+    <div className="w-full">
+      <div ref={chartContainerRef} className="w-full rounded-xl pb-8" />
     </div>
   );
 }

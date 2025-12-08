@@ -33,31 +33,9 @@ export default function ProfilePage() {
 
   return (
     <div className="relative w-full px-6 py-4">
-      <div className="mb-6">
-        <div className="flex items-center md:flex-row flex-col px-6 gap-4">
-          <Avatar className="size-48 rounded-none border-r">
-            <AvatarImage
-              src={
-                "https://i.pinimg.com/736x/63/47/e2/6347e2a6a61f9a5990ff1201673e5d42.jpg"
-              }
-              alt="avatar"
-            />
-            <AvatarFallback>USR</AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col">
-            <span className="text-2xl font-bold md:block hidden">
-              Your Profile
-            </span>
-            <span className="text-muted-foreground text-sm break-all md:py-0 py-4">
-              {address}
-            </span>
-          </div>
-        </div>
-      </div>
-
       <div className="mt-8">
         <div className="relative mb-4">
-          <h2 className="text-sm font-medium absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2">
+          <h2 className="font-semibold">
             Your Tokens
           </h2>
         </div>

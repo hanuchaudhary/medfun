@@ -104,7 +104,7 @@ export default function TokenStats() {
   ];
 
   return (
-    <div>
+    <div className="border rounded-md my-4">
       <h4 className="text-sm font-medium text-muted-foreground my-4 px-4">
         Token Statistics
       </h4>
@@ -191,9 +191,9 @@ export default function TokenStats() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 divide-x mb-4">
+      <div className="grid grid-cols-3 divide-x">
         {changeStats.map((stat) => (
-          <div key={stat.label} className="text-center p-2 border-y">
+          <div key={stat.label} className="text-center p-2">
             <div className="text-xs text-muted-foreground mb-1">
               {stat.label}
             </div>

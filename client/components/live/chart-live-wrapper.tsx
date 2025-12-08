@@ -102,25 +102,25 @@ export function ChartLiveWrapper({ mintAddress }: { mintAddress: string }) {
             className={mode === "CHART" ? "text-primary" : ""}
           />
         </button>
-        <button
+        {/* <button
           className={`p-2 backdrop-blur-sm ${
             mode === "LIVE" ? "bg-primary/20" : "bg-transparent"
           }`}
           onClick={() => handleModeChange("LIVE")}
         >
           <IconVideoFilled className={mode === "LIVE" ? "text-primary" : ""} />
-        </button>
+        </button> */}
       </div>
-      {mode === "LIVE" ? (
+      {/* {mode === "LIVE" ? (
         <LiveStreamComponent
           ref={liveStreamRef}
           isCreator={isCreator}
           channelId={mintAddress}
           onStreamStateChange={handleStreamStateChange}
         />
-      ) : (
+      ) : ( */}
         <TokenChart mintAddress={mintAddress} />
-      )}
+      {/* )} */}
 
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <AlertDialogContent>
