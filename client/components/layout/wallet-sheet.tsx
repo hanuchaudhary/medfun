@@ -1,0 +1,154 @@
+"use client";
+
+import { useWallet } from "@/hooks/use-wallet";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Copy, ExternalLink, LogOut } from "lucide-react";
+import { toast } from "sonner";
+import React from "react";
+import { Connection, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import Image from "next/image";
+
+interface WalletModalProps {
+  open: boolean;
+  onClose: () => void;
+  disconnect: () => void;
+}
+
+export default function WalletModal({
+  open,
+  onClose,
+  disconnect,
+}: WalletModalProps) {
+  const { publicKey, wallet } = useWallet();
+  const [solanaBalance, setSolanaBalance] = React.useState<number | null>(null);
+  const [loadingBalance, setLoadingBalance] = React.useState(false);
+
+  const connection = new Connection(
+    process.env.NEXT_PUBLIC_RPC_URL!,
+    "confirmed"
+  );
+
+  React.useEffect(() => {
+    if (!publicKey) return;
+    const fetchBalance = async () => {
+      setLoadingBalance(true);
+      const lamports = await connection.getBalance(publicKey!);
+      console.log("lamports", lamports);
+      
+      setSolanaBalance(lamports / LAMPORTS_PER_SOL);
+      setLoadingBalance(false);
+    };
+    fetchBalance();
+  }, [publicKey]);
+
+  const handleCopyAddress = () => {
+    if (publicKey) {
+      navigator.clipboard.writeText(publicKey.toString());
+      toast.success("Address copied to clipboard");
+    }
+  };
+
+  const handleViewExplorer = () => {
+    if (publicKey) {
+      window.open(
+        `https://solscan.io/account/${publicKey.toString()}`,
+        "_blank"
+      );
+    }
+  };
+
+  const handleDisconnect = () => {
+    disconnect();
+    onClose();
+  };
+
+  return (
+    <Sheet open={open} onOpenChange={onClose}>
+      <SheetContent side="right" className="w-full sm:max-w-md px-4">
+        <SheetHeader>
+          <SheetTitle>Wallet Connected</SheetTitle>
+          <SheetDescription>
+            Your wallet is successfully connected
+          </SheetDescription>
+        </SheetHeader>
+        <div className="space-y-6">
+          {wallet && (
+            <div className="flex items-center gap-3 rounded-lg">
+              <div className="overflow-hidden flex items-center justify-center">
+                <Image
+                  src={wallet.icon || "/placeholder.png"}
+                  alt={wallet.name || "Solana Wallet"}
+                  height={40}
+                  width={40}
+                  className="rounded-full"
+                />
+              </div>
+              <span className="font-medium text-lg">
+                {wallet.name || "Solana Wallet"}
+              </span>
+            </div>
+          )}
+
+          {publicKey && (
+            <div className="space-y-2 cursor-pointer group" onClick={handleCopyAddress}>
+              <p className="text-sm font-medium text-muted-foreground">
+                Address
+              </p>
+              <div className="flex items-center gap-2 p-4 bg-muted rounded-lg font-mono text-sm">
+                <span className="flex-1 truncate">
+                  {publicKey.toString().slice(0, 12) +
+                    "..." +
+                    publicKey.toString().slice(-12)}
+                </span>
+                <Copy className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+            </div>
+          )}
+
+          {publicKey && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">
+                Balance
+              </p>
+              <div className="flex items-center gap-2 p-4 bg-muted rounded-lg">
+                {loadingBalance ? (
+                  <span className="text-muted-foreground">Loading...</span>
+                ) : (
+                  <span className="">
+                    {solanaBalance?.toFixed(4)} SOL
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div className="flex flex-col gap-3">
+            <Button
+              variant="outline"
+              className="w-full justify-start h-12 rounded-lg"
+              onClick={handleViewExplorer}
+            >
+              <ExternalLink className="w-4 h-4 mr-2" />
+              View on Explorer
+            </Button>
+            <Button
+              variant="destructive"
+              className="w-full justify-start h-12 rounded-lg"
+              onClick={handleDisconnect}
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Disconnect Wallet
+            </Button>
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}

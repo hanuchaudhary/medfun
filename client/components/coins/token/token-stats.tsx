@@ -14,7 +14,7 @@ export default function TokenStats() {
 
   if (isLoadingCurrentToken) {
     return (
-      <div className="w-full h-fit border-t uppercase p-2 animate-pulse">
+      <div className="w-full h-fit border-t   p-2 animate-pulse">
         <div className="h-62 bg-muted"></div>
       </div>
     );

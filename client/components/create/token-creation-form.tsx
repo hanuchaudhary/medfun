@@ -34,7 +34,7 @@ export function TokenCreationForm({
   const wallet = useWallet();
   const { wallets: walletsSolana } = useWalletsSolana();
   const { signTransaction: signTransactionSolana } = useSignTransactionSolana();
-  
+
   const getPrivyWallet = () => {
     if (!wallet.wallet?.address) return null;
     return walletsSolana.find((w) => w.address === wallet.wallet?.address);
@@ -125,19 +125,23 @@ export function TokenCreationForm({
           "You will be prompted to sign the transaction for creating the DBC pool",
         duration: 5000,
       });
-      
+
       const privyWallet = getPrivyWallet();
       if (!privyWallet) {
         toast.error("Could not find the selected Solana wallet");
         return;
       }
 
-      const txBase64 = transaction.serialize({ requireAllSignatures: false, verifySignatures: false }).toString("base64");
+      const txBase64 = transaction
+        .serialize({ requireAllSignatures: false, verifySignatures: false })
+        .toString("base64");
       const signedTransactionResult = await signTransactionSolana({
         transaction: Buffer.from(txBase64, "base64"),
         wallet: privyWallet,
       });
-      const signedBase64 = Buffer.from(signedTransactionResult.signedTransaction).toString("base64");
+      const signedBase64 = Buffer.from(
+        signedTransactionResult.signedTransaction
+      ).toString("base64");
       const finalResponse = await axios.post("/api/launch", {
         signedTransaction: signedBase64,
         mint: tokenMint,
@@ -193,7 +197,7 @@ export function TokenCreationForm({
   };
   return (
     <>
-      <form onSubmit={handleSubmit} className="uppercase">
+      <form onSubmit={handleSubmit} className=" ">
         <Card className="border-y border-x-0 rounded-none p-0 bg-background">
           <CardContent className="pt-6 p-0 divide-y">
             <div className="flex md:flex-row flex-col">
@@ -227,7 +231,7 @@ export function TokenCreationForm({
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                          symbol: e.target.value.toUpperCase(),
+                          symbol: e.target.value.to(),
                         })
                       }
                       required

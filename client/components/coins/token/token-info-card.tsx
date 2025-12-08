@@ -17,7 +17,7 @@ export function TokenInfoCard() {
 
   if (isLoadingCurrentToken) {
     return (
-      <div className="w-full h-fit border-t uppercase p-2 animate-pulse">
+      <div className="w-full h-fit border-t   p-2 animate-pulse">
         <div className="h-62 bg-muted"></div>
       </div>
     );
@@ -38,7 +38,7 @@ export function TokenInfoCard() {
   };
 
   return (
-    <div className="w-full h-fit border-t uppercase">
+    <div className="w-full h-fit border-t  ">
       <div className="p-4 space-y-4">
         <div>
           <h4 className="text-sm font-bold text-muted-foreground mb-2">
@@ -130,8 +130,10 @@ export function TokenInfoCard() {
           <div className="space-y-2">
             <div className="flex flex-col text-sm group">
               <span className="text-muted-foreground mb-1">Mint Address:</span>
-              <div 
-                onClick={() => copyToClipboard(currentToken.mintAddress, "Mint address")}
+              <div
+                onClick={() =>
+                  copyToClipboard(currentToken.mintAddress, "Mint address")
+                }
                 className="font-mono text-xs break-all normal-case cursor-pointer hover:bg-secondary/50 p-2 transition-colors flex items-start gap-2 group"
               >
                 <span className="flex-1">{currentToken.mintAddress}</span>
@@ -140,8 +142,10 @@ export function TokenInfoCard() {
             </div>
             <div className="flex flex-col text-sm group">
               <span className="text-muted-foreground mb-1">Pool Address:</span>
-              <div 
-                onClick={() => copyToClipboard(currentToken.poolAddress, "Pool address")}
+              <div
+                onClick={() =>
+                  copyToClipboard(currentToken.poolAddress, "Pool address")
+                }
                 className="font-mono text-xs break-all normal-case cursor-pointer hover:bg-secondary/50 p-2 transition-colors flex items-start gap-2 group"
               >
                 <span className="flex-1">{currentToken.poolAddress}</span>
@@ -150,8 +154,13 @@ export function TokenInfoCard() {
             </div>
             <div className="flex flex-col text-sm group">
               <span className="text-muted-foreground mb-1">Creator:</span>
-              <div 
-                onClick={() => copyToClipboard(currentToken.creatorAddress, "Creator address")}
+              <div
+                onClick={() =>
+                  copyToClipboard(
+                    currentToken.creatorAddress,
+                    "Creator address"
+                  )
+                }
                 className="font-mono text-xs break-all normal-case cursor-pointer hover:bg-secondary/50 p-2 transition-colors flex items-start gap-2 group"
               >
                 <span className="flex-1">{currentToken.creatorAddress}</span>

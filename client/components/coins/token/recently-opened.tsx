@@ -115,7 +115,7 @@ export function RecentlyOpened({
                     />
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium uppercase">
+                    <span className="text-sm font-medium  ">
                       {token.symbol}
                     </span>
                     <span className="text-xs text-muted-foreground">

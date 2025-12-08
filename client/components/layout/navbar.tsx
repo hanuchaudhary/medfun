@@ -7,11 +7,11 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { useWallet } from "@/hooks/use-wallet";
 import { usePrivy } from "@privy-io/react-auth";
 import { toast } from "sonner";
-import WalletModal from "./wallet-modal";
-import Image from "next/image";
+import WalletModal from "./wallet-sheet";
 import { motion, AnimatePresence } from "motion/react";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
+import { Plus } from "lucide-react";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -20,9 +20,7 @@ export function Navbar() {
   const [hasShownInitialModal, setHasShownInitialModal] =
     useState<boolean>(false);
   const [isManualConnection, setIsManualConnection] = useState<boolean>(false);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
-  const { theme } = useTheme();
   const { connected, publicKey, connect, disconnect, connecting } = useWallet();
   const { ready, login } = usePrivy();
   useEffect(() => {
@@ -99,7 +97,6 @@ export function Navbar() {
     { href: "/profile", label: "Profile" },
     { href: "/create", label: "Create" },
     // { href: "/migrate", label: "Dev" },
-    { href: "#", label: "How?", onClick: () => setIsModalOpen(true) },
   ];
 
   useEffect(() => {
@@ -119,32 +116,24 @@ export function Navbar() {
 
   return (
     <>
-      <header className="border-b bg-background uppercase">
+      <header className="">
         <div className="relative w-full">
-          <div className="flex items-center justify-between px-6">
-            <div className="flex-1 max-w-md py-3">
-              <input
-                type="text"
-                placeholder="Search..."
-                className="w-full px-4 py-2 bg-accent/50 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-              />
-            </div>
-
+          <div className="flex items-center justify-end py-2 px-6">
             <nav className="hidden md:flex items-center gap-3 h-full">
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors px-3 py-2"
-              >
-                How?
-              </button>
               <ThemeToggle />
               <Button
-                className="bg-primary hover:bg-primary/90 rounded-lg text-sm font-semibold"
+                className="bg-primary hover:bg-primary/90 rounded-sm text-sm text-background font-semibold py-3 px-6"
                 onClick={connecting ? undefined : handleWalletClick}
                 disabled={connecting}
               >
-                {connected ? "Log in" : getButtonText()}
+                {getButtonText()}
               </Button>
+              <Link href="/create">
+                <Button className="bg-primary hover:bg-primary/90 text-background font-semibold">
+                  <Plus className="h-5 w-5" />
+                  Create coin
+                </Button>
+              </Link>
             </nav>
 
             <div className="flex md:hidden items-center gap-2 mr-4">
@@ -194,29 +183,6 @@ export function Navbar() {
                   <div className="flex flex-col divide-y">
                     {navLinks.map((link, index) => {
                       const isActive = pathname === link.href;
-
-                      if (link.onClick) {
-                        return (
-                          <motion.button
-                            key={link.label}
-                            initial={{ opacity: 0, y: -20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.1 + index * 0.05 }}
-                            onClick={() => {
-                              link.onClick?.();
-                              handleMobileMenuClose();
-                            }}
-                            className={`flex items-center px-6 py-5 text-base font-medium transition-colors text-left ${
-                              isActive
-                                ? "text-primary bg-accent"
-                                : "text-muted-foreground hover:text-primary hover:bg-accent"
-                            }`}
-                          >
-                            {link.label}
-                          </motion.button>
-                        );
-                      }
-
                       return (
                         <motion.div
                           key={link.href}

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { markVanityPairAsUsed, saveToken } from '@/lib/db';
 import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { DynamicBondingCurveClient } from '@meteora-ag/dynamic-bonding-curve-sdk';
+import { saveToken } from '@/lib/db';
 
 type SendTransactionRequest = {
   signedTransaction: string;
@@ -112,11 +112,6 @@ export async function POST(req: Request) {
           }
         }
       }
-    }
-
-    if (vid) {
-      await markVanityPairAsUsed(vid);
-      console.log('Marked vanity pair as used for vid:', vid);
     }
 
     return NextResponse.json({

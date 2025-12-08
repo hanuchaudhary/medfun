@@ -52,7 +52,7 @@ export default function CreateTokenPage() {
 
   return (
     <div
-      className="relative w-full px-6 py-4 uppercase"
+      className="relative w-full px-6 py-4  "
       onDragEnter={handleDragEnter}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -79,7 +79,8 @@ export default function CreateTokenPage() {
         <div className="flex flex-col px-4">
           <h1 className="md:text-2xl font-semibold">Create Token</h1>
           <p className="text-muted-foreground md:text-base text-xs">
-            Launch your custom token with ease using our intuitive creation process.
+            Launch your custom token with ease using our intuitive creation
+            process.
           </p>
         </div>
         <TokenCreationForm

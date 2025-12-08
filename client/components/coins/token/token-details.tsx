@@ -33,7 +33,7 @@ export function TokenDetails({ tokenMint }: TokenDetailsProps) {
 
   if (isLoadingCurrentToken) {
     return (
-      <div className="border-b p-2 uppercase animate-pulse">
+      <div className="border-b p-2   animate-pulse">
         <div className="h-84 bg-muted"></div>
       </div>
     );
@@ -41,7 +41,7 @@ export function TokenDetails({ tokenMint }: TokenDetailsProps) {
 
   if (!currentToken) {
     return (
-      <div className="border-b uppercase p-8">
+      <div className="border-b   p-8">
         <p className="text-destructive">Token not found</p>
       </div>
     );
@@ -50,7 +50,7 @@ export function TokenDetails({ tokenMint }: TokenDetailsProps) {
   const progress = currentToken.bondingCurveProgress ?? 0;
 
   return (
-    <div className="border-b uppercase">
+    <div className="border-b  ">
       <div className="">
         <div className="flex items-start gap-4 border-b">
           <div className="relative w-24 h-24 flex-shrink-0">

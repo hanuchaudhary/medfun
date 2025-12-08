@@ -1,8 +1,8 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 export function formatNumber(num: number | null | undefined): string {
@@ -17,10 +17,15 @@ export function formatNumber(num: number | null | undefined): string {
 
 export function formatPercentage(num: number | null | undefined): string {
   if (num === null || num === undefined) return "0%";
-  return `${num > 0 ? '+' : ''}${num.toFixed(2)}%`;
+  return `${num > 0 ? "+" : ""}${num.toFixed(2)}%`;
 }
 
 export function formatCount(num: number | null | undefined): string {
   if (num === null || num === undefined) return "0";
   return num.toLocaleString();
 }
+
+export const formatAddress = (address: string) => {
+  if (!address || address.length < 8) return address;
+  return `${address.slice(0, 4)}...${address.slice(-4)}`;
+};

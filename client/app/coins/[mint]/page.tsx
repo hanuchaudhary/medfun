@@ -23,7 +23,7 @@ export default async function TokenDetailPage({
   return (
     <TokenPageWrapper tokenMint={mint}>
       <RecentlyOpened currentTokenId={mint} />
-      <div className="relative uppercase">
+      <div className="relative  ">
         <div className="lg:hidden pb-24">
           <div className="border-b">
             <TokenDetails tokenMint={mint} />

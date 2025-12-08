@@ -174,7 +174,7 @@ export function HoldersTradesTable({ tokenId }: HoldersTradesTableProps) {
   ];
 
   return (
-    <div className="w-full border-t uppercase">
+    <div className="w-full border-t  ">
       <Tabs defaultValue="holders" className="w-full">
         <div className="border-b flex items-center justify-between">
           <TabsList className="">

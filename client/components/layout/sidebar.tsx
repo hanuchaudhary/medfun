@@ -19,10 +19,10 @@ import { useWallet } from "@/hooks/use-wallet";
 
 const navigation = [
   { name: "Home", href: "/", icon: Home },
-  { name: "Livestreams", href: "/live", icon: Zap },
-  { name: "Terminal", href: "/coins", icon: TrendingUp },
+  { name: "Livestreams", href: "/live", icon: Zap, locked: true },
+  { name: "Terminal", href: "/coins", icon: TrendingUp, locked: true },
   { name: "Profile", href: "/profile", icon: User },
-  { name: "Support", href: "/support", icon: Headphones },
+  { name: "Support", href: "/support", icon: Headphones, locked: true },
 ];
 
 export function Sidebar() {
@@ -43,52 +43,47 @@ export function Sidebar() {
         </div>
       </Link>
 
-      <nav className="flex-1 px-2 space-y-1">
+      <nav className="flex-1 px-2">
         {navigation.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
-
           return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-4 py-3 px-2 rounded-lg transition-colors text-xs font-medium",
-                isActive
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:text-foreground hover:bg-accent"
-              )}
-            >
-              <Icon className="h-5 w-5" />
-              <span>{item.name}</span>
+            <Link key={item.name} href={item.href}>
+              <button
+                disabled={item.locked}
+                className={cn(
+                  "flex w-full items-center gap-2.5 py-2 px-4 rounded-sm transition-colors text-xs font-medium text-md mb-2",
+                  isActive
+                    ? "bg-primary text-background"
+                    : "hover:text-foreground hover:bg-accent"
+                  , item.locked && "opacity-50 cursor-not-allowed"
+                )}
+              >
+                <Icon className="h-5 w-5" />
+                <span>{item.name}</span>
+              </button>
             </Link>
           );
         })}
 
-        <button className="flex items-center gap-4 py-3 px-2 rounded-lg transition-colors text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent w-full">
+        <button className="flex items-center gap-4 py-3 px-4 rounded-lg transition-colors font-medium text-md text-muted-foreground hover:text-foreground hover:bg-accent w-full">
           <MoreVertical className="h-5 w-5" />
-          <span>More</span>
+          More
         </button>
       </nav>
 
       <div className="p-3 pb-4">
         <Link href="/create">
-          <Button
-            className="w-full rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6"
-            size="lg"
-          >
-            <Plus className="h-5 w-5 mr-1" />
+          <Button className="w-full rounded-lg bg-primary hover:bg-primary/90 text-background font-semibold py-6">
+            <Plus className="h-5 w-5" />
             Create coin
           </Button>
         </Link>
 
         {connected && (
           <div className="mt-3 text-center">
-            <div className="text-xs text-muted-foreground mb-1 flex items-center justify-center gap-1">
+            <div className="text-xs mb-1 flex items-center justify-center gap-1">
               Creator rewards
-              <span className="inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold bg-primary text-primary-foreground rounded">
-                New
-              </span>
             </div>
             <div className="text-sm font-bold text-foreground">$0.04</div>
           </div>
