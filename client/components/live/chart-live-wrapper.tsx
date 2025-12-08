@@ -2,7 +2,6 @@
 
 import React from "react";
 import LiveStreamComponent, { LiveStreamHandle } from "./live-stream-component";
-import { TokenChart } from "../tokens/token/token-chart";
 import { useWallet } from "@/hooks/use-wallet";
 import { useTokenStore } from "@/store/tokenStore";
 import {
@@ -20,6 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { TokenChart } from "../coins/token/token-chart";
 
 export function ChartLiveWrapper({ mintAddress }: { mintAddress: string }) {
   const [mode, setMode] = React.useState<"LIVE" | "CHART">("CHART");

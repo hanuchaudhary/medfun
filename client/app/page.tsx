@@ -1,4 +1,4 @@
-import { TokenGrid } from "@/components/tokens/token-grid";
+import { TokenGrid } from "@/components/coins/token-grid";
 
 export default function TokensPage() {
   return (

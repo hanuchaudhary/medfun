@@ -28,7 +28,7 @@ export const useTokenStore = create<TokenStore>((set, get) => ({
       if (!isBackgroundRefresh) {
         set({ isLoadingTokens: true });
       }
-      const res = await axios.get("/api/tokens");
+      const res = await axios.get("/api/coins");
       if (res.data.success) {
         set({ tokens: res.data.tokens, isLoadingTokens: false });
       } else {
@@ -48,7 +48,7 @@ export const useTokenStore = create<TokenStore>((set, get) => ({
       if (!isBackgroundRefresh) {
         set({ isLoadingTrendingTokens: true });
       }
-      const res = await axios.get(`/api/tokens/trending?limit=${limit}`);
+      const res = await axios.get(`/api/coins/trending?limit=${limit}`);
       if (res.data.success) {
         set({
           trendingTokens: res.data.tokens,
@@ -71,7 +71,7 @@ export const useTokenStore = create<TokenStore>((set, get) => ({
       if (!isBackgroundRefresh) {
         set({ isLoadingUserTokens: true });
       }
-      const res = await axios.get(`/api/tokens/user/${userAddress}`);
+      const res = await axios.get(`/api/coins/user/${userAddress}`);
       if (res.data.success) {
         set({ userTokens: res.data.tokens, isLoadingUserTokens: false });
       } else {
@@ -91,7 +91,7 @@ export const useTokenStore = create<TokenStore>((set, get) => ({
       if (!isBackgroundRefresh) {
         set({ isLoadingCurrentToken: true });
       }
-      const res = await axios.get(`/api/tokens/${mintAddress}`);
+      const res = await axios.get(`/api/coins/${mintAddress}`);
 
       if (res.data.success && res.data.token) {
         set({ currentToken: res.data.token, isLoadingCurrentToken: false });

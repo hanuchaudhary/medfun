@@ -1,17 +1,17 @@
-import { TokenDetails } from "@/components/tokens/token/token-details";
-import SwapContainer from "@/components/tokens/swap/swap-container";
-import { TokenChart } from "@/components/tokens/token/token-chart";
-import { HoldersTradesTable } from "@/components/tokens/token/holders-trades-table";
-import { TokenInfoCard } from "@/components/tokens/token/token-info-card";
-import { MobileSwapModal } from "@/components/tokens/swap/mobile-swap-modal";
-import { RecentlyOpened } from "@/components/tokens/token/recently-opened";
-import { TokenPageWrapper } from "@/components/tokens/token/token-page-wrapper";
+import { TokenDetails } from "@/components/coins/token/token-details";
+import SwapContainer from "@/components/coins/swap/swap-container";
+import { TokenChart } from "@/components/coins/token/token-chart";
+import { HoldersTradesTable } from "@/components/coins/token/holders-trades-table";
+import { TokenInfoCard } from "@/components/coins/token/token-info-card";
+import { MobileSwapModal } from "@/components/coins/swap/mobile-swap-modal";
+import { RecentlyOpened } from "@/components/coins/token/recently-opened";
+import { TokenPageWrapper } from "@/components/coins/token/token-page-wrapper";
 import {
   ResizablePanelGroup,
   ResizablePanel,
   ResizableHandle,
 } from "@/components/ui/resizable";
-import TokenStats from "@/components/tokens/token/token-stats";
+import TokenStats from "@/components/coins/token/token-stats";
 import { ChartLiveWrapper } from "@/components/live/chart-live-wrapper";
 
 export default async function TokenDetailPage({
@@ -35,7 +35,7 @@ export default async function TokenDetailPage({
               </span>
               <a
                 className="px-8 py-6 bg-primary text-background font-medium"
-                href={"https://jup.ag/tokens/" + mint}
+                href={"https://jup.ag/coins/" + mint}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -79,7 +79,7 @@ export default async function TokenDetailPage({
               </span>
               <a
                 className="px-8 py-6 bg-primary text-background font-medium"
-                href={"https://jup.ag/tokens/" + mint}
+                href={"https://jup.ag/coins/" + mint}
                 target="_blank"
                 rel="noopener noreferrer"
               >

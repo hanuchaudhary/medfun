@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import BackButton from "@/components/BackButton";
-import Pattern from "@/components/landing/pattern";
 import { useWallet } from "@/hooks/use-wallet";
 import {
   useSignAndSendTransaction as useSendTransactionSolana,
@@ -89,7 +88,7 @@ export default function ProfileDetailPage({
     const fetchToken = async () => {
       try {
         setIsLoading(true);
-        const res = await axios.get(`/api/tokens/${mint}`);
+        const res = await axios.get(`/api/coins/${mint}`);
         const data = res.data;
 
         if (!data.success || !data.token) {
@@ -143,66 +142,6 @@ export default function ProfileDetailPage({
     }
   }, [mint]);
 
-  // const handleSaveDescription = async () => {
-  //   if (!token) return;
-
-  //   try {
-  //     setIsSaving(true);
-  //     const res = await fetch(`/api/tokens/${mint}`, {
-  //       method: "PATCH",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({ description }),
-  //     });
-
-  //     const data = await res.json();
-
-  //     if (!data.success) {
-  //       toast.error(data.error || "Failed to update description");
-  //       return;
-  //     }
-
-  //     setToken(data.token);
-  //     toast.success("Description updated successfully!");
-  //   } catch (err) {
-  //     console.error("Error updating description:", err);
-  //     toast.error("Failed to update description");
-  //   } finally {
-  //     setIsSaving(false);
-  //   }
-  // };
-
-  // const handleSaveSocialLinks = async () => {
-  //   if (!token) return;
-
-  //   try {
-  //     setIsSaving(true);
-  //     const res = await fetch(`/api/tokens/${mint}`, {
-  //       method: "PATCH",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({ twitter, telegram, website }),
-  //     });
-
-  //     const data = await res.json();
-
-  //     if (!data.success) {
-  //       toast.error(data.error || "Failed to update social links");
-  //       return;
-  //     }
-
-  //     setToken(data.token);
-  //     toast.success("Social links updated successfully!");
-  //   } catch (err) {
-  //     console.error("Error updating social links:", err);
-  //     toast.error("Failed to update social links");
-  //   } finally {
-  //     setIsSaving(false);
-  //   }
-  // };
-
   const claimFees = React.useCallback(async () => {
     if (!client || !wallet?.publicKey || !mint) {
       toast.error("Missing client or wallet info");
@@ -252,7 +191,6 @@ export default function ProfileDetailPage({
   if (isLoading) {
     return (
       <div className="relative max-w-7xl border-x border-b mx-auto">
-        <Pattern />
         <BackButton />
         <div className="p-8 animate-pulse">
           <div className="flex items-start gap-6">
@@ -270,8 +208,6 @@ export default function ProfileDetailPage({
   if (!token) {
     return (
       <div className="relative max-w-7xl border-x border-b mx-auto">
-        <Pattern />
-        <BackButton />
         <div className="p-8">
           <p className="text-destructive">Token not found</p>
         </div>
@@ -281,8 +217,6 @@ export default function ProfileDetailPage({
 
   return (
     <div className="relative max-w-7xl border-x border-b mx-auto md:px-0 px-4">
-      <Pattern />
-      <BackButton />
       <div className="border-b p-8">
         <div className="flex items-start gap-6">
           <div className="relative w-24 h-24 flex-shrink-0">

@@ -23,8 +23,7 @@ export function Navbar() {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const { theme } = useTheme();
-  const { connected, publicKey, connect, disconnect, connecting } =
-    useWallet();
+  const { connected, publicKey, connect, disconnect, connecting } = useWallet();
   const { ready, login } = usePrivy();
   useEffect(() => {
     const fetchWalletAddress = async () => {
@@ -96,7 +95,7 @@ export function Navbar() {
   };
 
   const navLinks = [
-    { href: "/tokens", label: "Tokens" },
+    { href: "/coins", label: "Tokens" },
     { href: "/profile", label: "Profile" },
     { href: "/create", label: "Create" },
     // { href: "/migrate", label: "Dev" },
@@ -117,8 +116,6 @@ export function Navbar() {
   const handleMobileMenuClose = () => {
     setIsMobileMenuOpen(false);
   };
-
-  const isTerminalPage = pathname.startsWith("/tokens/");
 
   return (
     <>

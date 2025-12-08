@@ -20,7 +20,7 @@ import { useWallet } from "@/hooks/use-wallet";
 const navigation = [
   { name: "Home", href: "/", icon: Home },
   { name: "Livestreams", href: "/live", icon: Zap },
-  { name: "Terminal", href: "/tokens", icon: TrendingUp },
+  { name: "Terminal", href: "/coins", icon: TrendingUp },
   { name: "Profile", href: "/profile", icon: User },
   { name: "Support", href: "/support", icon: Headphones },
 ];
@@ -30,12 +30,11 @@ export function Sidebar() {
   const { connected } = useWallet();
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-40 bg-background border-r border-border flex flex-col">
-      {/* Logo */}
+    <aside className="hidden md:flex fixed left-0 top-0 z-40 h-screen w-60 bg-background border-r border-border flex-col">
       <Link href="/" className="flex items-center justify-center py-6 px-4">
         <div className="relative w-12 h-12">
           <Image
-            src="/logo.jpg"
+            src="/medfun-favicon.png"
             alt="Logo"
             fill
             className="object-contain"
@@ -44,7 +43,6 @@ export function Sidebar() {
         </div>
       </Link>
 
-      {/* Navigation */}
       <nav className="flex-1 px-2 space-y-1">
         {navigation.map((item) => {
           const isActive = pathname === item.href;
@@ -55,7 +53,7 @@ export function Sidebar() {
               key={item.name}
               href={item.href}
               className={cn(
-                "flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-lg transition-colors text-xs font-medium",
+                "flex items-center gap-4 py-3 px-2 rounded-lg transition-colors text-xs font-medium",
                 isActive
                   ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:text-foreground hover:bg-accent"
@@ -67,16 +65,13 @@ export function Sidebar() {
           );
         })}
 
-        <button
-          className="flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-lg transition-colors text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent w-full"
-        >
+        <button className="flex items-center gap-4 py-3 px-2 rounded-lg transition-colors text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent w-full">
           <MoreVertical className="h-5 w-5" />
           <span>More</span>
         </button>
       </nav>
 
-      {/* Create Coin Button */}
-      <div className="p-3 pb-6">
+      <div className="p-3 pb-4">
         <Link href="/create">
           <Button
             className="w-full rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6"
@@ -87,9 +82,8 @@ export function Sidebar() {
           </Button>
         </Link>
 
-        {/* Creator Rewards */}
         {connected && (
-          <div className="mt-4 text-center">
+          <div className="mt-3 text-center">
             <div className="text-xs text-muted-foreground mb-1 flex items-center justify-center gap-1">
               Creator rewards
               <span className="inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold bg-primary text-primary-foreground rounded">

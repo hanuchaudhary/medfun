@@ -228,14 +228,14 @@ async function uploadTokenMetadata(params: {
       attributes: [
         {
           trait_type: "Platform",
-          value: "Onlyfounders",
+          value: "Medfun",
         },
         {
           trait_type: "DEX",
-          value: "Onlyfounders.fu",
+          value: "Medfun",
         },
       ],
-      tags: ["OnlyFounders.fun", "MEME", "#ONLY"],
+      tags: ["Medfun", "MEME", "#ONLY"],
     };
 
     const fileName = `metadata/${params.mint}.json`;

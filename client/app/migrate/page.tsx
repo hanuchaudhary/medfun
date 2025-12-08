@@ -1,4 +1,4 @@
-import { MigrationCard } from "@/components/tokens/migration-card";
+import { MigrationCard } from "@/components/coins/migration-card";
 import React from "react";
 
 export default function page() {

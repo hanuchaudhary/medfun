@@ -3,17 +3,12 @@
 import React, { useMemo } from "react";
 import { useWallet } from "@/hooks/use-wallet";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import BackButton from "@/components/BackButton";
-import Pattern from "@/components/landing/pattern";
 import { Token } from "@/types/token";
-import { TokenCard } from "@/components/tokens/token-card";
+import { TokenCard } from "@/components/coins/token-card";
 
 export default function ProfilePage() {
   const { publicKey } = useWallet();
-  const address = useMemo(
-    () => publicKey?.toString(),
-    [publicKey]
-  );
+  const address = useMemo(() => publicKey?.toString(), [publicKey]);
   const [isLoading, setIsLoading] = React.useState(false);
   const [creatorTokens, setCreatorTokens] = React.useState<Token[]>();
 
@@ -22,7 +17,7 @@ export default function ProfilePage() {
       try {
         if (!address) return;
         setIsLoading(true);
-        const res = await fetch(`/api/tokens/user/${address}`);
+        const res = await fetch(`/api/coins/user/${address}`);
         const data = await res.json();
         if (data.success) {
           setCreatorTokens(data.tokens);
@@ -38,8 +33,6 @@ export default function ProfilePage() {
 
   return (
     <div className="relative w-full px-6 py-4">
-      <Pattern />
-      <BackButton href="/tokens" />
       <div className="mb-6">
         <div className="flex items-center md:flex-row flex-col px-6 gap-4">
           <Avatar className="size-48 rounded-none border-r">
@@ -52,7 +45,9 @@ export default function ProfilePage() {
             <AvatarFallback>USR</AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
-            <span className="text-2xl font-bold md:block hidden">Your Profile</span>
+            <span className="text-2xl font-bold md:block hidden">
+              Your Profile
+            </span>
             <span className="text-muted-foreground text-sm break-all md:py-0 py-4">
               {address}
             </span>

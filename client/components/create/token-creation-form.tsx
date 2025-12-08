@@ -353,7 +353,7 @@ export function TokenCreationForm({
                     View on Solscan
                     <ExternalLink className="w-4 h-4 ml-2" />
                   </Button>
-                  <Link href="/tokens" className="flex-1">
+                  <Link href="/coins" className="flex-1">
                     <Button className="w-full">View All Tokens</Button>
                   </Link>
                 </div>
