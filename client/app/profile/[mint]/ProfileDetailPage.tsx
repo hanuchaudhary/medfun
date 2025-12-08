@@ -190,14 +190,14 @@ export default function ProfileDetailPage({
 
   if (isLoading) {
     return (
-      <div className="relative max-w-7xl border-x border-b mx-auto">
+      <div className="relative max-w-7xl border rounded-lg mx-auto">
         <BackButton />
         <div className="p-8 animate-pulse">
           <div className="flex items-start gap-6">
-            <div className="w-24 h-24 bg-muted rounded-full"></div>
+            <div className="w-24 h-24 bg-muted rounded-lg"></div>
             <div className="flex-1 space-y-2">
-              <div className="h-8 bg-muted w-48 rounded"></div>
-              <div className="h-4 bg-muted w-96 rounded"></div>
+              <div className="h-8 bg-muted w-48 rounded-lg"></div>
+              <div className="h-4 bg-muted w-96 rounded-lg"></div>
             </div>
           </div>
         </div>
@@ -207,7 +207,7 @@ export default function ProfileDetailPage({
 
   if (!token) {
     return (
-      <div className="relative max-w-7xl border-x border-b mx-auto">
+      <div className="relative max-w-7xl border rounded-lg mx-auto">
         <div className="p-8">
           <p className="text-destructive">Token not found</p>
         </div>
@@ -216,7 +216,7 @@ export default function ProfileDetailPage({
   }
 
   return (
-    <div className="relative max-w-7xl border-x border-b mx-auto md:px-0 px-4">
+    <div className="relative max-w-7xl mx-auto md:px-0 px-4 overflow-hidden">
       <div className="border-b p-8">
         <div className="flex items-start gap-6">
           <div className="relative w-24 h-24 flex-shrink-0">
@@ -228,13 +228,13 @@ export default function ProfileDetailPage({
               }
               alt={token.name}
               fill
-              className="rounded-full object-cover"
+              className="rounded-lg object-cover"
             />
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <h1 className="text-3xl font-bold">{token.name}</h1>
-              <Badge variant="secondary" className="text-sm">
+              <Badge variant="secondary" className="text-sm rounded-lg">
                 {token.symbol}
               </Badge>
             </div>
@@ -243,25 +243,25 @@ export default function ProfileDetailPage({
             </p>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-              <div>
+              <div className="p-3 bg-muted/50 rounded-lg">
                 <p className="text-xs text-muted-foreground">Market Cap</p>
                 <p className="text-sm font-semibold">
                   ${token.marketCap?.toLocaleString() ?? "0"}
                 </p>
               </div>
-              <div>
+              <div className="p-3 bg-muted/50 rounded-lg">
                 <p className="text-xs text-muted-foreground">Volume</p>
                 <p className="text-sm font-semibold">
                   ${token.volume?.toLocaleString() ?? "0"}
                 </p>
               </div>
-              <div>
+              <div className="p-3 bg-muted/50 rounded-lg">
                 <p className="text-xs text-muted-foreground">Liquidity</p>
                 <p className="text-sm font-semibold">
                   ${token.liquidity?.toLocaleString() ?? "0"}
                 </p>
               </div>
-              <div>
+              <div className="p-3 bg-muted/50 rounded-lg">
                 <p className="text-xs text-muted-foreground">Progress</p>
                 <p className="text-sm font-semibold">
                   {token.bondingCurveProgress?.toFixed(2) ?? 0}%
@@ -276,87 +276,78 @@ export default function ProfileDetailPage({
         <div className="">
           <div className="">
             {feeMetrics && (
-              <div className="p-4 rounded-none bg-muted/50 border-b">
+              <div className="p-4 bg-muted/50 border-b">
                 <p className="text-sm text-center font-medium">
                   Available to Claim
                 </p>
-                <p className="md:text-3xl font-bold text-center my-5 text-primary">
+                <p className="md:text-3xl font-bold text-center my-3 text-primary">
                   {(
                     feeMetrics.current.creatorQuoteFee.toNumber() /
                     LAMPORTS_PER_SOL
                   ).toFixed(4)}{" "}
                   SOL
                 </p>
-                <p className="text-xs text-muted-foreground mt-1 text-center">
-                  Creator trading fees accumulated
-                </p>
               </div>
             )}
-            <div className="p-8">
-              <p className="text-sm text-muted-foreground">
-                Claim creator trading fees
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Connect your wallet and claim fees earned from trading activity
-              </p>
+            <div className="p-4">
+              <Button
+                onClick={claimFees}
+                disabled={loading || !wallet.connected}
+                className="w-full rounded-lg py-6 font-semibold text-background"
+              >
+                {loading ? "Claiming..." : "Claim Fees"}
+              </Button>
+              {!wallet.connected && (
+                <p className="text-xs text-muted-foreground text-center mt-2">
+                  Connect wallet to claim fees
+                </p>
+              )}
             </div>
-            <Button
-              onClick={claimFees}
-              disabled={loading || !wallet.connected}
-              className="w-full rounded-none py-10"
-            >
-              {loading ? "Claiming..." : "Claim Fees"}
-            </Button>
-            {!wallet.connected && (
-              <p className="text-xs text-muted-foreground text-center">
-                Connect wallet to claim fees
-              </p>
-            )}
           </div>
         </div>
 
         <div className="lg:col-span-2">
           <div className="p-6">
             <div className="space-y-4">
-              <p className="rounded-none">{description}</p>
+              <h3 className="text-sm font-medium">Description</h3>
+              <p className="text-muted-foreground">
+                {description || "No description provided"}
+              </p>
             </div>
           </div>
 
           <Separator />
 
           <div className="relative">
-            <div className="relative">
-              <div className="w-full h-10 pointer-events-none md:border-l border-r bg-[image:repeating-linear-gradient(315deg,_#0000000d_0,_#0000000d_1px,_transparent_0,_transparent_50%)] bg-[size:10px_10px] bg-fixed dark:bg-[image:repeating-linear-gradient(315deg,_#ffffff1a_0,_#ffffff0a_1px,_transparent_0,_transparent_50%)] border-b" />
-              <h2 className="absolute text-sm font-medium top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                Social Links
-              </h2>
-            </div>
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3">
+            <div className="p-6">
+              <h2 className="text-sm font-medium mb-4">Social Links</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
                   { label: "Twitter", value: twitter },
                   { label: "Telegram", value: telegram },
                   { label: "Website", value: website },
-                ]
-                  .filter((social) => social.value)
-                  .map((social) => (
-                    <div
-                      key={social.label}
-                      className="flex flex-col gap-2 p-4 border"
-                    >
-                      <label className="text-sm font-medium text-muted-foreground">
-                        {social.label}
-                      </label>
+                ].map((social) => (
+                  <div
+                    key={social.label}
+                    className="flex flex-col gap-2 p-4 border rounded-lg bg-muted/20"
+                  >
+                    <label className="text-sm font-medium text-muted-foreground">
+                      {social.label}
+                    </label>
+                    {social.value ? (
                       <a
-                        className="hover:underline break-all hover:text-primary transition-colors"
+                        className="hover:underline break-all hover:text-primary transition-colors text-sm"
                         href={social.value}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
                         {social.value}
                       </a>
-                    </div>
-                  ))}
+                    ) : (
+                      <span className="text-muted-foreground text-sm">—</span>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           </div>

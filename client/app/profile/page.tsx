@@ -39,13 +39,13 @@ export default function ProfilePage() {
             Your Tokens
           </h2>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 relative">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 relative">
           {isLoading && (
-            <div className="col-span-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="col-span-full grid grid-cols-1 gap-6 sm:grid-cols-2 rounded-xl lg:grid-cols-3">
               {[...Array(6)].map((_, i) => (
                 <div
                   key={i}
-                  className="border-0 rounded-none p-4 bg-card animate-pulse h-40 border-r"
+                  className="border-0 rounded-xl p-4 bg-card animate-pulse h-40"
                 />
               ))}
             </div>
