@@ -1,0 +1,91 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Token {
+  id                   Int      @id @default(autoincrement())
+  name                 String
+  symbol               String
+  description          String?
+  mintAddress          String   @unique
+  poolAddress          String   @unique
+  website              String?
+  twitter              String?
+  telegram             String?
+  imageUrl             String?
+  metadataUrl          String?
+  creatorAddress       String
+  bondingCurveProgress Float?
+  volume               Float?
+  liquidity            Float?
+  marketCap            Float?
+  holderCount          Int?
+  stats5m              Json?
+  stats1h              Json?
+  stats6h              Json?
+  stats24h             Json?
+  holders              Holder[]
+  trades               Trade[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  klines    kline[]
+}
+
+model Trade {
+  id              Int      @id @default(autoincrement())
+  asset           String
+  type            String
+  usdPrice        Float
+  usdVolume       Float
+  traderAddress   String
+  txHash          String   @unique
+  amount          Float
+  isMev           Boolean
+  isValidPrice    Boolean
+  isValidPosition Boolean
+  poolId          String
+  nativeVolume    Float
+  timestamp       DateTime
+
+  token   Token @relation(fields: [tokenId], references: [id])
+  tokenId Int
+}
+
+model kline {
+  id        Int      @id @default(autoincrement())
+  time      DateTime
+  netVolume Float
+
+  token   Token @relation(fields: [tokenId], references: [id])
+  tokenId Int
+
+  @@unique([tokenId, time])
+}
+
+model Holder {
+  id                Int    @id @default(autoincrement())
+  address           String
+  amount            Float
+  solBalance        String
+  solBalanceDisplay Float
+  tags              Json?
+  token             Token  @relation(fields: [tokenId], references: [id])
+  tokenId           Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tokenId, address])
+}
