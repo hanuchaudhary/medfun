@@ -1,19 +1,27 @@
-import { TOKEN_MINT_ADDRESS, TOKEN_POOL_ADDRESS } from '@/app/constant';
-import { DAMM_V2_MIGRATION_FEE_ADDRESS, deriveDammV2PoolAddress, DynamicBondingCurveClient } from '@meteora-ag/dynamic-bonding-curve-sdk';
-import { Connection, PublicKey } from '@solana/web3.js';
-import React from 'react'
-import { toast } from 'sonner';
-import { Button } from '../ui/button';
+import {
+  DAMM_V2_MIGRATION_FEE_ADDRESS,
+  deriveDammV2PoolAddress,
+  DynamicBondingCurveClient,
+} from "@meteora-ag/dynamic-bonding-curve-sdk";
+import { Connection, PublicKey } from "@solana/web3.js";
+import React from "react";
+import { toast } from "sonner";
+import { Button } from "../ui/button";
 
-export default function PoolState() {
-
+export default function PoolState({
+  TOKEN_MINT_ADDRESS,
+  TOKEN_POOL_ADDRESS,
+}: {
+  TOKEN_MINT_ADDRESS: PublicKey;
+  TOKEN_POOL_ADDRESS: PublicKey;
+}) {
   const connection = new Connection(
     process.env.NEXT_PUBLIC_RPC_URL!,
     "confirmed"
   );
 
   const client = new DynamicBondingCurveClient(connection, "confirmed");
-const POOL_ADDRESS = TOKEN_POOL_ADDRESS;
+  const POOL_ADDRESS = TOKEN_POOL_ADDRESS;
   async function handlePoolState() {
     try {
       const poolState = await client.state.getPool(POOL_ADDRESS);
@@ -49,6 +57,11 @@ const POOL_ADDRESS = TOKEN_POOL_ADDRESS;
     }
   }
   return (
-    <Button onClick={() => handlePoolState()} className="w-full rounded-none py-8">Get Pool State</Button>
-  )
+    <Button
+      onClick={() => handlePoolState()}
+      className="w-full rounded-none py-8"
+    >
+      Get Pool State
+    </Button>
+  );
 }

@@ -44,11 +44,12 @@ export default function RootLayout({
               </div>
             </div>
             <Toaster
-              position="bottom-left"
+              position="bottom-right"
               toastOptions={{
                 style: {
-                  borderRadius: "0px",
+                  borderRadius: "30px",
                   border: "0px",
+                  color:"#30b561"
                 },
               }}
               richColors

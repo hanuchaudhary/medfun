@@ -343,8 +343,7 @@ export function TokenCreationForm({
         </div>
       </form>
       <Dialog open={showSuccessDialog} onOpenChange={closeSuccessDialog}>
-        <DialogContent className="sm:max-w-xl bg-transparent rounded-[32px] backdrop-blur-sm border border-primary/10 p-2">
-          <div className="p-6 rounded-3xl border bg-card">
+        <DialogContent className="sm:max-w-xl rounded-[32px] backdrop-blur-sm border border-primary/10">
             <DialogHeader>
               <div className="flex items-center justify-center mb-4">
                 <div className="rounded-full bg-green-100 dark:bg-green-900 p-3">
@@ -413,7 +412,7 @@ export function TokenCreationForm({
                     <ExternalLink className="w-4 h-4 ml-2" />
                   </Button>
                   <Link href="/coins" className="flex-1">
-                    <Button className="w-full">View All Tokens</Button>
+                    <Button className="w-full font-semibold text-background">View All Tokens</Button>
                   </Link>
                 </div>
                 <Button
@@ -425,7 +424,6 @@ export function TokenCreationForm({
                 </Button>
               </div>
             )}
-          </div>
         </DialogContent>
       </Dialog>
     </>

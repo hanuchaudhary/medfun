@@ -32,6 +32,7 @@ export async function GET(
         data: {
           bondingCurveProgress: jupData.bondingCurve || null,
           volume: volume24h,
+          graduatedPoolAddress: jupData.graduatedPoolAddress || null,
           liquidity: jupData.liquidity || null,
           marketCap: jupData.mcap || null,
           holderCount: jupData.holderCount || 0,

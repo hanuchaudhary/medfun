@@ -4,13 +4,7 @@ import { TokenChart } from "@/components/coins/token/token-chart";
 import { HoldersTradesTable } from "@/components/coins/token/holders-trades-table";
 import { TokenInfoCard } from "@/components/coins/token/token-info-card";
 import { MobileSwapModal } from "@/components/coins/swap/mobile-swap-modal";
-import { RecentlyOpened } from "@/components/coins/token/recently-opened";
 import { TokenPageWrapper } from "@/components/coins/token/token-page-wrapper";
-import {
-  ResizablePanelGroup,
-  ResizablePanel,
-  ResizableHandle,
-} from "@/components/ui/resizable";
 import TokenStats from "@/components/coins/token/token-stats";
 import { ChartLiveWrapper } from "@/components/live/chart-live-wrapper";
 
@@ -32,7 +26,7 @@ export default async function TokenDetailPage({
               <TokenChart mintAddress={mint} />
             </div>
             <div className="border-b">
-              <HoldersTradesTable tokenId={mint} />
+              <HoldersTradesTable/>
             </div>
             <div className="border-b">
               <TokenInfoCard />
@@ -45,19 +39,12 @@ export default async function TokenDetailPage({
             <TokenStats />
           </div>
           <div className="col-span-2 flex flex-col overflow-hidden relative space-y-4">
-            {/* <ResizablePanelGroup direction="vertical"> */}
-              {/* <ResizablePanel defaultSize={65} minSize={30}> */}
-                <div className="h-full overflow-auto hide-scrollbar border rounded-xl">
-                  <ChartLiveWrapper mintAddress={mint} />
-                </div>
-              {/* </ResizablePanel> */}
-              {/* <ResizableHandle /> */}
-              {/* <ResizablePanel defaultSize={35} minSize={30}> */}
-                <div className="h-full overflow-auto border rounded-xl hide-scrollbar">
-                  <HoldersTradesTable tokenId={mint} />
-                </div>
-              {/* </ResizablePanel> */}
-            {/* </ResizablePanelGroup> */}
+            <div className="overflow-auto hide-scrollbar border rounded-xl">
+              <ChartLiveWrapper mintAddress={mint} />
+            </div>
+            <div className="overflow-auto border rounded-xl hide-scrollbar">
+              <HoldersTradesTable />
+            </div>
           </div>
           <div className="col-span-1 overflow-auto relative hide-scrollbar space-y-4">
             <SwapContainer mint={mint} />

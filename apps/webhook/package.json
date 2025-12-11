@@ -1,0 +1,19 @@
+{
+  "name": "@repo/webhook",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/express": "^5.0.6",
+    "@repo/db": "workspace:*"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@prisma/client": "^7.1.0",
+    "@solana/web3.js": "^1.98.4",
+    "express": "^5.2.1"
+  }
+}

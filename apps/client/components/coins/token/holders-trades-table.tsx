@@ -1,19 +1,13 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useTokenStore } from "@/store/tokenStore";
-import { useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-interface HoldersTradesTableProps {
-  tokenId: string;
-}
-
-export function HoldersTradesTable({ tokenId }: HoldersTradesTableProps) {
-  const { holders, isLoadingHolders, trades, isLoadingTrades, currentToken } =
+export function HoldersTradesTable() {
+  const { holders, isLoadingHolders, trades, isLoadingTrades } =
     useTokenStore();
 
   const formatAddress = (address: string) => {
@@ -38,24 +32,24 @@ export function HoldersTradesTable({ tokenId }: HoldersTradesTableProps) {
     return `${Math.floor(seconds / 86400)}d`;
   };
 
-  const totalSupply = currentToken ? 1000000000 : 1;
+  const TOTAL_SUPPLY = 1_000_000_000;
 
   return (
     <div className="w-full">
-      <Tabs defaultValue="holders" className="w-full">
+      <Tabs defaultValue="trades" className="w-full">
         <div className="flex items-center justify-between">
           <TabsList className="">
-            <TabsTrigger value="holders">
-              Top Holders({holders.length})
-            </TabsTrigger>
             <TabsTrigger value="trades">
               Recent Trades({trades.length})
+            </TabsTrigger>
+            <TabsTrigger value="holders">
+              Top Holders({holders.length})
             </TabsTrigger>
           </TabsList>
         </div>
 
         <TabsContent value="holders" className="mt-0">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
             {isLoadingHolders ? (
               <div className="space-y-2 p-3">
                 {[...Array(8)].map((_, i) => (
@@ -86,7 +80,7 @@ export function HoldersTradesTable({ tokenId }: HoldersTradesTableProps) {
                   ) : (
                     holders.slice(0, 20).map((holder, index) => {
                       const percentage = (
-                        (holder.amount / totalSupply) *
+                        (holder.amount / TOTAL_SUPPLY) *
                         100
                       ).toFixed(2);
                       return (
@@ -100,31 +94,19 @@ export function HoldersTradesTable({ tokenId }: HoldersTradesTableProps) {
                           <td className="p-3">
                             <div className="flex items-center gap-2">
                               <Link
-                                href={`https://solscan.io/account/${holder.address}`}
+                                href={`https://solscan.io/account/${holder.holderAddress}?cluster=devnet`}
                                 target="_blank"
                                 className="inline-flex text-xs items-center gap-1 hover:text-primary transition-colors font-mono"
                               >
-                                {formatAddress(holder.address)}
+                                {formatAddress(holder.holderAddress)}
                                 <ExternalLink className="w-3 h-3" />
                               </Link>
-                              {holder.tags && (
-                                <Badge
-                                  variant="secondary"
-                                  className="rounded-none text-xs"
-                                >
-                                  {typeof holder.tags === "object"
-                                    ? JSON.stringify(holder.tags)
-                                    : holder.tags}
-                                </Badge>
-                              )}
                             </div>
                           </td>
                           <td className="p-3 text-right font-medium text-xs">
                             {percentage}%
                           </td>
-                          <td className="p-3 text-right font-medium">
-                            {formatNumber(holder.solBalanceDisplay)}
-                          </td>
+                          <td className="p-3 text-right font-medium">-</td>
                           <td className="p-3 text-right font-medium">
                             {formatNumber(holder.amount)}
                           </td>
@@ -139,7 +121,7 @@ export function HoldersTradesTable({ tokenId }: HoldersTradesTableProps) {
         </TabsContent>
 
         <TabsContent value="trades" className="mt-0">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
             {isLoadingTrades ? (
               <div className="space-y-2 p-3">
                 {[...Array(10)].map((_, i) => (
@@ -152,13 +134,13 @@ export function HoldersTradesTable({ tokenId }: HoldersTradesTableProps) {
                   <tr className="text-muted-foreground">
                     <th className="text-left p-3 font-medium">Date/Age</th>
                     <th className="text-left p-3 font-medium">Type</th>
-                    <th className="text-right p-3 font-medium">Price</th>
-                    <th className="text-right p-3 font-medium">Volume</th>
-                    <th className="text-right p-3 font-medium">SOL</th>
+                    <th className="text-right p-3 font-medium">Price (SOL)</th>
+                    <th className="text-right p-3 font-medium">Token Amount</th>
+                    <th className="text-right p-3 font-medium">SOL Amount</th>
                     <th className="text-right p-3 font-medium">Trader</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="h-30">
                   {trades.length === 0 ? (
                     <tr>
                       <td
@@ -170,7 +152,7 @@ export function HoldersTradesTable({ tokenId }: HoldersTradesTableProps) {
                     </tr>
                   ) : (
                     trades.map((trade) => {
-                      const isBuy = trade.type.toLowerCase() === "buy";
+                      const isBuy = trade.type === "BUY";
                       return (
                         <tr
                           key={trade.id}
@@ -193,17 +175,17 @@ export function HoldersTradesTable({ tokenId }: HoldersTradesTableProps) {
                             </span>
                           </td>
                           <td className="p-3 text-right font-medium">
-                            ${trade.usdPrice.toFixed(4)}
+                            {trade.price.toFixed(10)}
                           </td>
                           <td className="p-3 text-right font-medium">
-                            ${formatNumber(trade.usdVolume)}
+                            {formatNumber(trade.tokenAmount)}
                           </td>
                           <td className="p-3 text-right font-medium">
-                            {trade.nativeVolume.toFixed(3)}
+                            {trade.solAmount.toFixed(6)}
                           </td>
                           <td className="p-3 text-right normal-case">
                             <Link
-                              href={`https://solscan.io/tx/${trade.txHash}`}
+                              href={`https://solscan.io/tx/${trade.signature}?cluster=devnet`}
                               target="_blank"
                               className="inline-flex items-center gap-1 hover:text-primary transition-colors"
                             >

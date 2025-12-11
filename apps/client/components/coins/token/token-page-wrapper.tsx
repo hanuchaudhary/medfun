@@ -28,22 +28,21 @@ export function TokenPageWrapper({
 
   useEffect(() => {
     fetchTokenDetails(tokenMint);
-    fetchHolders(tokenMint);
+    fetchHolders(tokenMint);`
     fetchTrades(tokenMint, 50);
-    fetchKlines(tokenMint, "1_HOUR");
+    // fetchKlines(tokenMint, "1_HOUR");`
   }, [tokenMint, fetchTokenDetails, fetchHolders, fetchTrades, fetchKlines]);
 
   useEffect(() => {
-    // const pollInterval = setInterval(() => {
-      fetchTokenDetails(tokenMint, true);
+    const pollInterval = setInterval(() => {
+      // fetchTokenDetails(tokenMint, true);
       fetchHolders(tokenMint, true);
       fetchTrades(tokenMint, 50, 0, true);
       fetchKlines(tokenMint, "1_HOUR", true);
-    // }, 10000);
-
-    // return () => {
-    //   clearInterval(pollInterval);
-    // };
+    }, 5000);
+    return () => {
+      clearInterval(pollInterval);
+    };
   }, [tokenMint, fetchTokenDetails, fetchHolders, fetchTrades, fetchKlines]);
 
   useEffect(() => {

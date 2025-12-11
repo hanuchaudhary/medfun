@@ -21,11 +21,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Rocket, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { useWallet } from "@/hooks/use-wallet";
 import { toast } from "sonner";
-import {
-  Connection,
-  PublicKey,
-  Transaction,
-} from "@solana/web3.js";
+import { Connection, PublicKey, Transaction } from "@solana/web3.js";
 import {
   useSignTransaction as useSignTransactionSolana,
   useSignAndSendTransaction as useSendTransactionSolana,
@@ -39,8 +35,8 @@ import {
   deriveEscrow,
 } from "@meteora-ag/dynamic-bonding-curve-sdk";
 import { BN } from "bn.js";
-import { POOL_CONFIG_KEY, TOKEN_POOL_ADDRESS } from "@/app/constant";
 import PoolState from "./pool-state";
+import { useTokenStore } from "@/store/tokenStore";
 
 interface MigrationCardProps {
   tokenId: string;
@@ -57,14 +53,15 @@ export function MigrationCard({
   poolAddress,
   configAddress,
 }: MigrationCardProps) {
+  const { currentToken } = useTokenStore();
   const [showDialog, setShowDialog] = useState(false);
   const [isMigrating, setIsMigrating] = useState(false);
   const [migrationComplete, setMigrationComplete] = useState(false);
   const [migrationStep, setMigrationStep] = useState("");
   const wallet = useWallet();
   const { wallets: walletsSolana } = useWalletsSolana();
-  const { signTransaction: signTransactionSolana } = useSignTransactionSolana();
-  const { signAndSendTransaction: sendTransactionSolana } = useSendTransactionSolana();
+  const { signAndSendTransaction: sendTransactionSolana } =
+    useSendTransactionSolana();
 
   const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL!;
 
@@ -75,6 +72,9 @@ export function MigrationCard({
     if (!wallet.wallet?.address) return null;
     return walletsSolana.find((w) => w.address === wallet.wallet?.address);
   };
+
+  const TOKEN_POOL_ADDRESS = new PublicKey(poolAddress);
+  const POOL_CONFIG_KEY = new PublicKey(configAddress);
 
   React.useEffect(() => {
     let isMounted = true;
@@ -112,6 +112,7 @@ export function MigrationCard({
       const poolPubkey = TOKEN_POOL_ADDRESS;
       const configPubkey = POOL_CONFIG_KEY;
       const virtualPoolState = await client.state.getPool(poolPubkey);
+
       const poolConfigState = await client.state.getPoolConfig(configPubkey);
 
       toast.info("Fetching pool state...", {
@@ -123,6 +124,8 @@ export function MigrationCard({
         throw new Error("Pool not found");
       }
 
+
+      console.log("Virtual Pool State:", virtualPoolState);
       if (virtualPoolState.isMigrated) {
         toast.warning("Pool already migrated");
         setMigrationComplete(true);
@@ -132,9 +135,8 @@ export function MigrationCard({
       setMigrationStep("Checking migration metadata...");
       const migrationMetadata =
         deriveDammV2MigrationMetadataAddress(poolPubkey);
-      const metadataAccount = await connection.getAccountInfo(
-        migrationMetadata
-      );
+      const metadataAccount =
+        await connection.getAccountInfo(migrationMetadata);
 
       if (!metadataAccount) {
         toast.info("Creating migration metadata...", {
@@ -153,7 +155,9 @@ export function MigrationCard({
         createMetadataTx.recentBlockhash = blockhash;
         createMetadataTx.feePayer = wallet.publicKey;
 
-        const signedTxBase64 = createMetadataTx.serialize({ requireAllSignatures: false, verifySignatures: false }).toString("base64");
+        const signedTxBase64 = createMetadataTx
+          .serialize({ requireAllSignatures: false, verifySignatures: false })
+          .toString("base64");
         const signedMetadataTxResult = await sendTransactionSolana({
           transaction: Buffer.from(signedTxBase64, "base64"),
           wallet: privyWallet,
@@ -189,7 +193,9 @@ export function MigrationCard({
           createLockerTx.recentBlockhash = lockerBlockhash;
           createLockerTx.feePayer = wallet.publicKey;
 
-          const lockerTxBase64 = createLockerTx.serialize({ requireAllSignatures: false, verifySignatures: false }).toString("base64");
+          const lockerTxBase64 = createLockerTx
+            .serialize({ requireAllSignatures: false, verifySignatures: false })
+            .toString("base64");
           const signedLockerTxResult = await sendTransactionSolana({
             transaction: Buffer.from(lockerTxBase64, "base64"),
             wallet: privyWallet,
@@ -211,7 +217,7 @@ export function MigrationCard({
         payer: wallet.publicKey,
         virtualPool: poolPubkey,
         dammConfig:
-          DAMM_V2_MIGRATION_FEE_ADDRESS[poolConfigState.migrationFeeOption]!
+          DAMM_V2_MIGRATION_FEE_ADDRESS[poolConfigState.migrationFeeOption]!,
       });
 
       const { blockhash: migrateBlockhash, lastValidBlockHeight } =
@@ -231,7 +237,9 @@ export function MigrationCard({
       console.log("NFT keypairs signed successfully");
 
       console.log("Requesting wallet signature...");
-      const migrateTxBase64 = migrateTx.transaction.serialize({ requireAllSignatures: false, verifySignatures: false }).toString("base64");
+      const migrateTxBase64 = migrateTx.transaction
+        .serialize({ requireAllSignatures: false, verifySignatures: false })
+        .toString("base64");
       const signedMigrateTxResult = await sendTransactionSolana({
         transaction: Buffer.from(migrateTxBase64, "base64"),
         wallet: privyWallet,
@@ -324,7 +332,12 @@ export function MigrationCard({
               </>
             )}
           </Button>
-          {migrationComplete && <PoolState />}
+          {migrationComplete && (
+            <PoolState
+              TOKEN_MINT_ADDRESS={new PublicKey(tokenId)}
+              TOKEN_POOL_ADDRESS={TOKEN_POOL_ADDRESS}
+            />
+          )}
         </CardFooter>
       </Card>
 

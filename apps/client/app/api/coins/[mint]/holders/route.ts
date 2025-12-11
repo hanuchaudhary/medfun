@@ -27,50 +27,14 @@ export async function GET(
       );
     }
 
-    const response = await axios.get(
-      `https://datapi.jup.ag/v1/holders/${mint}`
-    );
-
-    const holdersData = response.data;
-
-    if (holdersData?.data?.holders && Array.isArray(holdersData.data.holders)) {
-      await prisma.$transaction(
-        holdersData.data.holders.map((holder: any) =>
-          prisma.holder.upsert({
-            where: {
-              tokenId_address: {
-                tokenId: token.id,
-                address: holder.address,
-              },
-            },
-            update: {
-              amount: holder.amount,
-              solBalance: holder.sol_balance,
-              solBalanceDisplay: holder.sol_balance_display,
-              tags: holder.tags || null,
-            },
-            create: {
-              tokenId: token.id,
-              address: holder.address,
-              amount: holder.amount,
-              solBalance: holder.sol_balance,
-              solBalanceDisplay: holder.sol_balance_display,
-              tags: holder.tags || null,
-            },
-          })
-        )
-      );
-    }
-
     const holders = await prisma.holder.findMany({
-      where: { tokenId: token.id },
+      where: { tokenMintAddress: mint },
       orderBy: { amount: "desc" },
     });
 
     return NextResponse.json({
       success: true,
       holders,
-      totalHolders: holders.length,
     });
   } catch (error) {
     console.error("Error fetching holders:", error);

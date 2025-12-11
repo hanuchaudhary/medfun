@@ -2,11 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { GraduatedSwapSection } from "@/components/coins/swap/graduated-swap-section";
-import { Connection } from "@solana/web3.js";
-import { CpAmm } from "@meteora-ag/cp-amm-sdk";
-import { TOKEN_POOL_ADDRESS } from "@/app/constant";
+import { Connection, PublicKey } from "@solana/web3.js";
 import { DynamicBondingCurveClient } from "@meteora-ag/dynamic-bonding-curve-sdk";
 import { SwapSection } from "./swap-section";
+import { useTokenStore } from "@/store/tokenStore";
 
 interface SwapContainerProps {
   mint: string;
@@ -36,18 +35,32 @@ export function SwapContainer({ mint }: SwapContainerProps) {
     } catch {}
   }, [activeTab]);
 
+  const ct = useTokenStore((state) => state.currentToken);
   useEffect(() => {
+    if (!ct?.poolAddress) {
+      return;
+    }
+
     let cancelled = false;
     (async () => {
       try {
-        const cpAmm = new CpAmm(connection);
-        const dbcClient = new DynamicBondingCurveClient(connection, "confirmed");
-        const state = await dbcClient.state.getPool(TOKEN_POOL_ADDRESS);
+        const dbcClient = new DynamicBondingCurveClient(
+          connection,
+          "confirmed"
+        );
+        console.log("POOL: ", ct.poolAddress);
+
+        const state = await dbcClient.state.getPool(
+          new PublicKey(ct.poolAddress)
+        );
         const poolStatus = (state as any)?.isMigrated;
+        console.log("Pool state", poolStatus);
+
         if (!cancelled) {
           setIsGraduated(!!poolStatus);
         }
       } catch (e) {
+        console.error("Error fetching pool state:", e);
         if (!cancelled) {
           setIsGraduated(false);
         }
@@ -56,7 +69,7 @@ export function SwapContainer({ mint }: SwapContainerProps) {
     return () => {
       cancelled = true;
     };
-  }, [connection]);
+  }, [connection, ct?.poolAddress]);
 
   if (isGraduated === null) {
     return null;
@@ -65,10 +78,8 @@ export function SwapContainer({ mint }: SwapContainerProps) {
   return isGraduated ? (
     <GraduatedSwapSection activeTab={activeTab} onTabChange={setActiveTab} />
   ) : (
-    <SwapSection tokenId={mint} />
+    <SwapSection tokenmint={mint} />
   );
 }
 
 export default SwapContainer;
-
-

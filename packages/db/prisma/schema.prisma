@@ -14,12 +14,12 @@ datasource db {
 }
 
 model Token {
-  id                   Int      @id @default(autoincrement())
+  mintAddress          String   @id @unique
   name                 String
   symbol               String
   description          String?
-  mintAddress          String   @unique
   poolAddress          String   @unique
+  graduatedPoolAddress String?  @unique
   website              String?
   twitter              String?
   telegram             String?
@@ -44,48 +44,41 @@ model Token {
 }
 
 model Trade {
-  id              Int      @id @default(autoincrement())
-  asset           String
-  type            String
-  usdPrice        Float
-  usdVolume       Float
-  traderAddress   String
-  txHash          String   @unique
-  amount          Float
-  isMev           Boolean
-  isValidPrice    Boolean
-  isValidPosition Boolean
-  poolId          String
-  nativeVolume    Float
-  timestamp       DateTime
+  id            Int      @id @default(autoincrement())
+  type          String
+  price         Float
+  tokenAmount   Float
+  solAmount     Float
+  traderAddress String
+  signature     String
+  timestamp     DateTime
+  slot          Int
 
-  token   Token @relation(fields: [tokenId], references: [id])
-  tokenId Int
+  token            Token  @relation(fields: [tokenMintAddress], references: [mintAddress])
+  tokenMintAddress String
 }
 
 model kline {
-  id        Int      @id @default(autoincrement())
-  time      DateTime
-  netVolume Float
+  id               Int      @id @default(autoincrement())
+  timestamp        DateTime
+  open             Float
+  high             Float
+  low              Float
+  close            Float
+  volume           Float
+  trades           Int
+  token            Token    @relation(fields: [tokenMintAddress], references: [mintAddress])
+  tokenMintAddress String
 
-  token   Token @relation(fields: [tokenId], references: [id])
-  tokenId Int
-
-  @@unique([tokenId, time])
+  @@unique([tokenMintAddress, timestamp])
 }
 
 model Holder {
-  id                Int    @id @default(autoincrement())
-  address           String
-  amount            Float
-  solBalance        String
-  solBalanceDisplay Float
-  tags              Json?
-  token             Token  @relation(fields: [tokenId], references: [id])
-  tokenId           Int
+  id               Int    @id @default(autoincrement())
+  holderAddress    String
+  amount           Float
+  token            Token  @relation(fields: [tokenMintAddress], references: [mintAddress])
+  tokenMintAddress String
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([tokenId, address])
+  @@unique([tokenMintAddress, holderAddress])
 }

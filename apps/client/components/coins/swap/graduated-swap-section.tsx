@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,9 +15,10 @@ import { Connection, PublicKey } from "@solana/web3.js";
 import { CpAmm } from "@meteora-ag/cp-amm-sdk";
 import BN from "bn.js";
 import { toast } from "sonner";
-import { TOKEN_GRADUATION_ADDRESS } from "@/app/constant";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { useQuery } from "@tanstack/react-query";
+import { useTokenStore } from "@/store/tokenStore";
+import { getTokenBalance } from "@/lib/helius";
+import bs58 from "bs58";
 
 interface GraduatedSwapSectionProps {
   activeTab?: "buy" | "sell";
@@ -30,9 +31,17 @@ export function GraduatedSwapSection({
 }: GraduatedSwapSectionProps) {
   const [buyAmount, setBuyAmount] = useState("");
   const [sellAmount, setSellAmount] = useState("");
+  const [buyOutputAmount, setBuyOutputAmount] = useState("");
+  const [sellOutputAmount, setSellOutputAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
-  const GRADUATED_POOL_ADDRESS = TOKEN_GRADUATION_ADDRESS;
+  const [isFetchingQuote, setIsFetchingQuote] = useState(false);
+  const buyDebounceTimer = useRef<NodeJS.Timeout | null>(null);
+  const sellDebounceTimer = useRef<NodeJS.Timeout | null>(null);
+  const current = useTokenStore((state) => state.currentToken);
+  const GRADUATED_POOL_ADDRESS = new PublicKey(
+    current?.graduatedPoolAddress! ||
+      "HKLXtngZBf4BLya8pMyuRyMmiYQj2NXKEwNQJ1Encx7d"
+  );
 
   const TOKEN_SYMBOL = "TKN";
   const SLIPPAGE = 0.5;
@@ -46,6 +55,18 @@ export function GraduatedSwapSection({
     "confirmed"
   );
 
+  useEffect(() => {
+    if (!wallet.connected || !current?.mintAddress) return;
+
+    (async () => {
+      const balance = await getTokenBalance(
+        wallet.publicKey!.toBase58() as any,
+        current?.mintAddress! as any
+      );
+      console.log("Balance", balance);
+    })();
+  });
+
   const { balance: solBalance, isLoading: balanceLoading } = useBalance({
     publicKey: wallet.publicKey,
     refetchInterval: 30000,
@@ -57,6 +78,122 @@ export function GraduatedSwapSection({
     if (!wallet.wallet?.address) return null;
     return walletsSolana.find((w) => w.address === wallet.wallet?.address);
   };
+
+  const getQuote = useCallback(
+    async (amount: number, isBuy: boolean) => {
+      try {
+        const poolState = await cpAmm.fetchPoolState(GRADUATED_POOL_ADDRESS);
+        if (!poolState) return null;
+
+        const currentSlot = await connection.getSlot();
+        const blockTime = await connection.getBlockTime(currentSlot);
+        if (blockTime === null) return null;
+
+        const amountIn = new BN(Math.floor(amount * (isBuy ? 1e9 : 1e6)));
+        const inputMint = isBuy ? poolState.tokenAMint : poolState.tokenBMint;
+        const tokenADecimal = 9;
+        const tokenBDecimal = 6;
+
+        const quote = await cpAmm.getQuote({
+          inAmount: amountIn,
+          inputTokenMint: inputMint,
+          slippage: SLIPPAGE,
+          poolState,
+          currentTime: blockTime,
+          currentSlot,
+          tokenADecimal,
+          tokenBDecimal,
+        });
+
+        console.log("swapout: ", new BN(quote.swapOutAmount).toNumber());
+
+        const outputAmount =
+          parseFloat(quote.swapOutAmount.toString()) / (isBuy ? 1e6 : 1e9);
+        return outputAmount;
+      } catch (error) {
+        console.error("Failed to fetch quote:", error);
+        return null;
+      }
+    },
+    [GRADUATED_POOL_ADDRESS, SLIPPAGE, connection, cpAmm]
+  );
+
+  const fetchBuyQuote = useCallback(
+    async (amount: string) => {
+      if (!amount || parseFloat(amount) <= 0) {
+        setBuyOutputAmount("");
+        return;
+      }
+      setIsFetchingQuote(true);
+      try {
+        const outputAmount = await getQuote(parseFloat(amount), true);
+        if (outputAmount !== null) {
+          setBuyOutputAmount(outputAmount.toFixed(6));
+        }
+      } catch (error) {
+        console.error("Failed to fetch buy quote:", error);
+        setBuyOutputAmount("");
+      } finally {
+        setIsFetchingQuote(false);
+      }
+    },
+    [getQuote]
+  );
+
+  const fetchSellQuote = useCallback(
+    async (amount: string) => {
+      if (!amount || parseFloat(amount) <= 0) {
+        setSellOutputAmount("");
+        return;
+      }
+      setIsFetchingQuote(true);
+      try {
+        const outputAmount = await getQuote(parseFloat(amount), false);
+        if (outputAmount !== null) {
+          setSellOutputAmount(outputAmount.toFixed(6));
+        }
+      } catch (error) {
+        console.error("Failed to fetch sell quote:", error);
+        setSellOutputAmount("");
+      } finally {
+        setIsFetchingQuote(false);
+      }
+    },
+    [getQuote]
+  );
+
+  const handleBuyAmountChange = (value: string) => {
+    setBuyAmount(value);
+
+    if (buyDebounceTimer.current) {
+      clearTimeout(buyDebounceTimer.current);
+    }
+
+    if (value && parseFloat(value) > 0) {
+      buyDebounceTimer.current = setTimeout(() => {
+        fetchBuyQuote(value);
+      }, 500);
+    } else {
+      setBuyOutputAmount("");
+    }
+  };
+
+  const handleSellAmountChange = (value: string) => {
+    setSellAmount(value);
+
+    if (sellDebounceTimer.current) {
+      clearTimeout(sellDebounceTimer.current);
+    }
+
+    if (value && parseFloat(value) > 0) {
+      sellDebounceTimer.current = setTimeout(() => {
+        fetchSellQuote(value);
+      }, 500);
+    } else {
+      setSellOutputAmount("");
+    }
+  };
+
   async function performCpAmmSwap(amountIn: BN, swapAToB: boolean) {
     if (!wallet.connected || !wallet.publicKey) {
       toast.error("Please connect your wallet first");
@@ -137,7 +274,7 @@ export function GraduatedSwapSection({
       transaction: Buffer.from(txBase64, "base64"),
       wallet: privyWallet,
     });
-    const signature = result.signature;
+    const signature = bs58.encode(result.signature);
 
     toast.success("Swap completed successfully!", {
       id: toastId,
@@ -168,6 +305,7 @@ export function GraduatedSwapSection({
       toast.error(e?.message || "Swap failed");
     } finally {
       setIsLoading(false);
+      toast.dismiss();
     }
   };
 
@@ -185,6 +323,7 @@ export function GraduatedSwapSection({
       toast.error(e?.message || "Swap failed");
     } finally {
       setIsLoading(false);
+      toast.dismiss();
     }
   };
 
@@ -196,12 +335,14 @@ export function GraduatedSwapSection({
           onValueChange={(v) => onTabChange?.(v as "buy" | "sell")}
           className="w-full"
         >
-          <TabsList className="grid w-full grid-cols-2 h-20">
-            <TabsTrigger value="buy">Buy</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger className="" value="buy">
+              Buy
+            </TabsTrigger>
             <TabsTrigger value="sell">Sell</TabsTrigger>
           </TabsList>
-          <TabsContent value="buy" className="space-y-4 p-6">
-            <div className="flex justify-between items-center">
+          <TabsContent value="buy">
+            <div className="flex justify-between items-center p-3">
               <span className="text-sm text-muted-foreground">balance:</span>
               <span className="text-sm">
                 {balanceLoading
@@ -212,12 +353,12 @@ export function GraduatedSwapSection({
 
             <div className="relative">
               <Input
-                className="w-full border rounded-lg pr-20 py-6 text-lg"
+                className="w-full border rounded-xl pr-20 py-3"
                 id="buy-from"
                 type="number"
                 placeholder="0.0"
                 value={buyAmount}
-                onChange={(e) => setBuyAmount(e.target.value)}
+                onChange={(e) => handleBuyAmountChange(e.target.value)}
               />
               <div className="flex items-center gap-2 absolute top-1/2 right-3 -translate-y-1/2">
                 <span className="text-sm font-medium">SOL</span>
@@ -226,14 +367,14 @@ export function GraduatedSwapSection({
                 </div>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex py-3 gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                className="flex-1 rounded-lg"
+                className="flex-1 rounded-sm border border-r"
                 onClick={() => {
                   const amount = (solBalance || 0) * 0.25;
-                  setBuyAmount(amount.toString());
+                  handleBuyAmountChange(amount.toString());
                 }}
               >
                 25%
@@ -241,10 +382,10 @@ export function GraduatedSwapSection({
               <Button
                 variant="outline"
                 size="sm"
-                className="flex-1 rounded-lg"
+                className="flex-1 rounded-sm border border-r"
                 onClick={() => {
                   const amount = (solBalance || 0) * 0.5;
-                  setBuyAmount(amount.toString());
+                  handleBuyAmountChange(amount.toString());
                 }}
               >
                 50%
@@ -252,10 +393,10 @@ export function GraduatedSwapSection({
               <Button
                 variant="outline"
                 size="sm"
-                className="flex-1 rounded-lg"
+                className="flex-1 rounded-sm border border-r"
                 onClick={() => {
                   const amount = (solBalance || 0) * 0.75;
-                  setBuyAmount(amount.toString());
+                  handleBuyAmountChange(amount.toString());
                 }}
               >
                 75%
@@ -263,19 +404,32 @@ export function GraduatedSwapSection({
               <Button
                 variant="outline"
                 size="sm"
-                className="flex-1 rounded-lg"
+                className="flex-1 rounded-sm border"
                 onClick={() => {
                   const amount = solBalance || 0;
-                  setBuyAmount(amount.toString());
+                  handleBuyAmountChange(amount.toString());
                 }}
               >
                 100%
               </Button>
             </div>
 
+            {isFetchingQuote ? (
+              <div className="text-center py-2 text-sm text-muted-foreground">
+                Loading quote...
+              </div>
+            ) : buyOutputAmount ? (
+              <div className="text-center py-2 text-sm">
+                <span className="text-muted-foreground">you receive </span>
+                <span className="font-medium">
+                  {buyOutputAmount} {TOKEN_SYMBOL}
+                </span>
+              </div>
+            ) : null}
+
             <Button
               onClick={handleBuy}
-              className="w-full rounded-lg py-6 text-lg"
+              className="w-full text-background"
               size="lg"
               disabled={
                 !wallet.connected ||
@@ -287,27 +441,25 @@ export function GraduatedSwapSection({
               {!wallet.connected
                 ? "Connect Wallet"
                 : isLoading
-                ? "Processing..."
-                : `Buy ${TOKEN_SYMBOL}`}
+                  ? "Processing..."
+                  : `Buy ${TOKEN_SYMBOL}`}
             </Button>
           </TabsContent>
 
-          <TabsContent value="sell" className="space-y-4 p-6">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">
-                {TOKEN_SYMBOL} balance:
-              </span>
-              <span className="text-sm">0</span>
+          <TabsContent value="sell">
+            <div className="flex justify-between items-center p-3">
+              <span className="text-sm text-muted-foreground">balance:</span>
+              <span className="text-sm">0 {TOKEN_SYMBOL}</span>
             </div>
 
             <div className="relative">
               <Input
-                className="w-full border rounded-lg pr-20 py-6 text-lg"
+                className="w-full border rounded-xl pr-20 py-3"
                 id="sell-from"
                 type="number"
                 placeholder="0.0"
                 value={sellAmount}
-                onChange={(e) => setSellAmount(e.target.value)}
+                onChange={(e) => handleSellAmountChange(e.target.value)}
               />
               <div className="flex items-center gap-2 absolute top-1/2 right-3 -translate-y-1/2">
                 <span className="text-sm font-medium">{TOKEN_SYMBOL}</span>
@@ -317,19 +469,11 @@ export function GraduatedSwapSection({
               </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex py-3 gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                className="flex-1 rounded-lg"
-                onClick={() => setSellAmount("")}
-              >
-                Reset
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 rounded-lg"
+                className="flex-1 rounded-sm border border-r"
                 onClick={() => setSellAmount("0")}
               >
                 25%
@@ -337,7 +481,7 @@ export function GraduatedSwapSection({
               <Button
                 variant="outline"
                 size="sm"
-                className="flex-1 rounded-lg"
+                className="flex-1 rounded-sm border border-r"
                 onClick={() => setSellAmount("0")}
               >
                 50%
@@ -345,7 +489,7 @@ export function GraduatedSwapSection({
               <Button
                 variant="outline"
                 size="sm"
-                className="flex-1 rounded-lg"
+                className="flex-1 rounded-sm border border-r"
                 onClick={() => setSellAmount("0")}
               >
                 75%
@@ -353,16 +497,27 @@ export function GraduatedSwapSection({
               <Button
                 variant="outline"
                 size="sm"
-                className="flex-1 rounded-lg"
+                className="flex-1 rounded-sm border"
                 onClick={() => setSellAmount("0")}
               >
                 100%
               </Button>
             </div>
 
+            {isFetchingQuote ? (
+              <div className="text-center py-2 text-sm text-muted-foreground">
+                Loading quote...
+              </div>
+            ) : sellOutputAmount ? (
+              <div className="text-center py-2 text-sm">
+                <span className="text-muted-foreground">you receive </span>
+                <span className="font-medium">{sellOutputAmount} SOL</span>
+              </div>
+            ) : null}
+
             <Button
               onClick={handleSell}
-              className="w-full rounded-lg py-6 text-lg"
+              className="w-full text-background"
               size="lg"
               variant="destructive"
               disabled={
@@ -375,8 +530,8 @@ export function GraduatedSwapSection({
               {!wallet.connected
                 ? "Connect Wallet"
                 : isLoading
-                ? "Processing..."
-                : `Sell ${TOKEN_SYMBOL}`}
+                  ? "Processing..."
+                  : `Sell ${TOKEN_SYMBOL}`}
             </Button>
           </TabsContent>
         </Tabs>

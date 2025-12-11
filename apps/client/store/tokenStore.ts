@@ -177,7 +177,7 @@ export const useTokenStore = create<TokenStore>((set, get) => ({
         `/api/coins/${mintAddress}/transactions?limit=${limit}&offset=${offset}`
       );
       if (res.data.success) {
-        set({ trades: res.data.trades, isLoadingTrades: false });
+        set({ trades: res.data.transactions, isLoadingTrades: false });
       } else {
         set({ isLoadingTrades: false });
         console.error("Error fetching trades:", res.data.error);
@@ -192,7 +192,7 @@ export const useTokenStore = create<TokenStore>((set, get) => ({
   isLoadingKlines: false,
   fetchKlines: async (
     mintAddress: string,
-    interval = "1_DAY",
+    interval = "5m",
     isBackgroundRefresh = false
   ) => {
     try {

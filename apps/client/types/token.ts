@@ -4,6 +4,7 @@ export interface Token {
   symbol: string;
   description: string | null;
   mintAddress: string;
+  graduatedPoolAddress: string | null;
   poolAddress: string;
   website: string | null;
   twitter: string | null;
@@ -56,37 +57,32 @@ export interface TokenFormData {
 
 export interface Kline {
   id?: number;
-  tokenId: number;
-  time: Date | string;
-  netVolume: number;
+  timestamp: Date | string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+  trades: number;
+  tokenMintAddress: string;
 }
 
 export interface Holder {
   id: number;
-  address: string;
+  holderAddress: string;
   amount: number;
-  solBalance: string;
-  solBalanceDisplay: number;
-  tags: any;
-  tokenId: number;
-  createdAt?: Date | string;
-  updatedAt?: Date | string;
+  tokenMintAddress: string;
 }
 
 export interface Trade {
-  id: number;
-  asset: string;
-  type: string;
-  usdPrice: number;
-  usdVolume: number;
+  id?: number;
+  type: "BUY" | "SELL";
+  price: number;
+  tokenAmount: number;
+  solAmount: number;
   traderAddress: string;
-  txHash: string;
-  amount: number;
-  isMev: boolean;
-  isValidPrice: boolean;
-  isValidPosition: boolean;
-  poolId: string;
-  nativeVolume: number;
+  signature: string;
   timestamp: Date | string;
-  tokenId: number;
+  slot: number;
+  tokenMintAddress: string;
 }

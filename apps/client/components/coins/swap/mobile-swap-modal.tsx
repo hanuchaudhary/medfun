@@ -98,7 +98,7 @@ export function MobileSwapModal({ tokenId, tokenName }: MobileSwapModalProps) {
               onTabChange={setActiveTab}
             />
           ) : (
-            <SwapSection tokenId={tokenId} />
+            <SwapSection tokenmint={tokenId} />
           )}
         </div>
       </SheetContent>

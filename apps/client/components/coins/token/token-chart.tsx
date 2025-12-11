@@ -4,13 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import {
   createChart,
   ColorType,
-  UTCTimestamp,
   CrosshairMode,
+  UTCTimestamp,
+  CandlestickSeries,
   HistogramSeries,
 } from "lightweight-charts";
 import { useTheme } from "next-themes";
 import { useTokenStore } from "@/store/tokenStore";
-import { Button } from "@/components/ui/button";
 
 interface TokenChartProps {
   mintAddress: string;
@@ -19,87 +19,76 @@ interface TokenChartProps {
 export function TokenChart({ mintAddress }: TokenChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
-  const { klines, isLoadingKlines, fetchKlines } = useTokenStore();
+  const { klines, fetchKlines, isLoadingKlines } = useTokenStore();
   const [interval, setInterval] = useState("1_HOUR");
-
-  useEffect(() => {
-    if (mintAddress && interval) {
-      fetchKlines(mintAddress, interval);
-    }
-  }, [interval]);
 
   useEffect(() => {
     if (!chartContainerRef.current) return;
 
     const chart = createChart(chartContainerRef.current, {
       autoSize: true,
-      width: chartContainerRef.current.clientWidth,
       height: 450,
       layout: {
         background: { type: ColorType.Solid, color: "transparent" },
-        textColor: theme === "dark" ? "#9CA3AF" : "#6B7280",
-        fontSize: 12,
+        textColor: theme === "dark" ? "#e5e7eb" : "#111827",
       },
       grid: {
-        vertLines: { color: theme === "dark" ? "#1F2937" : "#E5E7EB" },
-        horzLines: { color: theme === "dark" ? "#1F2937" : "#E5E7EB" },
+        vertLines: { color: theme === "dark" ? "#1f2937" : "#e5e7eb" },
+        horzLines: { color: theme === "dark" ? "#1f2937" : "#e5e7eb" },
       },
       crosshair: {
         mode: CrosshairMode.Normal,
-        vertLine: {
-          width: 1,
-          color: "rgba(224, 224, 224, 0.3)",
-          style: 2,
-        },
-        horzLine: {
-          width: 1,
-          color: "rgba(224, 224, 224, 0.3)",
-          style: 2,
-        },
       },
       rightPriceScale: {
         borderVisible: false,
-        scaleMargins: {
-          top: 0.1,
-          bottom: 0.1,
-        },
       },
       timeScale: {
         borderVisible: false,
         timeVisible: true,
-        secondsVisible: false,
       },
     });
 
-    const histogramSeries = chart.addSeries(HistogramSeries, {
-      color: theme === "dark" ? "#6bbd6f" : "#0ea5e9",
-      priceFormat: {
-        type: "volume",
-      },
+    const candleSeries = chart.addSeries(CandlestickSeries,({
+      upColor: "#30b561",
+      wickUpColor: "#22c55e",
+      borderUpColor: "#22c55e",
+      downColor: "#ef4444",       
+      wickDownColor: "#ef4444",
+      borderDownColor: "#ef4444",
+    }));
+
+    const volumeSeries = chart.addSeries(HistogramSeries, {
+      priceFormat: { type: "volume" },
+      priceScaleId: "",
     });
 
     if (klines && klines.length > 0) {
-      const chartData = klines.map((kline) => ({
-        time: Math.floor(new Date(kline.time).getTime() / 1000) as UTCTimestamp,
-        value: kline.netVolume,
-        color:
-          kline.netVolume >= 0
-            ? theme === "dark"
-              ? "#6bbd6f"
-              : "#0ea5e9"
-            : "#F10D11",
+      const candleData = klines.map((k) => ({
+        time: Math.floor(new Date(k.timestamp).getTime() / 1000) as UTCTimestamp,
+        open: k.open,
+        high: k.high,
+        low: k.low,
+        close: k.close,
       }));
 
-      histogramSeries.setData(chartData);
+      candleSeries.setData(candleData);
+
+      const volumeData = klines.map((k) => ({
+        time: Math.floor(new Date(k.timestamp).getTime() / 1000) as UTCTimestamp,
+        value: k.volume,
+        color: k.close >= k.open ? "#22c55e" : "#ef4444",
+      }));
+
+      volumeSeries.setData(volumeData);
     }
 
     chart.timeScale().fitContent();
+
     const handleResize = () => {
-      if (chartContainerRef.current) {
-        chart.applyOptions({
-          width: chartContainerRef.current.clientWidth,
-        });
-      }
+      if (!chartContainerRef.current) return;
+      chart.applyOptions({
+        width: chartContainerRef.current.clientWidth,
+      });
     };
 
     window.addEventListener("resize", handleResize);
@@ -110,33 +99,12 @@ export function TokenChart({ mintAddress }: TokenChartProps) {
     };
   }, [klines, theme]);
 
-  const intervals = [
-    { label: "5M", value: "5_MINUTE" },
-    { label: "15M", value: "15_MINUTE" },
-    { label: "1H", value: "1_HOUR" },
-    { label: "4H", value: "4_HOUR" },
-    { label: "1D", value: "1_DAY" },
-  ];
-
   return (
-    <div className="w-full">
-      <div className="flex gap-2 p-3 border-b">
-        {intervals.map((int) => (
-          <Button
-            key={int.value}
-            variant={interval === int.value ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setInterval(int.value)}
-            className="text-xs"
-          >
-            {int.label}
-          </Button>
-        ))}
-      </div>
+    <div className="relative w-full">
       <div ref={chartContainerRef} className="w-full rounded-xl pb-8" />
       {isLoadingKlines && klines.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-muted-foreground">Loading chart data...</div>
+          <div className="text-muted-foreground">Loading chart...</div>
         </div>
       )}
     </div>

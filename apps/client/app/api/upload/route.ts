@@ -5,26 +5,20 @@ import {
   deriveDbcPoolAddress,
 } from "@meteora-ag/dynamic-bonding-curve-sdk";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import bs58 from "bs58";
 
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL as string;
 const POOL_CONFIG_KEY = process.env.POOL_CONFIG_KEY;
 const QUOTE_MINT =
   process.env.QUOTE_MINT || "So11111111111111111111111111111111111111112";
-
-const DO_SPACES_ACCESS_KEY_ID = process.env.DO_SPACES_ACCESS_KEY_ID as string;
-const DO_SPACES_SECRET_ACCESS_KEY = process.env
-  .DO_SPACES_SECRET_ACCESS_KEY as string;
-const DO_SPACES_ENDPOINT = process.env.DO_SPACES_ENDPOINT as string;
-const DO_SPACES_BUCKET = process.env.DO_SPACES_BUCKET as string;
-const DO_SPACES_PUBLIC_URL = process.env.DO_SPACES_PUBLIC_URL as string;
+const DO_SPACES_BUCKET = process.env.DO_SPACES_BUCKET;
+const DO_SPACES_PUBLIC_URL = process.env.DO_SPACES_PUBLIC_URL;
 
 const s3Client = new S3Client({
-  endpoint: DO_SPACES_ENDPOINT,
-  region: "auto",
+  endpoint: process.env.DO_SPACES_ENDPOINT as string,
+  region: "sfo3",
   credentials: {
-    accessKeyId: DO_SPACES_ACCESS_KEY_ID,
-    secretAccessKey: DO_SPACES_SECRET_ACCESS_KEY,
+    accessKeyId: process.env.DO_SPACES_ACCESS_KEY_ID as string,
+    secretAccessKey: process.env.DO_SPACES_SECRET_ACCESS_KEY as string,
   },
 });
 
@@ -182,6 +176,7 @@ async function uploadTokenImage(
     await uploadToSpaces(fileBuffer, contentType, fileName);
     return `${DO_SPACES_PUBLIC_URL}/${fileName}`;
   } catch (error) {
+    console.log("Upload image error:", error);
     return false;
   }
 }

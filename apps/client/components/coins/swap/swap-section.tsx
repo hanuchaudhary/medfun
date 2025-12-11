@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,72 +15,40 @@ import {
   useSignAndSendTransaction as useSendTransactionSolana,
   useWallets as useWalletsSolana,
 } from "@privy-io/react-auth/solana";
-import { Connection } from "@solana/web3.js";
+import { Connection, PublicKey } from "@solana/web3.js";
 import BN from "bn.js";
+import bs58 from "bs58";
 import { toast } from "sonner";
-import { TOKEN_POOL_ADDRESS } from "@/app/constant";
 import Image from "next/image";
+import { useTokenStore } from "@/store/tokenStore";
+import { Loader2 } from "lucide-react";
 
 interface SwapSectionProps {
-  tokenId: string;
+  tokenmint: string;
 }
 
-export function SwapSection({ tokenId }: SwapSectionProps) {
+export function SwapSection({ tokenmint }: SwapSectionProps) {
   const [buyAmount, setBuyAmount] = useState("");
   const [sellAmount, setSellAmount] = useState("");
   const [buyOutputAmount, setBuyOutputAmount] = useState("");
   const [sellOutputAmount, setSellOutputAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingQuote, setIsFetchingQuote] = useState(false);
-  const [SOLPrice, setSOLPrice] = useState<number | null>(null);
-  const [tokenPriceUSD, setTokenPriceUSD] = useState<string | null>(null);
-  const [isFetchingPrice, setIsFetchingPrice] = useState(false);
+  const { currentToken } = useTokenStore();
 
   const buyDebounceTimer = useRef<NodeJS.Timeout | null>(null);
   const sellDebounceTimer = useRef<NodeJS.Timeout | null>(null);
-  const priceRefetchTimer = useRef<NodeJS.Timeout | null>(null);
 
-  const POOL_ADDRESS = TOKEN_POOL_ADDRESS;
-
-  const fetchPrices = useCallback(async () => {
-    setIsFetchingPrice(true);
+  const POOL_ADDRESS = React.useMemo(() => {
+    if (!currentToken?.poolAddress) return null;
     try {
-      const response = await fetch("https://gated.chat/price/sol");
-      const solPriceData = await response.json();
-      setSOLPrice(solPriceData);
-
-      try {
-        const { outputAmount } = await getSwapQuote(1, true);
-        const pricePerToken = solPriceData * outputAmount;
-        setTokenPriceUSD(pricePerToken.toFixed(6));
-      } catch (error) {
-        console.error("Failed to fetch token quote:", error);
-        setTokenPriceUSD(null);
-      }
+      return new PublicKey(currentToken.poolAddress);
     } catch (error) {
-      console.error("Failed to fetch SOL price:", error);
-      setSOLPrice(null);
-      setTokenPriceUSD(null);
-    } finally {
-      setIsFetchingPrice(false);
+      console.error("Invalid pool address:", error);
+      return null;
     }
-  }, [POOL_ADDRESS]);
-
-  useEffect(() => {
-    fetchPrices();
-
-    priceRefetchTimer.current = setInterval(() => {
-      fetchPrices();
-    }, 30000);
-
-    return () => {
-      if (priceRefetchTimer.current) {
-        clearInterval(priceRefetchTimer.current);
-      }
-    };
-  }, [fetchPrices]);
-
-  const TOKEN_SYMBOL = "TOKEN";
+  }, [currentToken?.poolAddress]);
+  const TOKEN_SYMBOL = currentToken?.symbol;
   const SLIPPAGE_BPS = 100;
 
   const wallet = useWallet();
@@ -103,6 +71,9 @@ export function SwapSection({ tokenId }: SwapSectionProps) {
   };
 
   const getSwapQuote = async (amount: number, isBuy: boolean) => {
+    if (!POOL_ADDRESS) {
+      throw new Error("Pool address not available");
+    }
     const client = new DynamicBondingCurveClient(connection, "confirmed");
     const virtualPoolState = await client.state.getPool(POOL_ADDRESS);
     const poolConfigState = await client.state.getPoolConfig(
@@ -139,6 +110,7 @@ export function SwapSection({ tokenId }: SwapSectionProps) {
         setBuyOutputAmount("");
         return;
       }
+      if (!POOL_ADDRESS) return;
       setIsFetchingQuote(true);
       try {
         const { outputAmount } = await getSwapQuote(parseFloat(amount), true);
@@ -159,6 +131,7 @@ export function SwapSection({ tokenId }: SwapSectionProps) {
         setSellOutputAmount("");
         return;
       }
+      if (!POOL_ADDRESS) return;
 
       setIsFetchingQuote(true);
       try {
@@ -223,6 +196,11 @@ export function SwapSection({ tokenId }: SwapSectionProps) {
       return;
     }
 
+    if (!POOL_ADDRESS) {
+      toast.error("Pool address not available. Please try again.");
+      return;
+    }
+
     const privyWallet = getPrivyWallet();
     if (!privyWallet) {
       toast.error("Could not find the selected Solana wallet");
@@ -268,7 +246,8 @@ export function SwapSection({ tokenId }: SwapSectionProps) {
         transaction: Buffer.from(txBase64, "base64"),
         wallet: privyWallet,
       });
-      const signature = result.signature;
+      const signature = bs58.encode(result.signature);
+      console.log("Sign: ", signature);
 
       toast.success(
         <div className="flex flex-col gap-1">
@@ -297,6 +276,11 @@ export function SwapSection({ tokenId }: SwapSectionProps) {
   const handleSell = async () => {
     if (!wallet.connected || !wallet.publicKey) {
       toast.error("Please connect your wallet first");
+      return;
+    }
+
+    if (!POOL_ADDRESS) {
+      toast.error("Pool address not available. Please try again.");
       return;
     }
 
@@ -343,7 +327,7 @@ export function SwapSection({ tokenId }: SwapSectionProps) {
         transaction: Buffer.from(txBase64, "base64"),
         wallet: privyWallet,
       });
-      const signature = result.signature;
+      const signature = bs58.encode(result.signature);
 
       toast.success(
         <div className="flex flex-col gap-1">
@@ -456,19 +440,25 @@ export function SwapSection({ tokenId }: SwapSectionProps) {
                 100%
               </Button>
             </div>
-
-            {buyOutputAmount && (
-              <div className="text-center py-2 text-sm">
-                <span className="text-muted-foreground">you receive </span>
-                <span className="font-medium">
-                  {buyOutputAmount} {TOKEN_SYMBOL}
-                </span>
-              </div>
-            )}
+            <div className="flex items-center justify-center">
+              {isFetchingQuote ? (
+                <div className="text-center py-2 text-sm text-muted-foreground flex items-center justify-center mb-2">
+                  <Loader2 className="w-4 h-4 mr-2 inline-block animate-spin" />{" "}
+                  Loading quote...
+                </div>
+              ) : buyOutputAmount ? (
+                <div className="text-center py-2 text-sm mb-2">
+                  <span className="text-muted-foreground">you receive </span>
+                  <span className="font-semibold text-primary">
+                    {buyOutputAmount} {TOKEN_SYMBOL}
+                  </span>
+                </div>
+              ) : null}
+            </div>
 
             <Button
               onClick={handleBuy}
-              className="w-full text-background"
+              className="w-full text-background font-semibold"
               size="lg"
               disabled={
                 !wallet.connected ||
@@ -480,21 +470,19 @@ export function SwapSection({ tokenId }: SwapSectionProps) {
               {!wallet.connected
                 ? "Connect Wallet"
                 : isLoading
-                ? "Processing..."
-                : `Buy ${TOKEN_SYMBOL}`}
+                  ? "Processing..."
+                  : `Buy ${TOKEN_SYMBOL}`}
             </Button>
           </TabsContent>
           <TabsContent value="sell">
-            <div className="flex justify-between items-center p-6">
-              <span className="text-sm text-muted-foreground">
-                {TOKEN_SYMBOL} balance:
-              </span>
-              <span className="text-sm">0</span>
+            <div className="flex justify-between items-center p-3">
+              <span className="text-sm text-muted-foreground">balance:</span>
+              <span className="text-sm">0 {TOKEN_SYMBOL}</span>
             </div>
 
             <div className="relative">
               <Input
-                className="w-full border-y rounded-none pr-20 py-6 text-lg"
+                className="w-full border rounded-xl pr-20 py-3"
                 id="sell-from"
                 type="number"
                 placeholder="0.0"
@@ -509,19 +497,11 @@ export function SwapSection({ tokenId }: SwapSectionProps) {
               </div>
             </div>
 
-            <div className="flex">
+            <div className="flex py-3 gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                className="flex-1 rounded-none py-8 border-0 border-r"
-                onClick={() => handleSellAmountChange("0")}
-              >
-                Reset
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 rounded-none py-8 border-0 border-r"
+                className="flex-1 rounded-sm border border-r"
                 onClick={() => handleSellAmountChange("0")}
               >
                 25%
@@ -529,7 +509,7 @@ export function SwapSection({ tokenId }: SwapSectionProps) {
               <Button
                 variant="outline"
                 size="sm"
-                className="flex-1 rounded-none py-8 border-0 border-r"
+                className="flex-1 rounded-sm border border-r"
                 onClick={() => handleSellAmountChange("0")}
               >
                 50%
@@ -537,7 +517,7 @@ export function SwapSection({ tokenId }: SwapSectionProps) {
               <Button
                 variant="outline"
                 size="sm"
-                className="flex-1 rounded-none py-8 border-0 border-r"
+                className="flex-1 rounded-sm border border-r"
                 onClick={() => handleSellAmountChange("0")}
               >
                 75%
@@ -545,32 +525,41 @@ export function SwapSection({ tokenId }: SwapSectionProps) {
               <Button
                 variant="outline"
                 size="sm"
-                className="flex-1 rounded-none py-8 border-0"
+                className="flex-1 rounded-sm border"
                 onClick={() => handleSellAmountChange("0")}
               >
                 100%
               </Button>
             </div>
 
-            {sellOutputAmount && (
-              <div className="text-center py-4">
+            {isFetchingQuote ? (
+              <div className="text-center py-2 text-sm text-muted-foreground">
+                Loading quote...
+              </div>
+            ) : sellOutputAmount ? (
+              <div className="text-center py-2 text-sm">
                 <span className="text-muted-foreground">you receive </span>
                 <span className="font-medium">{sellOutputAmount} SOL</span>
               </div>
-            )}
+            ) : null}
 
             <Button
               onClick={handleSell}
-              className="w-full rounded-none py-8 text-lg"
+              className="w-full text-background"
               size="lg"
               variant="destructive"
-              disabled={!wallet.connected || isLoading || !sellAmount}
+              disabled={
+                !wallet.connected ||
+                isLoading ||
+                !sellAmount ||
+                parseFloat(sellAmount) <= 0
+              }
             >
               {!wallet.connected
                 ? "Connect Wallet"
                 : isLoading
-                ? "Processing..."
-                : `Sell ${TOKEN_SYMBOL}`}
+                  ? "Processing..."
+                  : `Sell ${TOKEN_SYMBOL}`}
             </Button>
           </TabsContent>
         </Tabs>
