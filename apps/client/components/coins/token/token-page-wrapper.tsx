@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, createContext, useContext } from "react";
 import { addRecentToken } from "./recently-opened";
-import { useTokenStore } from "@/store/tokenStore";
+import { useTokenPolling } from "@/hooks/use-token-polling";
+import { Token } from "@/types/token";
 
 interface TokenPageWrapperProps {
   tokenMint: string;
@@ -14,36 +15,17 @@ const formatPrice = (marketCap: number | null, supply: number = 1000000000) => {
   return `$${(marketCap / supply).toFixed(6)}`;
 };
 
+const TokenContext = createContext<Token | null>(null);
+
+export function useCurrentToken() {
+  return useContext(TokenContext);
+}
+
 export function TokenPageWrapper({
   tokenMint,
   children,
 }: TokenPageWrapperProps) {
-  const {
-    currentToken,
-    fetchTokenDetails,
-    fetchHolders,
-    fetchTrades,
-    fetchKlines,
-  } = useTokenStore();
-
-  useEffect(() => {
-    fetchTokenDetails(tokenMint);
-    fetchHolders(tokenMint);`
-    fetchTrades(tokenMint, 50);
-    // fetchKlines(tokenMint, "1_HOUR");`
-  }, [tokenMint, fetchTokenDetails, fetchHolders, fetchTrades, fetchKlines]);
-
-  useEffect(() => {
-    const pollInterval = setInterval(() => {
-      // fetchTokenDetails(tokenMint, true);
-      fetchHolders(tokenMint, true);
-      fetchTrades(tokenMint, 50, 0, true);
-      fetchKlines(tokenMint, "1_HOUR", true);
-    }, 5000);
-    return () => {
-      clearInterval(pollInterval);
-    };
-  }, [tokenMint, fetchTokenDetails, fetchHolders, fetchTrades, fetchKlines]);
+  const { token: currentToken } = useTokenPolling(tokenMint);
 
   useEffect(() => {
     if (currentToken) {
@@ -59,5 +41,9 @@ export function TokenPageWrapper({
     }
   }, [currentToken, tokenMint]);
 
-  return <>{children}</>;
+  return (
+    <TokenContext.Provider value={currentToken}>
+      {children}
+    </TokenContext.Provider>
+  );
 }

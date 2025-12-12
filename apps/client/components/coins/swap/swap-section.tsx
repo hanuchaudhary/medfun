@@ -20,7 +20,7 @@ import BN from "bn.js";
 import bs58 from "bs58";
 import { toast } from "sonner";
 import Image from "next/image";
-import { useTokenStore } from "@/store/tokenStore";
+import { useCurrentToken } from "../token/token-page-wrapper";
 import { Loader2 } from "lucide-react";
 
 interface SwapSectionProps {
@@ -34,7 +34,7 @@ export function SwapSection({ tokenmint }: SwapSectionProps) {
   const [sellOutputAmount, setSellOutputAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingQuote, setIsFetchingQuote] = useState(false);
-  const { currentToken } = useTokenStore();
+  const currentToken = useCurrentToken();
 
   const buyDebounceTimer = useRef<NodeJS.Timeout | null>(null);
   const sellDebounceTimer = useRef<NodeJS.Timeout | null>(null);
@@ -385,6 +385,7 @@ export function SwapSection({ tokenmint }: SwapSectionProps) {
               <div className="flex items-center gap-2 absolute top-1/2 right-3 -translate-y-1/2">
                 <div className="flex items-center justify-center">
                   <Image
+                    // className="w-auto h-auto"
                     src={"/solana.svg"}
                     alt="Solana"
                     width={20}
@@ -490,9 +491,15 @@ export function SwapSection({ tokenmint }: SwapSectionProps) {
                 onChange={(e) => handleSellAmountChange(e.target.value)}
               />
               <div className="flex items-center gap-2 absolute top-1/2 right-3 -translate-y-1/2">
-                <span className="text-sm font-medium">{TOKEN_SYMBOL}</span>
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="text-xs">P</span>
+                  <Image
+                    priority
+                    className="w-auto h-auto"
+                    src={currentToken?.imageUrl!}
+                    alt={currentToken?.name || "Token Image"}
+                    width={32}
+                    height={32}
+                  />
                 </div>
               </div>
             </div>

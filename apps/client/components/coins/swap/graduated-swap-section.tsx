@@ -16,7 +16,7 @@ import { CpAmm } from "@meteora-ag/cp-amm-sdk";
 import BN from "bn.js";
 import { toast } from "sonner";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { useTokenStore } from "@/store/tokenStore";
+import { useCurrentToken } from "../token/token-page-wrapper";
 import { getTokenBalance } from "@/lib/helius";
 import bs58 from "bs58";
 
@@ -37,7 +37,7 @@ export function GraduatedSwapSection({
   const [isFetchingQuote, setIsFetchingQuote] = useState(false);
   const buyDebounceTimer = useRef<NodeJS.Timeout | null>(null);
   const sellDebounceTimer = useRef<NodeJS.Timeout | null>(null);
-  const current = useTokenStore((state) => state.currentToken);
+  const current = useCurrentToken();
   const GRADUATED_POOL_ADDRESS = new PublicKey(
     current?.graduatedPoolAddress! ||
       "HKLXtngZBf4BLya8pMyuRyMmiYQj2NXKEwNQJ1Encx7d"

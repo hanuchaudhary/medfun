@@ -1,27 +1,23 @@
 "use client";
 
 import { formatCount, formatNumber, formatPercentage } from "@/lib/utils";
-import { useTokenStore } from "@/store/tokenStore";
+import { useCurrentToken } from "./token-page-wrapper";
 import type { TokenStats as StatType } from "@/types/token";
 import React from "react";
 
 type TimeFrame = "5m" | "1h" | "6h" | "24h";
 
 export default function TokenStats() {
-  const { currentToken, isLoadingCurrentToken } = useTokenStore();
+  const currentToken = useCurrentToken();
   const [selectedTimeFrame, setSelectedTimeFrame] =
     React.useState<TimeFrame>("24h");
 
-  if (isLoadingCurrentToken) {
+  if (!currentToken) {
     return (
       <div className="w-full h-fit border-t   p-2 animate-pulse">
         <div className="h-62 bg-muted"></div>
       </div>
     );
-  }
-
-  if (!currentToken) {
-    return null;
   }
 
   const calculateBuySellPercentage = (stats: StatType | null) => {
@@ -125,8 +121,8 @@ export default function TokenStats() {
                 isDisabled
                   ? "opacity-40 cursor-not-allowed bg-secondary/10"
                   : isActive
-                  ? "bg-primary/5 border-primary/20 border-r"
-                  : "bg-secondary/20 hover:bg-secondary/40 cursor-pointer"
+                    ? "bg-primary/5 border-primary/20 border-r"
+                    : "bg-secondary/20 hover:bg-secondary/40 cursor-pointer"
               }`}
             >
               <div className="text-xs text-muted-foreground mb-1">
@@ -137,8 +133,8 @@ export default function TokenStats() {
                   isDisabled
                     ? "text-muted-foreground"
                     : (stats?.priceChange || 0) >= 0
-                    ? "text-primary"
-                    : "text-[#F23674]"
+                      ? "text-primary"
+                      : "text-red-500"
                 }`}
               >
                 {isDisabled ? "-" : formatPercentage(stats?.priceChange)}
@@ -174,18 +170,18 @@ export default function TokenStats() {
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-[#F23674]">
+            <span className="text-xs font-medium text-red-500">
               {sellPercent.toFixed(0)}% Sell
             </span>
           </div>
         </div>
-        <div className="h-3 bg-[#F23674]/20 overflow-hidden flex">
+        <div className="h-3 bg-red-500/20 overflow-hidden flex">
           <div
             className="h-full bg-primary transition-all"
             style={{ width: `${buyPercent}%` }}
           />
           <div
-            className="h-full bg-[#F23674] transition-all"
+            className="h-full bg-red-500 transition-all"
             style={{ width: `${sellPercent}%` }}
           />
         </div>
@@ -199,7 +195,7 @@ export default function TokenStats() {
             </div>
             <div
               className={`text-sm font-medium ${
-                (stat.value || 0) >= 0 ? "text-primary" : "text-[#F23674]"
+                (stat.value || 0) >= 0 ? "text-primary" : "text-red-500"
               }`}
             >
               {formatPercentage(stat.value)}

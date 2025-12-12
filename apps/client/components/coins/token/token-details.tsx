@@ -4,24 +4,16 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import React from "react";
-import { useTokenStore } from "@/store/tokenStore";
+import { useCurrentToken } from "./token-page-wrapper";
+import { formatNumber } from "@/lib/utils";
 
 interface TokenDetailsProps {
   tokenMint: string;
 }
 
 export function TokenDetails({ tokenMint }: TokenDetailsProps) {
-  const { currentToken, isLoadingCurrentToken } = useTokenStore();
-
-  const formatNumber = (num: number | null) => {
-    if (num === null || num === undefined) return "$0";
-    if (num >= 1000000) {
-      return `$${(num / 1000000).toFixed(2)}M`;
-    } else if (num >= 1000) {
-      return `$${(num / 1000).toFixed(2)}K`;
-    }
-    return `$${num.toFixed(2)}`;
-  };
+  const currentToken = useCurrentToken();
+  const isLoadingCurrentToken = !currentToken;
 
   const formatPrice = (
     marketCap: number | null,
@@ -53,7 +45,7 @@ export function TokenDetails({ tokenMint }: TokenDetailsProps) {
     <div className="border p-2 rounded-xl">
       <div className="">
         <div className="flex items-start gap-4">
-          <div className="relative w-24 h-24 flex-shrink-0 rounded-md overflow-hidden bg-muted">
+          <div className="relative w-24 h-24 shrink-0 rounded-md overflow-hidden bg-muted">
             <Image
               src={
                 currentToken.imageUrl ||
@@ -67,7 +59,7 @@ export function TokenDetails({ tokenMint }: TokenDetailsProps) {
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-semibold">{currentToken.name}</h1>
+              <h1 className="text-xl font-semibold">{currentToken.name}</h1>
               <Badge variant="secondary" className="rounded-sm text-primary">
                 {currentToken.symbol}
               </Badge>
@@ -104,7 +96,7 @@ export function TokenDetails({ tokenMint }: TokenDetailsProps) {
             </span>
             <span className="font-medium">{progress.toFixed(2)}%</span>
           </div>
-          <Progress value={progress} className="h-8" />
+          <Progress isGraduated={progress >= 100} value={progress} className="h-8" />
         </div>
       </div>
     </div>

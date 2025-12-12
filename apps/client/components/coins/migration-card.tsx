@@ -36,7 +36,7 @@ import {
 } from "@meteora-ag/dynamic-bonding-curve-sdk";
 import { BN } from "bn.js";
 import PoolState from "./pool-state";
-import { useTokenStore } from "@/store/tokenStore";
+import { useCurrentToken } from "./token/token-page-wrapper";
 
 interface MigrationCardProps {
   tokenId: string;
@@ -53,7 +53,7 @@ export function MigrationCard({
   poolAddress,
   configAddress,
 }: MigrationCardProps) {
-  const { currentToken } = useTokenStore();
+  const currentToken = useCurrentToken();
   const [showDialog, setShowDialog] = useState(false);
   const [isMigrating, setIsMigrating] = useState(false);
   const [migrationComplete, setMigrationComplete] = useState(false);
@@ -123,7 +123,6 @@ export function MigrationCard({
       if (!virtualPoolState) {
         throw new Error("Pool not found");
       }
-
 
       console.log("Virtual Pool State:", virtualPoolState);
       if (virtualPoolState.isMigrated) {

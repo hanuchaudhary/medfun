@@ -11,7 +11,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Token } from "@/types/token";
-import { useTokenStore } from "@/store/tokenStore";
 import { useSearchParams, useRouter } from "next/navigation";
 import { LayoutGrid, Table as TableIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,6 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useTokensPolling } from "@/hooks/use-token-polling";
 
 export function TokenGrid() {
   const [search, setSearch] = React.useState("");
@@ -33,7 +33,7 @@ export function TokenGrid() {
   const router = useRouter();
   const view = searchParams.get("view") || "grid";
 
-  const { tokens, isLoadingTokens, fetchTokens } = useTokenStore();
+  const { tokens, isLoading: isLoadingTokens } = useTokensPolling();
 
   const toggleView = (newView: string) => {
     const params = new URLSearchParams(searchParams);
@@ -61,20 +61,6 @@ export function TokenGrid() {
     if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h`;
     return `${Math.floor(diffInSeconds / 86400)}d`;
   };
-
-  useEffect(() => {
-    fetchTokens();
-  }, [fetchTokens]);
-
-  useEffect(() => {
-    const pollInterval = setInterval(() => {
-      fetchTokens(true);
-    }, 5000);
-
-    return () => {
-      clearInterval(pollInterval);
-    };
-  }, [fetchTokens]);
 
   const filteredAndSorted = React.useMemo(() => {
     const list = (tokens ?? []).filter((t: Token) => {

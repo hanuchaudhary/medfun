@@ -206,6 +206,7 @@ export function TokenCreationForm({
       description:
         formData.description || "Your token description will appear here...",
       imageUrl: formData.image || null,
+      graduatedPoolAddress: null,
       mintAddress: "Preview",
       poolAddress: "Preview",
       creatorAddress: wallet.publicKey?.toString() || "",
@@ -324,8 +325,8 @@ export function TokenCreationForm({
               {!wallet.connected
                 ? "Connect Wallet"
                 : isSubmitting
-                ? "Creating coin..."
-                : "Create coin"}
+                  ? "Creating coin..."
+                  : "Create coin"}
             </Button>
           </div>
 
@@ -343,87 +344,85 @@ export function TokenCreationForm({
         </div>
       </form>
       <Dialog open={showSuccessDialog} onOpenChange={closeSuccessDialog}>
-        <DialogContent className="sm:max-w-xl rounded-[32px] backdrop-blur-sm border border-primary/10">
-            <DialogHeader>
-              <div className="flex items-center justify-center mb-4">
-                <div className="rounded-full bg-green-100 dark:bg-green-900 p-3">
-                  <CheckCircle2 className="w-12 h-12 text-green-600 dark:text-green-400" />
+        <DialogContent className="sm:max-w-xl rounded-4xl backdrop-blur-sm border border-primary/10">
+          <DialogHeader>
+            <div className="flex items-center justify-center mb-4">
+              <div className="rounded-full bg-green-100 dark:bg-green-900 p-3">
+                <CheckCircle2 className="w-12 h-12 text-green-600 dark:text-green-400" />
+              </div>
+            </div>
+            <DialogTitle className="text-center text-2xl">
+              Token Created Successfully! :tada:
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              Your token has been launched on TokunLunchpad
+            </DialogDescription>
+          </DialogHeader>
+          {successData && (
+            <div className="space-y-4 mt-4 ">
+              <div className="bg-muted p-4 rounded-2xl space-y-3">
+                <div>
+                  <p className="text-sm font-medium mb-1">Token Name</p>
+                  <p className="text-lg font-bold">
+                    {successData.tokenName} ({successData.tokenSymbol})
+                  </p>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-sm font-medium">Transaction</p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => copyToClipboard(successData.signature)}
+                    >
+                      <Copy className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <p className="text-xs font-mono break-all">
+                    {successData.signature}
+                  </p>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-sm font-medium">Mind Address</p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => copyToClipboard(successData.tokenMint)}
+                    >
+                      <Copy className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <p className="text-xs font-mono break-all">
+                    {successData.tokenMint}
+                  </p>
                 </div>
               </div>
-              <DialogTitle className="text-center text-2xl">
-                Token Created Successfully! :tada:
-              </DialogTitle>
-              <DialogDescription className="text-center">
-                Your token has been launched on TokunLunchpad
-              </DialogDescription>
-            </DialogHeader>
-            {successData && (
-              <div className="space-y-4 mt-4 ">
-                <div className="bg-muted p-4 rounded-2xl space-y-3">
-                  <div>
-                    <p className="text-sm font-medium mb-1">Token Name</p>
-                    <p className="text-lg font-bold">
-                      {successData.tokenName} ({successData.tokenSymbol})
-                    </p>
-                  </div>
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <p className="text-sm font-medium">Transaction</p>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => copyToClipboard(successData.signature)}
-                      >
-                        <Copy className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    <p className="text-xs font-mono break-all">
-                      {successData.signature}
-                    </p>
-                  </div>
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <p className="text-sm font-medium">Pool Address</p>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => copyToClipboard(successData.poolAddress)}
-                      >
-                        <Copy className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    <p className="text-xs font-mono break-all">
-                      {successData.poolAddress}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <Button
-                    variant="outline"
-                    className="flex-1"
-                    onClick={() =>
-                      window.open(
-                        `https://solscan.io/token/${successData.tokenMint}?cluster=devnet`,
-                        "_blank"
-                      )
-                    }
-                  >
+              <div className="flex gap-3">
+                <Link
+                  href={`https://solscan.io/token/${successData.tokenMint}?cluster=devnet`}
+                  target="_blank"
+                >
+                  <Button variant="outline" className="flex-1">
                     View on Solscan
                     <ExternalLink className="w-4 h-4 ml-2" />
                   </Button>
-                  <Link href="/coins" className="flex-1">
-                    <Button className="w-full font-semibold text-background">View All Tokens</Button>
-                  </Link>
-                </div>
-                <Button
-                  variant="secondary"
-                  className="w-full"
-                  onClick={closeSuccessDialog}
-                >
-                  Create Another Token
-                </Button>
+                </Link>
+                <Link href="/coins" className="flex-1">
+                  <Button className="w-full font-semibold text-background">
+                    View All Tokens
+                  </Button>
+                </Link>
               </div>
-            )}
+              <Button
+                variant="secondary"
+                className="w-full"
+                onClick={closeSuccessDialog}
+              >
+                Create Another Token
+              </Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </>

@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
         hostname: "i.pinimg.com",
       },
       {
-        hostname: "icm-bucket.sfo3.digitaloceanspaces.com",
+        hostname: "medfun.sfo3.digitaloceanspaces.com",
       },
     ],
   },

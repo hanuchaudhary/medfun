@@ -22,7 +22,7 @@ export function Navbar() {
   const [isManualConnection, setIsManualConnection] = useState<boolean>(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const { connected, publicKey, connect, disconnect, connecting } = useWallet();
-  const { ready, login } = usePrivy();
+  const { ready, authenticated, login } = usePrivy();
   useEffect(() => {
     const fetchWalletAddress = async () => {
       let addressStr: string | undefined;
@@ -61,6 +61,12 @@ export function Navbar() {
     if (connected) {
       setShowWalletModal(true);
     } else {
+      if (authenticated) {
+        // User is already authenticated, just show the wallet modal
+        setShowWalletModal(true);
+        return;
+      }
+
       setIsManualConnection(true);
       try {
         await login();

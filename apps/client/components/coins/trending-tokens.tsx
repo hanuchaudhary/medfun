@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import { TokenCard } from "./token-card";
 import { Button } from "@/components/ui/button";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
-import { useTokenStore } from "@/store/tokenStore";
+import { useTrendingTokensPolling } from "@/hooks/use-token-polling";
 
 interface TrendingTokensProps {
   limit?: number;
@@ -17,16 +17,13 @@ export function TrendingTokens({
   showViewAllButton = true,
 }: TrendingTokensProps) {
   const router = useRouter();
-  const { trendingTokens, isLoadingTrendingTokens, fetchTrendingTokens } = useTokenStore();
-
-  useEffect(() => {
-    fetchTrendingTokens(limit);
-  }, [limit, fetchTrendingTokens]);
+  const { tokens: trendingTokens, isLoading: isLoadingTrendingTokens } =
+    useTrendingTokensPolling(limit);
 
   return (
     <div className="flex flex-col">
       <div className="border-b">
-         <motion.div
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -36,7 +33,7 @@ export function TrendingTokens({
           <p className="text-xs font-medium text-muted-foreground py-3 px-8 w-fit">
             Trending Tokens
           </p>
-          </motion.div>
+        </motion.div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
@@ -65,17 +62,19 @@ export function TrendingTokens({
         )}
       </div>
 
-      {showViewAllButton && !isLoadingTrendingTokens && trendingTokens.length > 0 && (
-        <div className="border-t p-4 flex justify-center">
-          <Button
-            variant="default"
-            onClick={() => router.push("/tokens")}
-            className="w-full sm:w-auto rounded-none py-8"
-          >
-            View All Tokens
-          </Button>
-        </div>
-      )}
+      {showViewAllButton &&
+        !isLoadingTrendingTokens &&
+        trendingTokens.length > 0 && (
+          <div className="border-t p-4 flex justify-center">
+            <Button
+              variant="default"
+              onClick={() => router.push("/tokens")}
+              className="w-full sm:w-auto rounded-none py-8"
+            >
+              View All Tokens
+            </Button>
+          </div>
+        )}
     </div>
   );
 }

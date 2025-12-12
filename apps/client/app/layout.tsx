@@ -18,6 +18,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const metadata: Metadata = {
+  title: "Medfun - Token Launchpad & DEX",
+  description: "Medfun is a platform to launch and trade your own tokens easily.",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{

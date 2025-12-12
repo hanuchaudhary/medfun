@@ -1,6 +1,6 @@
-import { prisma } from "./prisma";
 import axios from "axios";
 import { Token } from "@/types/token";
+import { prisma } from "@repo/db";
 
 export const saveToken = async (token: Token) => {
   try {
@@ -57,3 +57,4 @@ export const getTokenDetails = async (mintAddress: string) => {
     console.error("Error fetching token details:", error);
   }
 };
+

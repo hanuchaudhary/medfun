@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Token } from "@/types/token";
+import { formatNumber,getTimeSince } from "@/lib/utils";
 
 interface TokenCardProps {
   token: Token;
@@ -10,47 +11,12 @@ interface TokenCardProps {
 }
 
 export function TokenCard({ token, href }: TokenCardProps) {
-  const formatNumber = (num: number | null) => {
-    if (num === null || num === undefined) return "$0";
-    if (num >= 1000000) {
-      return `$${(num / 1000000).toFixed(2)}M`;
-    } else if (num >= 1000) {
-      return `$${(num / 1000).toFixed(2)}K`;
-    }
-    return `$${num.toFixed(2)}`;
-  };
-
-  const formatTimeAgo = (date: Date | string) => {
-    const now = new Date();
-    const past = new Date(date);
-    const diffInSeconds = Math.floor((now.getTime() - past.getTime()) / 1000);
-
-    const intervals: { [key: string]: number } = {
-      year: 31536000,
-      month: 2592000,
-      week: 604800,
-      day: 86400,
-      hour: 3600,
-      minute: 60,
-      second: 1,
-    };
-
-    for (const interval in intervals) {
-      const intervalSeconds = intervals[interval];
-      if (diffInSeconds >= intervalSeconds!) {
-        const count = Math.floor(diffInSeconds / intervalSeconds!);
-        return `${count} ${interval}${count !== 1 ? "s" : ""} ago`;
-      }
-    }
-    return "just now";
-  };
-
   const progress = token.bondingCurveProgress ?? 0;
 
   return (
     <Link href={href}>
       <div className="flex gap-3 rounded-lg transition-all cursor-pointer group">
-        <div className="relative w-40 h-40 flex-shrink-0 rounded-lg overflow-hidden">
+        <div className="relative w-40 h-40 shrink-0 rounded-lg overflow-hidden">
           <Image
             unoptimized
             src={
@@ -71,7 +37,7 @@ export function TokenCard({ token, href }: TokenCardProps) {
               </h3>
               <Badge
                 variant="secondary"
-                className="text-xs text-primary rounded-md flex-shrink-0"
+                className="text-xs text-primary rounded-md shrink-0"
               >
                 {token.symbol}
               </Badge>
@@ -92,7 +58,7 @@ export function TokenCard({ token, href }: TokenCardProps) {
             <div>
               <p className="text-xs text-muted-foreground">Created</p>
               <p className="font-semibold text-xs">
-                {formatTimeAgo(token.createdAt!)}
+                {getTimeSince(token.createdAt!)}
               </p>
             </div>
           </div>
@@ -102,7 +68,7 @@ export function TokenCard({ token, href }: TokenCardProps) {
               <span className="text-muted-foreground">Bonding Progress</span>
               <span className="font-semibold">{progress.toFixed(1)}%</span>
             </div>
-            <Progress value={progress+10} className="" />
+            <Progress isGraduated={progress >= 100} value={progress} className="" />
           </div>
         </div>
       </div>

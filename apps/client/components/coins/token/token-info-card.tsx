@@ -1,6 +1,6 @@
 "use client";
 
-import { useTokenStore } from "@/store/tokenStore";
+import { useCurrentToken } from "./token-page-wrapper";
 import { toast } from "sonner";
 import { Copy } from "lucide-react";
 
@@ -13,9 +13,9 @@ export function TokenInfoCard() {
       toast.error("Failed to copy to clipboard");
     }
   };
-  const { currentToken, isLoadingCurrentToken } = useTokenStore();
+  const currentToken = useCurrentToken();
 
-  if (isLoadingCurrentToken) {
+  if (!currentToken) {
     return (
       <div className="w-full h-fit border-t   p-2 animate-pulse">
         <div className="h-62 bg-muted"></div>

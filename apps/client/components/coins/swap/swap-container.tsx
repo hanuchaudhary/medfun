@@ -5,7 +5,7 @@ import { GraduatedSwapSection } from "@/components/coins/swap/graduated-swap-sec
 import { Connection, PublicKey } from "@solana/web3.js";
 import { DynamicBondingCurveClient } from "@meteora-ag/dynamic-bonding-curve-sdk";
 import { SwapSection } from "./swap-section";
-import { useTokenStore } from "@/store/tokenStore";
+import { useCurrentToken } from "../token/token-page-wrapper";
 
 interface SwapContainerProps {
   mint: string;
@@ -35,7 +35,7 @@ export function SwapContainer({ mint }: SwapContainerProps) {
     } catch {}
   }, [activeTab]);
 
-  const ct = useTokenStore((state) => state.currentToken);
+  const ct = useCurrentToken();
   useEffect(() => {
     if (!ct?.poolAddress) {
       return;

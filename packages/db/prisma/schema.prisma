@@ -13,7 +13,7 @@ datasource db {
   provider = "postgresql"
 }
 
-model Token {
+model token {
   mintAddress          String   @id @unique
   name                 String
   symbol               String
@@ -35,15 +35,15 @@ model Token {
   stats1h              Json?
   stats6h              Json?
   stats24h             Json?
-  holders              Holder[]
-  trades               Trade[]
+  holders              holder[]
+  trades               trade[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   klines    kline[]
 }
 
-model Trade {
+model trade {
   id            Int      @id @default(autoincrement())
   type          String
   price         Float
@@ -54,7 +54,7 @@ model Trade {
   timestamp     DateTime
   slot          Int
 
-  token            Token  @relation(fields: [tokenMintAddress], references: [mintAddress])
+  token            token  @relation(fields: [tokenMintAddress], references: [mintAddress])
   tokenMintAddress String
 }
 
@@ -67,17 +67,17 @@ model kline {
   close            Float
   volume           Float
   trades           Int
-  token            Token    @relation(fields: [tokenMintAddress], references: [mintAddress])
+  token            token    @relation(fields: [tokenMintAddress], references: [mintAddress])
   tokenMintAddress String
 
   @@unique([tokenMintAddress, timestamp])
 }
 
-model Holder {
+model holder {
   id               Int    @id @default(autoincrement())
   holderAddress    String
   amount           Float
-  token            Token  @relation(fields: [tokenMintAddress], references: [mintAddress])
+  token            token  @relation(fields: [tokenMintAddress], references: [mintAddress])
   tokenMintAddress String
 
   @@unique([tokenMintAddress, holderAddress])

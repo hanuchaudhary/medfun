@@ -1,6 +1,5 @@
 import { TokenDetails } from "@/components/coins/token/token-details";
 import SwapContainer from "@/components/coins/swap/swap-container";
-import { TokenChart } from "@/components/coins/token/token-chart";
 import { HoldersTradesTable } from "@/components/coins/token/holders-trades-table";
 import { TokenInfoCard } from "@/components/coins/token/token-info-card";
 import { MobileSwapModal } from "@/components/coins/swap/mobile-swap-modal";
@@ -23,10 +22,10 @@ export default async function TokenDetailPage({
           </div>
           <div className="relative">
             <div className="border-b relative">
-              <TokenChart mintAddress={mint} />
+              <ChartLiveWrapper mintAddress={mint} />
             </div>
             <div className="border-b">
-              <HoldersTradesTable/>
+              <HoldersTradesTable mintAddress={mint} />
             </div>
             <div className="border-b">
               <TokenInfoCard />
@@ -43,7 +42,7 @@ export default async function TokenDetailPage({
               <ChartLiveWrapper mintAddress={mint} />
             </div>
             <div className="overflow-auto border rounded-xl hide-scrollbar">
-              <HoldersTradesTable />
+              <HoldersTradesTable mintAddress={mint} />
             </div>
           </div>
           <div className="col-span-1 overflow-auto relative hide-scrollbar space-y-4">
@@ -51,7 +50,7 @@ export default async function TokenDetailPage({
             <TokenInfoCard />
           </div>
         </div>
-        <MobileSwapModal tokenName={"tokenName"} tokenId={mint} />
+        <MobileSwapModal tokenId={mint} />
         {/* <RecentlyOpened currentTokenId={mint} /> */}
       </div>
     </TokenPageWrapper>
