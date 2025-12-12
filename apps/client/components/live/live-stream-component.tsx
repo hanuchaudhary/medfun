@@ -429,21 +429,25 @@ const LiveStreamComponent = React.forwardRef<LiveStreamHandle, LiveStreamProps>(
                     onClick={joinAsHost}
                     id="start-stream"
                     size="lg"
-                    className="px-8 py-8 rounded-none text-lg"
+                    className="text-lg font-semibold text-background"
                     disabled={isConnecting || !wallet.publicKey}
                   >
-                    {isConnecting ? "Connecting..." : "Start Streaming"}
+                    {isConnecting
+                      ? "Connecting..."
+                      : loadingMessage
+                        ? loadingMessage
+                        : "Start Streaming"}
                   </Button>
                   {!wallet.publicKey && (
                     <p className="text-sm text-muted-foreground">
                       Please Login with your wallet first
                     </p>
                   )}
-                  {loadingMessage && (
+                  {/* {loadingMessage && (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       {loadingMessage}
                     </div>
-                  )}
+                  )} */}
                 </div>
               ) : (
                 <div className="text-sm text-muted-foreground"></div>
@@ -454,7 +458,7 @@ const LiveStreamComponent = React.forwardRef<LiveStreamHandle, LiveStreamProps>(
                   onClick={joinAsAudience}
                   id="join-stream"
                   size="lg"
-                  className="px-8 py-8 rounded-none text-lg"
+                  className="text-lg font-semibold text-background"
                   disabled={isConnecting || !wallet.publicKey}
                 >
                   {isConnecting ? "Connecting..." : "Join Stream"}
@@ -496,7 +500,10 @@ const LiveStreamComponent = React.forwardRef<LiveStreamHandle, LiveStreamProps>(
                           showControls ? "opacity-100" : "opacity-0"
                         )}
                       >
-                        <button onClick={toggleMute} className="px-5 py-3 cursor-pointer bg-black/10 backdrop-blur-sm ">
+                        <button
+                          onClick={toggleMute}
+                          className="px-5 py-3 cursor-pointer bg-black/10 backdrop-blur-sm "
+                        >
                           {isAudioMuted ? (
                             <MicOff className="w-4 h-4 text-destructive" />
                           ) : (
@@ -504,7 +511,10 @@ const LiveStreamComponent = React.forwardRef<LiveStreamHandle, LiveStreamProps>(
                           )}
                         </button>
 
-                        <button className="px-5 py-3 cursor-pointer bg-black/10 backdrop-blur-sm " onClick={toggleVideo}>
+                        <button
+                          className="px-5 py-3 cursor-pointer bg-black/10 backdrop-blur-sm "
+                          onClick={toggleVideo}
+                        >
                           {isVideoOff ? (
                             <VideoOff className="w-4 h-4 text-destructive" />
                           ) : (
@@ -523,7 +533,10 @@ const LiveStreamComponent = React.forwardRef<LiveStreamHandle, LiveStreamProps>(
                           )}
                         </button>
 
-                        <button className="px-5 py-2 cursor-pointer bg-destructive text-red-50 backdrop-blur-sm " onClick={leaveChannel}>
+                        <button
+                          className="px-5 py-2 cursor-pointer bg-destructive text-red-50 backdrop-blur-sm "
+                          onClick={leaveChannel}
+                        >
                           Stop
                         </button>
                       </div>

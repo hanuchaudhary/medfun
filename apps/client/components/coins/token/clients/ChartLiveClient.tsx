@@ -20,7 +20,9 @@ import {
 import { TokenChart } from "../token-chart";
 import { Kline } from "@/types/token";
 import { supabaseClient } from "@/lib/supabaseClient";
-import { LiveStreamHandle } from "@/components/live/live-stream-component";
+import LiveStreamComponent, {
+  LiveStreamHandle,
+} from "@/components/live/live-stream-component";
 import { useWallet } from "@/hooks/use-wallet";
 import { subscribeToTableChanges } from "@/lib/realtime";
 
@@ -118,7 +120,7 @@ export default function ChartLiveClient({
     setPendingMode(null);
   };
 
-  if (!currentToken) {
+  if (!currentToken && mode === "CHART" && isLoadingCurrentToken) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-gray-900"></div>
@@ -139,25 +141,25 @@ export default function ChartLiveClient({
             className={mode === "CHART" ? "text-primary" : ""}
           />
         </button>
-        {/* <button
+        <button
           className={`p-2 backdrop-blur-sm ${
             mode === "LIVE" ? "bg-primary/20" : "bg-transparent"
           }`}
           onClick={() => handleModeChange("LIVE")}
         >
           <IconVideoFilled className={mode === "LIVE" ? "text-primary" : ""} />
-        </button> */}
+        </button>
       </div>
-      {/* {mode === "LIVE" ? (
+      {mode === "LIVE" ? (
         <LiveStreamComponent
           ref={liveStreamRef}
           isCreator={isCreator}
           channelId={mintAddress}
           onStreamStateChange={handleStreamStateChange}
         />
-      ) : ( */}
-      <TokenChart mintAddress={mintAddress} klines={klines} />
-      {/* )} */}
+      ) : (
+        <TokenChart mintAddress={mintAddress} klines={klines} />
+      )}
 
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <AlertDialogContent>
