@@ -15,12 +15,12 @@ model token {
   poolAddress          String   @unique
   graduatedPoolAddress String?  @unique
   website              String?
+  isStreamLive         Boolean  @default(false)
   twitter              String?
   telegram             String?
   imageUrl             String?
   metadataUrl          String?
   creatorAddress       String
-  isStreamLive         Boolean  @default(false)
   bondingCurveProgress Float?
   volume               Float?
   liquidity            Float?
