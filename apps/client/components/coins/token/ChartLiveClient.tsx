@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useCurrentToken } from "../token-page-wrapper";
+import { useCurrentToken } from "./token-page-wrapper";
 import {
   IconCamera,
   IconChartCandleFilled,
@@ -17,24 +17,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { TokenChart } from "../token-chart";
-import { Kline } from "@/types/token";
-import { supabaseClient } from "@/lib/supabaseClient";
+import { TokenChart } from "./token-chart";
 import LiveStreamComponent, {
   LiveStreamHandle,
 } from "@/components/live/live-stream-component";
 import { useWallet } from "@/hooks/use-wallet";
-import { subscribeToTableChanges } from "@/lib/realtime";
+import { useTokenStore } from "@/store/tokenStore";
 
 interface ChartLiveClientProps {
   mintAddress: string;
-  klines: Kline[];
 }
 
-export default function ChartLiveClient({
-  mintAddress,
-  klines: initialKlines,
-}: ChartLiveClientProps) {
+export default function ChartLiveClient({ mintAddress }: ChartLiveClientProps) {
   const [mode, setMode] = React.useState<"LIVE" | "CHART">("CHART");
   const [isStreamActive, setIsStreamActive] = React.useState(false);
   const [streamRole, setStreamRole] = React.useState<
@@ -48,31 +42,17 @@ export default function ChartLiveClient({
   const wallet = useWallet();
   const currentToken = useCurrentToken();
   const isLoadingCurrentToken = !currentToken;
-  const [klines, setKlines] = React.useState<Kline[]>(initialKlines);
+  const { klines, isLoadingKlines, fetchKlines } = useTokenStore();
 
   React.useEffect(() => {
-    const channel = subscribeToTableChanges({
-      table: "kline",
-      mintAddress,
-      callback: (payload: any) => {
-        console.log("KLINE CHANGE:", payload);
-        if (payload.eventType === "INSERT") {
-          setKlines((prev) => [...prev, payload.new as Kline]);
-        } else if (payload.eventType === "UPDATE") {
-          setKlines((prev) => {
-            const updatedKline = payload.new as Kline;
-            return prev.map((kline) =>
-              kline.id === updatedKline.id ? updatedKline : kline
-            );
-          });
-        }
-      },
-    });
+    fetchKlines(mintAddress);
 
-    return () => {
-      supabaseClient.removeChannel(channel);
-    };
-  }, [mintAddress]);
+    const interval = setInterval(() => {
+      fetchKlines(mintAddress, "5m", true);
+    }, 50000);
+
+    return () => clearInterval(interval);
+  }, [mintAddress, fetchKlines]);
 
   const isCreator =
     wallet?.connected &&
@@ -130,7 +110,7 @@ export default function ChartLiveClient({
 
   return (
     <div className="relative">
-      <div className="border divide-x w-fit z-10 absolute top-0 left-0">
+      <div className="border divide-x divide-dashed border-dashed w-fit z-10 absolute top-0 left-0">
         <button
           className={`p-2 backdrop-blur-sm ${
             mode === "CHART" ? "bg-primary/20" : "bg-transparent"

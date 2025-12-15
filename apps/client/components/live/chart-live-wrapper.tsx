@@ -1,26 +1,7 @@
-import { supabaseClient } from "@/lib/supabaseClient";
-import ChartLiveClient from "../coins/token/clients/ChartLiveClient";
-import { Kline } from "@/types/token";
+"use client";
 
-export async function ChartLiveWrapper({
-  mintAddress,
-}: {
-  mintAddress: string;
-}) {
-  const {
-    data: klines,
-    error,
-    statusText,
-  } = await supabaseClient
-    .from("kline")
-    .select("*")
-    .eq("tokenMintAddress", mintAddress)
-    .order("timestamp", { ascending: true });
+import ChartLiveClient from "../coins/token/ChartLiveClient";
 
-  return (
-    <ChartLiveClient
-      mintAddress={mintAddress}
-      klines={(klines as Kline[]) || []}
-    />
-  );
+export function ChartLiveWrapper({ mintAddress }: { mintAddress: string }) {
+  return <ChartLiveClient mintAddress={mintAddress} />;
 }

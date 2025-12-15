@@ -102,7 +102,7 @@ export function TokenChart({ mintAddress, klines }: TokenChartProps) {
 
   return (
     <div className="relative w-full">
-      <div ref={chartContainerRef} className="w-full rounded-xl pb-8" />
+      <div ref={chartContainerRef} className="w-full pb-8" />
       {klines?.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-muted-foreground">

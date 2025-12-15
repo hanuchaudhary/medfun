@@ -5,15 +5,30 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import React from "react";
 import { useCurrentToken } from "./token-page-wrapper";
-import { formatNumber } from "@/lib/utils";
+import { cn, formatNumber } from "@/lib/utils";
+import { useTokenStore } from "@/store/tokenStore";
 
 interface TokenDetailsProps {
   tokenMint: string;
 }
 
 export function TokenDetails({ tokenMint }: TokenDetailsProps) {
-  const currentToken = useCurrentToken();
-  const isLoadingCurrentToken = !currentToken;
+  const contextToken = useCurrentToken();
+  const { currentToken, isLoadingCurrentToken, fetchTokenDetails } =
+    useTokenStore();
+  const token = contextToken || currentToken;
+
+  React.useEffect(() => {
+    if (!contextToken) {
+      fetchTokenDetails(tokenMint);
+
+      const interval = setInterval(() => {
+        fetchTokenDetails(tokenMint, true);
+      }, 30000);
+
+      return () => clearInterval(interval);
+    }
+  }, [tokenMint, contextToken, fetchTokenDetails]);
 
   const formatPrice = (
     marketCap: number | null,
@@ -23,7 +38,7 @@ export function TokenDetails({ tokenMint }: TokenDetailsProps) {
     return `$${(marketCap / supply).toFixed(6)}`;
   };
 
-  if (isLoadingCurrentToken) {
+  if (isLoadingCurrentToken && !token) {
     return (
       <div className="border-b p-2 animate-pulse">
         <div className="h-84 bg-muted"></div>
@@ -31,7 +46,7 @@ export function TokenDetails({ tokenMint }: TokenDetailsProps) {
     );
   }
 
-  if (!currentToken) {
+  if (!token) {
     return (
       <div className="border-b p-8">
         <p className="text-destructive">Token not found</p>
@@ -39,19 +54,19 @@ export function TokenDetails({ tokenMint }: TokenDetailsProps) {
     );
   }
 
-  const progress = currentToken.bondingCurveProgress ?? 0;
+  const progress = token.bondingCurveProgress ?? 0;
 
   return (
-    <div className="border p-2 rounded-xl">
+    <div className="p-4">
       <div className="">
         <div className="flex items-start gap-4">
           <div className="relative w-24 h-24 shrink-0 rounded-md overflow-hidden bg-muted">
             <Image
               src={
-                currentToken.imageUrl ||
+                token.imageUrl ||
                 "https://i.pinimg.com/1200x/b7/8f/02/b78f023aa1bca7bdada28db1c30d1fe5.jpg"
               }
-              alt={currentToken.name}
+              alt={token.name}
               fill
               unoptimized
               className="object-cover"
@@ -59,44 +74,61 @@ export function TokenDetails({ tokenMint }: TokenDetailsProps) {
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-semibold">{currentToken.name}</h1>
+              <h1 className="text-xl font-semibold">{token.name}</h1>
               <Badge variant="secondary" className="rounded-sm text-primary">
-                {currentToken.symbol}
+                {token.symbol}
               </Badge>
             </div>
-            <p className="text-sm text-muted-foreground">
-              {currentToken.description}
+            <p className="text-sm text-muted-foreground">{token.description}</p>
+          </div>
+        </div>
+
+        <div className="mb-4 grid grid-cols-2 sm:grid-cols-4 gap-4 py-4">
+          <div className="text-xs">
+            <p className="text-muted-foreground">Price</p>
+            <p className="font-mono font-semibold">
+              {formatPrice(token.marketCap)}
+            </p>
+          </div>
+          <div className="text-xs">
+            <p className="text-muted-foreground">MC</p>
+            <p className="font-mono font-semibold">
+              {formatNumber(token.marketCap)}
+            </p>
+          </div>
+          <div className="text-xs">
+            <p className="text-muted-foreground">Vo. 24h</p>
+            <p className="font-mono font-semibold">
+              {formatNumber(token.volume)}
+            </p>
+          </div>
+          <div className="text-xs">
+            <p className="text-muted-foreground">Liquidity</p>
+            <p className="font-mono font-semibold">
+              {formatNumber(token.liquidity)}
             </p>
           </div>
         </div>
 
-        <div className="mb-4 grid grid-cols-2 sm:grid-cols-4 gap-4 py-4 border-b ">
-          <div className="">
-            <p className="text-xs text-muted-foreground">Price</p>
-            <p className="text-sm">{formatPrice(currentToken.marketCap)}</p>
-          </div>
-          <div className="">
-            <p className="text-xs text-muted-foreground">MC</p>
-            <p className="text-sm">{formatNumber(currentToken.marketCap)}</p>
-          </div>
-          <div className="">
-            <p className="text-xs text-muted-foreground">Vo. 24h</p>
-            <p className="text-sm">{formatNumber(currentToken.volume)}</p>
-          </div>
-          <div className="">
-            <p className="text-xs text-muted-foreground">Liquidity</p>
-            <p className="text-sm">{formatNumber(currentToken.liquidity)}</p>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div className="flex justify-between text-xs px-4">
+        <div className="space-y-2">
+          <div className="flex justify-between text-xs">
             <span className="text-muted-foreground">
               Bonding Curve Progress
             </span>
-            <span className="font-medium">{progress.toFixed(2)}%</span>
+            <span
+              className={cn(
+                "font-medium font-mono text-primary",
+                token.bondingCurveProgress ? "text-yellow-400" : ""
+              )}
+            >
+              {progress.toFixed(2)}%
+            </span>
           </div>
-          <Progress isGraduated={progress >= 100} value={progress} className="h-8" />
+          <Progress
+            isGraduated={progress >= 100}
+            value={progress}
+            className="h-6"
+          />
         </div>
       </div>
     </div>

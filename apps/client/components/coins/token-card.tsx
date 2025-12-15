@@ -15,7 +15,7 @@ export function TokenCard({ token, href }: TokenCardProps) {
 
   return (
     <Link href={href}>
-      <div className="flex gap-3 rounded-lg transition-all cursor-pointer group">
+      <div className="flex gap-3 rounded-lg transition-all cursor-pointer group hover:scale-[1.03]">
         <div className="relative w-40 h-40 shrink-0 rounded-lg overflow-hidden">
           <Image
             unoptimized
@@ -68,7 +68,7 @@ export function TokenCard({ token, href }: TokenCardProps) {
               <span className="text-muted-foreground">Bonding Progress</span>
               <span className="font-semibold">{progress.toFixed(1)}%</span>
             </div>
-            <Progress isGraduated={progress >= 100} value={progress} className="" />
+            <Progress isGraduated={progress >= 100} value={progress} className="border border-solid rounded border-primary/50" />
           </div>
         </div>
       </div>

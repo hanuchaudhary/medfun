@@ -11,6 +11,7 @@ import {
 } from "@meteora-ag/dynamic-bonding-curve-sdk";
 import { useWallet } from "@/hooks/use-wallet";
 import { useBalance } from "@/hooks/use-balance";
+import { useTokenBalance } from "@/hooks/use-token-balance";
 import {
   useSignAndSendTransaction as useSendTransactionSolana,
   useWallets as useWalletsSolana,
@@ -63,6 +64,15 @@ export function SwapSection({ tokenmint }: SwapSectionProps) {
   const { balance: solBalance, isLoading: balanceLoading } = useBalance({
     publicKey: wallet.publicKey,
     refetchInterval: 30000,
+  });
+
+  const {
+    balance: tokenBalance,
+    isLoading: tokenBalanceLoading,
+    refetch: refetchTokenBalance,
+  } = useTokenBalance({
+    owner: wallet.publicKey?.toString(),
+    mint: tokenmint,
   });
 
   const getPrivyWallet = () => {
@@ -178,6 +188,12 @@ export function SwapSection({ tokenmint }: SwapSectionProps) {
       setSellOutputAmount("");
     }
   };
+
+  useEffect(() => {
+    if (wallet.connected && wallet.publicKey && tokenmint) {
+      refetchTokenBalance();
+    }
+  }, [wallet.connected, wallet.publicKey, tokenmint, refetchTokenBalance]);
 
   useEffect(() => {
     return () => {
@@ -345,6 +361,7 @@ export function SwapSection({ tokenmint }: SwapSectionProps) {
       );
 
       setSellAmount("");
+      await refetchTokenBalance();
     } catch (error: any) {
       console.error("Swap failed:", error);
       toast.error(error?.message || "Failed to execute swap", { id: toastId });
@@ -354,7 +371,7 @@ export function SwapSection({ tokenmint }: SwapSectionProps) {
   };
 
   return (
-    <Card className="border-b border-x-0 border-t-0 bg-background gap-0 border p-4 rounded-xl">
+    <Card className="bg-background gap-0 border p-4 border-0">
       <CardContent className="p-0 gap-0 relative">
         <Tabs defaultValue="buy" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
@@ -478,7 +495,11 @@ export function SwapSection({ tokenmint }: SwapSectionProps) {
           <TabsContent value="sell">
             <div className="flex justify-between items-center p-3">
               <span className="text-sm text-muted-foreground">balance:</span>
-              <span className="text-sm">0 {TOKEN_SYMBOL}</span>
+              <span className="text-sm">
+                {tokenBalanceLoading
+                  ? "Loading..."
+                  : `${tokenBalance?.toFixed(6) || "0"} ${TOKEN_SYMBOL}`}
+              </span>
             </div>
 
             <div className="relative">
@@ -509,7 +530,10 @@ export function SwapSection({ tokenmint }: SwapSectionProps) {
                 variant="outline"
                 size="sm"
                 className="flex-1 rounded-sm border border-r"
-                onClick={() => handleSellAmountChange("0")}
+                onClick={() => {
+                  const amount = (tokenBalance || 0) * 0.25;
+                  handleSellAmountChange(amount.toString());
+                }}
               >
                 25%
               </Button>
@@ -517,7 +541,10 @@ export function SwapSection({ tokenmint }: SwapSectionProps) {
                 variant="outline"
                 size="sm"
                 className="flex-1 rounded-sm border border-r"
-                onClick={() => handleSellAmountChange("0")}
+                onClick={() => {
+                  const amount = (tokenBalance || 0) * 0.5;
+                  handleSellAmountChange(amount.toString());
+                }}
               >
                 50%
               </Button>
@@ -525,7 +552,10 @@ export function SwapSection({ tokenmint }: SwapSectionProps) {
                 variant="outline"
                 size="sm"
                 className="flex-1 rounded-sm border border-r"
-                onClick={() => handleSellAmountChange("0")}
+                onClick={() => {
+                  const amount = (tokenBalance || 0) * 0.75;
+                  handleSellAmountChange(amount.toString());
+                }}
               >
                 75%
               </Button>
@@ -533,7 +563,10 @@ export function SwapSection({ tokenmint }: SwapSectionProps) {
                 variant="outline"
                 size="sm"
                 className="flex-1 rounded-sm border"
-                onClick={() => handleSellAmountChange("0")}
+                onClick={() => {
+                  const amount = tokenBalance || 0;
+                  handleSellAmountChange(amount.toString());
+                }}
               >
                 100%
               </Button>

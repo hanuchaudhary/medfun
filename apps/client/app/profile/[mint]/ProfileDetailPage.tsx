@@ -21,6 +21,9 @@ import { toast } from "sonner";
 import BN from "bn.js";
 import { Token } from "@/types/token";
 import axios from "axios";
+import Link from "next/link";
+import { IconBrandTelegram, IconBrandX, IconWorld } from "@tabler/icons-react";
+import { icons } from "lucide-react";
 
 type FeeMetrics = {
   current: {
@@ -217,9 +220,9 @@ export default function ProfileDetailPage({
 
   return (
     <div className="relative max-w-7xl mx-auto md:px-0 px-4 overflow-hidden">
-      <div className="border-b p-8">
+      <div className="border-b border-dashed p-8">
         <div className="flex items-start gap-6">
-          <div className="relative w-24 h-24 flex-shrink-0">
+          <div className="relative w-24 h-24 shrink-0">
             <Image
               unoptimized
               src={
@@ -234,7 +237,10 @@ export default function ProfileDetailPage({
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <h1 className="text-3xl font-bold">{token.name}</h1>
-              <Badge variant="secondary" className="text-sm rounded-lg">
+              <Badge
+                variant="secondary"
+                className="text-sm rounded-lg text-primary"
+              >
                 {token.symbol}
               </Badge>
             </div>
@@ -272,11 +278,11 @@ export default function ProfileDetailPage({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x">
+      <div className="grid grid-cols-1 lg:grid-cols-3 divide-y divide-dashed lg:divide-y-0 lg:divide-x">
         <div className="">
           <div className="">
             {feeMetrics && (
-              <div className="p-4 bg-muted/50 border-b">
+              <div className="p-4 bg-muted/50 border-b border-dashed">
                 <p className="text-sm text-center font-medium">
                   Available to Claim
                 </p>
@@ -307,8 +313,8 @@ export default function ProfileDetailPage({
         </div>
 
         <div className="lg:col-span-2">
-          <div className="p-6">
-            <div className="space-y-4">
+          <div className="p-4">
+            <div className="space-y-2">
               <h3 className="text-sm font-medium">Description</h3>
               <p className="text-muted-foreground">
                 {description || "No description provided"}
@@ -316,33 +322,34 @@ export default function ProfileDetailPage({
             </div>
           </div>
 
-          <Separator />
-
-          <div className="relative">
-            <div className="p-6">
-              <h2 className="text-sm font-medium mb-4">Social Links</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="relative border-t border-dashed">
+            <div className="">
+              <h2 className="text-sm font-medium m-4">Social Links</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 divide-dashed border-y border-dashed divide-x">
                 {[
-                  { label: "Twitter", value: twitter },
-                  { label: "Telegram", value: telegram },
-                  { label: "Website", value: website },
+                  { label: "Twitter", value: twitter, icon: IconWorld },
+                  {
+                    label: "Telegram",
+                    value: telegram,
+                    icon: IconBrandTelegram,
+                  },
+                  { label: "Website", value: website, icon: IconBrandX },
                 ].map((social) => (
                   <div
                     key={social.label}
-                    className="flex flex-col gap-2 p-4 border rounded-lg bg-muted/20"
+                    className="flex flex-col p-4 bg-muted/20"
                   >
-                    <label className="text-sm font-medium text-muted-foreground">
-                      {social.label}
-                    </label>
                     {social.value ? (
-                      <a
-                        className="hover:underline break-all hover:text-primary transition-colors text-sm"
+                      <Link
                         href={social.value}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        {social.value}
-                      </a>
+                        {social.icon &&
+                          React.createElement(social.icon, {
+                            className: "inline-block size-5 text-primary",
+                          })}
+                      </Link>
                     ) : (
                       <span className="text-muted-foreground text-sm">—</span>
                     )}

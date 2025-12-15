@@ -30,7 +30,7 @@ export function Sidebar() {
   const { connected } = useWallet();
 
   return (
-    <aside className="hidden md:flex fixed left-0 top-0 z-40 h-screen w-60 bg-background border-r border-border flex-col">
+    <aside className="hidden md:flex fixed left-0 top-0 z-40 h-screen w-60 bg-background border-r border-dashed flex-col">
       <Link href="/" className="flex items-center justify-center py-6 px-4">
         <div className="relative w-12 h-12">
           <Image

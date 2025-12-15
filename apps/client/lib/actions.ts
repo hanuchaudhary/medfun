@@ -9,8 +9,6 @@ export async function updateTokenWithJupiterData(mintAddress: string) {
       `https://lite-api.jup.ag/tokens/v2/search?query=${mintAddress}`
     );
 
-    // console.log(res.data);
-
     let token;
     if (res.data.length) {
       const jupData = res.data[0];

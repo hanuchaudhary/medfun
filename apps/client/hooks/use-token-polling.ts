@@ -73,7 +73,7 @@ export function useTokensPolling(limit?: number) {
     fetchTokens();
     const interval = setInterval(() => {
       fetchTokens();
-    }, 3000);
+    }, 15000);
 
     return () => clearInterval(interval);
   }, [fetchTokens]);
