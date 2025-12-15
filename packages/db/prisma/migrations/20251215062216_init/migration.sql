@@ -1,33 +1,3 @@
-/*
-  Warnings:
-
-  - You are about to drop the `Holder` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Kline` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Token` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Trade` table. If the table is not empty, all the data it contains will be lost.
-
-*/
--- DropForeignKey
-ALTER TABLE "Holder" DROP CONSTRAINT "Holder_tokenMintAddress_fkey";
-
--- DropForeignKey
-ALTER TABLE "Kline" DROP CONSTRAINT "Kline_tokenMintAddress_fkey";
-
--- DropForeignKey
-ALTER TABLE "Trade" DROP CONSTRAINT "Trade_tokenMintAddress_fkey";
-
--- DropTable
-DROP TABLE "Holder";
-
--- DropTable
-DROP TABLE "Kline";
-
--- DropTable
-DROP TABLE "Token";
-
--- DropTable
-DROP TABLE "Trade";
-
 -- CreateTable
 CREATE TABLE "token" (
     "mintAddress" TEXT NOT NULL,
@@ -42,6 +12,7 @@ CREATE TABLE "token" (
     "imageUrl" TEXT,
     "metadataUrl" TEXT,
     "creatorAddress" TEXT NOT NULL,
+    "isStreamLive" BOOLEAN NOT NULL DEFAULT false,
     "bondingCurveProgress" DOUBLE PRECISION,
     "volume" DOUBLE PRECISION,
     "liquidity" DOUBLE PRECISION,
@@ -75,17 +46,16 @@ CREATE TABLE "trade" (
 
 -- CreateTable
 CREATE TABLE "kline" (
-    "id" SERIAL NOT NULL,
     "timestamp" TIMESTAMP(3) NOT NULL,
-    "open" DOUBLE PRECISION NOT NULL,
-    "high" DOUBLE PRECISION NOT NULL,
-    "low" DOUBLE PRECISION NOT NULL,
-    "close" DOUBLE PRECISION NOT NULL,
-    "volume" DOUBLE PRECISION NOT NULL,
+    "open" DECIMAL(38,18) NOT NULL,
+    "high" DECIMAL(38,18) NOT NULL,
+    "low" DECIMAL(38,18) NOT NULL,
+    "close" DECIMAL(38,18) NOT NULL,
+    "volume" DECIMAL(38,18) NOT NULL,
     "trades" INTEGER NOT NULL,
     "tokenMintAddress" TEXT NOT NULL,
 
-    CONSTRAINT "kline_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "kline_pkey" PRIMARY KEY ("tokenMintAddress","timestamp")
 );
 
 -- CreateTable
@@ -106,9 +76,6 @@ CREATE UNIQUE INDEX "token_poolAddress_key" ON "token"("poolAddress");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "token_graduatedPoolAddress_key" ON "token"("graduatedPoolAddress");
-
--- CreateIndex
-CREATE UNIQUE INDEX "kline_tokenMintAddress_timestamp_key" ON "kline"("tokenMintAddress", "timestamp");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "holder_tokenMintAddress_holderAddress_key" ON "holder"("tokenMintAddress", "holderAddress");
