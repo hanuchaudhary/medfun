@@ -26,13 +26,11 @@ export default function HolderTradeClient({
   const { trades, isLoadingTrades, fetchTrades } = useTokenStore();
 
   const handleOnMessage = (messages: ChatMessage[]) => {
-    console.log("mes: ",messages);
-    if(messages.length > 0){
-      console.log("last: ",messages[messages.length -1]);
-      
+    console.log("mes: ", messages);
+    if (messages.length > 0) {
+      console.log("last: ", messages[messages.length - 1]);
     }
-    
-  }
+  };
 
   React.useEffect(() => {
     fetchHolders(mintAddress);
@@ -62,11 +60,15 @@ export default function HolderTradeClient({
         </div>
 
         <TabsContent value="chat" className="mt-0 h-full">
-          <RealtimeChat roomName={`token-${mintAddress}`} username={username} onMessage={handleOnMessage} />
+          <RealtimeChat
+            roomName={`token-${mintAddress}`}
+            username={username}
+            onMessage={handleOnMessage}
+          />
         </TabsContent>
 
         <TabsContent value="holders" className="mt-0">
-          <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+          <div className="overflow-x-auto max-h-125 overflow-y-auto">
             {isLoadingHolders ? (
               <div className="space-y-2 p-3">
                 {[...Array(8)].map((_, i) => (
@@ -210,7 +212,7 @@ export default function HolderTradeClient({
                             </span>
                           </td>
                           <td className="p-2 text-right font-medium text-xs font-mono">
-                            {trade.price.toFixed(10)}
+                            {Number(trade.price).toFixed(10)}
                           </td>
                           <td className="p-2 text-right font-medium text-xs font-mono">
                             {formatNumber(trade.tokenAmount)}

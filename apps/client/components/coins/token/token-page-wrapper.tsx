@@ -41,6 +41,8 @@ export function TokenPageWrapper({
     }
   }, [currentToken, tokenMint]);
 
+  
+
   return (
     <TokenContext.Provider value={currentToken}>
       {children}

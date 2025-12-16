@@ -10,10 +10,12 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Copy, ExternalLink, LogOut } from "lucide-react";
+import { Copy, ExternalLink, LogOut, Download } from "lucide-react";
 import { toast } from "sonner";
 import React from "react";
 import Image from "next/image";
+import { usePrivy, type WalletWithMetadata } from "@privy-io/react-auth";
+import { useExportWallet } from "@privy-io/react-auth/solana";
 
 interface WalletModalProps {
   open: boolean;
@@ -31,6 +33,17 @@ export default function WalletModal({
     publicKey,
     refetchInterval: 30000,
   });
+
+  const { ready, authenticated, user } = usePrivy();
+  const { exportWallet } = useExportWallet();
+
+  const isAuthenticated = ready && authenticated;
+  const hasEmbeddedWallet = !!user?.linkedAccounts.find(
+    (account): account is WalletWithMetadata =>
+      account.type === "wallet" &&
+      account.walletClientType === "privy" &&
+      account.chainType === "solana"
+  );
 
   const handleCopyAddress = () => {
     if (publicKey) {
@@ -123,6 +136,19 @@ export default function WalletModal({
               <ExternalLink className="w-4 h-4 mr-2" />
               View on Explorer
             </Button>
+            {hasEmbeddedWallet && (
+              <Button
+                variant="outline"
+                className="w-full justify-start h-12 rounded-lg"
+                onClick={() =>
+                  exportWallet({ address: publicKey?.toString() || "" })
+                }
+                disabled={!isAuthenticated || !hasEmbeddedWallet}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export Wallet
+              </Button>
+            )}
             <Button
               variant="destructive"
               className="w-full justify-start h-12 rounded-lg"

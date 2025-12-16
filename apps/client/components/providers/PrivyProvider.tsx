@@ -25,7 +25,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
             walletChainType: "ethereum-and-solana",
             theme: "#000000",
             accentColor: "#6bbd6f",
-            logo: "/logogreen.png",
+            logo: "/medfun-favicon.png",
             // showWalletLoginFirst: true,
           },
           externalWallets: {

@@ -37,11 +37,17 @@ export async function GET(
       take: limit,
     });
 
+    const formattedTransactions = transactions.map((trade) => ({
+      ...trade,
+      price: Number(trade.price),
+      tokenAmount: Number(trade.tokenAmount),
+      solAmount: Number(trade.solAmount),
+    }));
+
     return NextResponse.json({
       success: true,
-      transactions,
+      transactions: formattedTransactions,
     });
-   
   } catch (error) {
     console.error("Error fetching transactions:", error);
     return NextResponse.json(

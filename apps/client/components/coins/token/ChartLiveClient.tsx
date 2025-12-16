@@ -2,11 +2,7 @@
 
 import React from "react";
 import { useCurrentToken } from "./token-page-wrapper";
-import {
-  IconCamera,
-  IconChartCandleFilled,
-  IconVideoFilled,
-} from "@tabler/icons-react";
+import { IconChartCandleFilled, IconVideoFilled } from "@tabler/icons-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,6 +19,7 @@ import LiveStreamComponent, {
 } from "@/components/live/live-stream-component";
 import { useWallet } from "@/hooks/use-wallet";
 import { useTokenStore } from "@/store/tokenStore";
+import { Loader2 } from "lucide-react";
 
 interface ChartLiveClientProps {
   mintAddress: string;
@@ -103,7 +100,7 @@ export default function ChartLiveClient({ mintAddress }: ChartLiveClientProps) {
   if (!currentToken && mode === "CHART" && isLoadingCurrentToken) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-gray-900"></div>
+        <Loader2 className="animate-spin h-8 w-8 text-primary" />
       </div>
     );
   }

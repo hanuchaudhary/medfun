@@ -102,7 +102,7 @@ export function RecentlyOpened({
                 <Link
                   href={`/tokens/${token.id}`}
                   className={`flex items-center gap-2 px-3 py-1.5 shrink-0 hover:bg-accent transition-colors ${
-                    currentTokenId === token.id ? "bg-accent" : ""
+                    currentTokenId === token.id ? "bg-accent text-primary" : ""
                   }`}
                 >
                   <div className="relative w-6 h-6 shrink-0">
@@ -115,7 +115,9 @@ export function RecentlyOpened({
                     />
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium  ">
+                    <span className={`text-xs font-medium ${
+                      currentTokenId === token.id ? "text-primary font-semibold" : ""
+                    }`}>
                       {token.symbol}
                     </span>
                     <span className="text-xs text-muted-foreground">
