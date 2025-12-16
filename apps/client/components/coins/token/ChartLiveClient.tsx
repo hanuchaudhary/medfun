@@ -20,13 +20,19 @@ import LiveStreamComponent, {
 import { useWallet } from "@/hooks/use-wallet";
 import { useTokenStore } from "@/store/tokenStore";
 import { Loader2 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 interface ChartLiveClientProps {
   mintAddress: string;
 }
 
 export default function ChartLiveClient({ mintAddress }: ChartLiveClientProps) {
-  const [mode, setMode] = React.useState<"LIVE" | "CHART">("CHART");
+  const searchParams = useSearchParams();
+  const shouldOpenLive = searchParams.get("live") === "true";
+
+  const [mode, setMode] = React.useState<"LIVE" | "CHART">(
+    shouldOpenLive ? "LIVE" : "CHART"
+  );
   const [isStreamActive, setIsStreamActive] = React.useState(false);
   const [streamRole, setStreamRole] = React.useState<
     "host" | "audience" | null
@@ -35,6 +41,8 @@ export default function ChartLiveClient({ mintAddress }: ChartLiveClientProps) {
   const [pendingMode, setPendingMode] = React.useState<"LIVE" | "CHART" | null>(
     null
   );
+  const [showNavigationDialog, setShowNavigationDialog] = React.useState(false);
+  const [blockedHref, setBlockedHref] = React.useState<string | null>(null);
   const liveStreamRef = React.useRef<LiveStreamHandle>(null);
   const wallet = useWallet();
   const currentToken = useCurrentToken();
@@ -50,6 +58,43 @@ export default function ChartLiveClient({ mintAddress }: ChartLiveClientProps) {
 
     return () => clearInterval(interval);
   }, [mintAddress, fetchKlines]);
+
+  React.useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isStreamActive && mode === "LIVE") {
+        e.preventDefault();
+        e.returnValue = "";
+        return "";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isStreamActive, mode]);
+
+  React.useEffect(() => {
+    const handleLinkClick = (e: MouseEvent) => {
+      if (!isStreamActive || mode !== "LIVE") return;
+
+      const target = e.target as HTMLElement;
+      const link = target.closest("a");
+
+      if (link && link.href && !link.href.includes(mintAddress)) {
+        const url = new URL(link.href);
+        const currentUrl = new URL(window.location.href);
+
+        if (url.pathname !== currentUrl.pathname) {
+          e.preventDefault();
+          e.stopPropagation();
+          setBlockedHref(link.href);
+          setShowNavigationDialog(true);
+        }
+      }
+    };
+
+    document.addEventListener("click", handleLinkClick, true);
+    return () => document.removeEventListener("click", handleLinkClick, true);
+  }, [isStreamActive, mode, mintAddress]);
 
   const isCreator =
     wallet?.connected &&
@@ -97,6 +142,21 @@ export default function ChartLiveClient({ mintAddress }: ChartLiveClientProps) {
     setPendingMode(null);
   };
 
+  const handleConfirmNavigation = async () => {
+    if (liveStreamRef.current) {
+      await liveStreamRef.current.leaveChannel();
+    }
+    setShowNavigationDialog(false);
+    if (blockedHref) {
+      window.location.href = blockedHref;
+    }
+  };
+
+  const handleCancelNavigation = () => {
+    setShowNavigationDialog(false);
+    setBlockedHref(null);
+  };
+
   if (!currentToken && mode === "CHART" && isLoadingCurrentToken) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -141,10 +201,21 @@ export default function ChartLiveClient({ mintAddress }: ChartLiveClientProps) {
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Stop Streaming?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to stop streaming? This will end the stream
-              for all viewers.
+            <AlertDialogTitle>
+              {streamRole === "host" ? "Stop Streaming?" : "Leave Stream?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              {streamRole === "host" ? (
+                <>
+                  <p>Leaving this page will end the stream for all viewers.</p>
+                  <p className="text-sm">
+                    If you want to keep the stream running, please open other
+                    pages in a new tab instead.
+                  </p>
+                </>
+              ) : (
+                <p>Are you sure you want to leave the stream?</p>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -152,7 +223,48 @@ export default function ChartLiveClient({ mintAddress }: ChartLiveClientProps) {
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirmStopStream}>
-              Stop Stream
+              {streamRole === "host" ? "End Stream" : "Leave"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={showNavigationDialog}
+        onOpenChange={setShowNavigationDialog}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {streamRole === "host"
+                ? "End Stream and Leave?"
+                : "Leave Stream?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              {streamRole === "host" ? (
+                <>
+                  <p>Navigating away will end the stream for all viewers.</p>
+                  <p className="text-sm">
+                    To keep the stream running, open links in a new tab instead
+                    (right-click → Open in New Tab).
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p>You are currently watching a stream.</p>
+                  <p className="text-sm">
+                    Navigating away will disconnect you from the stream.
+                  </p>
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelNavigation}>
+              Stay on Stream
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmNavigation}>
+              {streamRole === "host" ? "End Stream & Leave" : "Leave Stream"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

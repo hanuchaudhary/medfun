@@ -8,18 +8,16 @@ import {
   TrendingUp,
   Zap,
   User,
-  HelpCircle,
   MoreVertical,
   Plus,
   Headphones,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useWallet } from "@/hooks/use-wallet";
 
 const navigation = [
   { name: "Home", href: "/", icon: Home },
-  { name: "Livestreams", href: "/live", icon: Zap, locked: true },
+  { name: "Livestreams", href: "/live", icon: Zap },
   { name: "Terminal", href: "/coins", icon: TrendingUp, locked: true },
   { name: "Profile", href: "/profile", icon: User },
   { name: "Support", href: "/support", icon: Headphones, locked: true },
@@ -27,7 +25,6 @@ const navigation = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { connected } = useWallet();
 
   return (
     <aside className="hidden md:flex fixed left-0 top-0 z-40 h-screen w-60 bg-background border-r border-dashed flex-col">
@@ -41,6 +38,10 @@ export function Sidebar() {
             priority
           />
         </div>
+        <h4 className="ml-2 text-xl font-semibold tracking-tight">
+          Med
+          <span className="text-primary">Fun</span>
+        </h4>
       </Link>
 
       <nav className="flex-1 px-2">
@@ -55,8 +56,8 @@ export function Sidebar() {
                   "flex w-full items-center gap-2.5 py-2 px-4 rounded-sm transition-colors text-xs font-medium text-md mb-2",
                   isActive
                     ? "bg-primary text-background"
-                    : "hover:text-foreground hover:bg-accent"
-                  , item.locked && "opacity-50 cursor-not-allowed"
+                    : "hover:text-foreground hover:bg-accent",
+                  item.locked && "opacity-50 cursor-not-allowed"
                 )}
               >
                 <Icon className="h-5 w-5" />

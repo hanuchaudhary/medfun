@@ -3,7 +3,8 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Token } from "@/types/token";
-import { formatNumber,getTimeSince } from "@/lib/utils";
+import { formatNumber, getTimeSince } from "@/lib/utils";
+import { IconVideoFilled } from "@tabler/icons-react";
 
 interface TokenCardProps {
   token: Token;
@@ -27,6 +28,11 @@ export function TokenCard({ token, href }: TokenCardProps) {
             fill
             className="object-cover"
           />
+          {token.isStreamLive && (
+            <div className="absolute top-2 left-2 z-10">
+              <IconVideoFilled className="text-primary animate-pulse" />
+            </div>
+          )}
         </div>
 
         <div className="flex-1 min-w-0 space-y-2">
@@ -68,7 +74,11 @@ export function TokenCard({ token, href }: TokenCardProps) {
               <span className="text-muted-foreground">Bonding Progress</span>
               <span className="font-semibold">{progress.toFixed(1)}%</span>
             </div>
-            <Progress isGraduated={progress >= 100} value={progress} className="border border-solid rounded border-primary/50" />
+            <Progress
+              isGraduated={progress >= 100}
+              value={progress}
+              className="border border-solid rounded border-primary/50"
+            />
           </div>
         </div>
       </div>

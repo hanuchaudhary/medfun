@@ -51,3 +51,22 @@ export async function updateTokenWithJupiterData(mintAddress: string) {
     };
   }
 }
+
+export async function updateStreamLiveStatus(
+  mintAddress: string,
+  isLive: boolean
+) {
+  try {
+    const token = await prisma.token.update({
+      where: { mintAddress },
+      data: { isStreamLive: isLive },
+    });
+    return { success: true, token };
+  } catch (error) {
+    console.error("Error updating stream live status:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
