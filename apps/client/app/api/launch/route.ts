@@ -19,7 +19,7 @@ type SendTransactionRequest = {
   vid?: string;
 };
 
-const WEBHOOK_ID = process.env.HELIUS_WEBHOOK_ID!;
+const WEBHOOK_ID = process.env.HELIUS_WEBHOOK_ID!
 
 export async function POST(req: Request) {
   try {
