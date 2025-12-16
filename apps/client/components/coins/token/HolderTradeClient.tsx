@@ -9,6 +9,7 @@ import React from "react";
 import { RealtimeChat } from "@/components/realtime-chat";
 import { useWallet } from "@/hooks/use-wallet";
 import { useTokenStore } from "@/store/tokenStore";
+import { ChatMessage } from "@/hooks/use-realtime-chat";
 
 interface HolderTradeClientProps {
   mintAddress: string;
@@ -23,6 +24,15 @@ export default function HolderTradeClient({
 
   const { holders, isLoadingHolders, fetchHolders } = useTokenStore();
   const { trades, isLoadingTrades, fetchTrades } = useTokenStore();
+
+  const handleOnMessage = (messages: ChatMessage[]) => {
+    console.log("mes: ",messages);
+    if(messages.length > 0){
+      console.log("last: ",messages[messages.length -1]);
+      
+    }
+    
+  }
 
   React.useEffect(() => {
     fetchHolders(mintAddress);
@@ -52,7 +62,7 @@ export default function HolderTradeClient({
         </div>
 
         <TabsContent value="chat" className="mt-0 h-full">
-          <RealtimeChat roomName={`token-${mintAddress}`} username={username} />
+          <RealtimeChat roomName={`token-${mintAddress}`} username={username} onMessage={handleOnMessage} />
         </TabsContent>
 
         <TabsContent value="holders" className="mt-0">

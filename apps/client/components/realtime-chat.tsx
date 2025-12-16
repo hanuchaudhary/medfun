@@ -36,21 +36,19 @@ export const RealtimeChat = ({
     messages: realtimeMessages,
     sendMessage,
     isConnected,
+    isLoadingMessages,
   } = useRealtimeChat({
     roomName,
     username,
   });
   const [newMessage, setNewMessage] = useState("");
 
-  // Merge realtime messages with initial messages
   const allMessages = useMemo(() => {
     const mergedMessages = [...initialMessages, ...realtimeMessages];
-    // Remove duplicates based on message id
     const uniqueMessages = mergedMessages.filter(
       (message, index, self) =>
         index === self.findIndex((m) => m.id === message.id)
     );
-    // Sort by creation date
     const sortedMessages = uniqueMessages.sort((a, b) =>
       a.createdAt.localeCompare(b.createdAt)
     );
@@ -83,7 +81,11 @@ export const RealtimeChat = ({
   return (
     <div className="flex flex-col h-full w-full bg-background text-foreground antialiased">
       <div ref={containerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
-        {allMessages.length === 0 ? (
+        {isLoadingMessages ? (
+          <div className="text-center text-sm text-muted-foreground">
+            Loading messages...
+          </div>
+        ) : allMessages.length === 0 ? (
           <div className="text-center text-sm text-muted-foreground">
             No messages yet. Start the conversation!
           </div>

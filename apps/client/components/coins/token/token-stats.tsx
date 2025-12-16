@@ -174,7 +174,7 @@ export default function TokenStats() {
               className="bg-primary transition-all h-3 w-full rounded-full"
               style={{ width: `${buyPercent}%` }}
             />
-            <div className="bg-primary/10 rounded-full h-5 w-full absolute left-1/2 -translate-x-1/2 -bottom-0.5 blur-[4px]"></div>
+            <div className="bg-primary/10 rounded-full h-5 w-full absolute left-1/2 -translate-x-1/2 -bottom-0.5 blur-xs"></div>
           </div>
           <div className="relative">
             <div className="flex items-center gap-2">
@@ -186,7 +186,7 @@ export default function TokenStats() {
               className="bg-[#F23674] transition-all h-3 w-full rounded-full "
               style={{ width: `${sellPercent}%` }}
             >
-              <div className="bg-[#F23674]/10 rounded-full h-5 w-full absolute left-1/2 -translate-x-1/2 -bottom-0.5 blur-[4px]"></div>
+              <div className="bg-[#F23674]/10 rounded-full h-5 w-full absolute left-1/2 -translate-x-1/2 -bottom-0.5 blur-xs"></div>
             </div>
           </div>
         </div>

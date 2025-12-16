@@ -1,4 +1,5 @@
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import Decimal from "decimal.js";
 
 interface RawTokenAmount {
   decimals: number;
@@ -57,51 +58,65 @@ interface ParsedTransaction {
   slot: number;
 }
 
+const SOL_MINT = "So11111111111111111111111111111111111111112";
 
-function parseMeteoraWebhook(payload: WebhookTransaction[]): ParsedTransaction[] {
-  const SOL_MINT = "So11111111111111111111111111111111111111112";
+function parseMeteoraWebhook(
+  payload: WebhookTransaction[]
+): ParsedTransaction[] {
+  const results: ParsedTransaction[] = [];
 
-  return payload.map((tx) => {
-    const { signature, timestamp, slot, feePayer, tokenTransfers } = tx;
+  for (const tx of payload) {
+    try {
+      const { signature, timestamp, slot, feePayer, tokenTransfers } = tx;
+      const solTransfers = tokenTransfers.filter((t) => t.mint === SOL_MINT);
+      const tokenTransfersNonSol = tokenTransfers.filter(
+        (t) => t.mint !== SOL_MINT
+      );
 
-    const tokenTransfer = tokenTransfers.find((t) => t.mint !== SOL_MINT);
-    const solTransfer = tokenTransfers.find((t) => t.mint === SOL_MINT);
+      if (!solTransfers.length || !tokenTransfersNonSol.length) {
+        continue;
+      }
 
-    if (!tokenTransfer || !solTransfer) {
-      throw new Error("Invalid transaction: missing token or SOL transfer");
+      const solLeg = solTransfers.reduce((a, b) =>
+        Math.abs(a.tokenAmount) > Math.abs(b.tokenAmount) ? a : b
+      );
+
+      const tokenLeg = tokenTransfersNonSol.reduce((a, b) =>
+        Math.abs(a.tokenAmount) > Math.abs(b.tokenAmount) ? a : b
+      );
+
+      const isBuy = solLeg.fromUserAccount === feePayer;
+
+      const type: "BUY" | "SELL" = isBuy ? "BUY" : "SELL";
+
+      const tokenAmount = new Decimal(tokenLeg.tokenAmount);
+      const solAmount = new Decimal(solLeg.tokenAmount);
+
+      if (tokenAmount.lte(0) || solAmount.lte(0)) continue;
+
+      const price = solAmount.div(tokenAmount);
+
+      results.push({
+        type,
+        signature,
+        traderAddress: feePayer,
+        tokenMint: tokenLeg.mint,
+        tokenAmount: tokenAmount.toNumber(),
+        solAmount: solAmount.toNumber(),
+        price: price.toNumber(),
+        timestamp,
+        slot,
+      });
+    } catch (e) {
+      console.error("Parse error:", tx.signature, e);
     }
+  }
 
-    const isBuy = solTransfer.fromUserAccount === feePayer;
-
-    const type: "BUY" | "SELL" = isBuy ? "BUY" : "SELL";
-
-    const tokenAmount = Number(tokenTransfer.tokenAmount); 
-    const solAmount = Number(solTransfer.tokenAmount);     
-
-    const price = tokenAmount > 0 ? solAmount / tokenAmount : 0;
-
-    return {
-      type,
-      signature,
-      traderAddress: feePayer,
-      tokenMint: tokenTransfer.mint,
-      tokenAmount,
-      solAmount,
-      price,
-      timestamp,
-      slot,
-    };
-  });
+  return results;
 }
 
+export { parseMeteoraWebhook, type WebhookTransaction, type ParsedTransaction };
 
-export {
-  parseMeteoraWebhook,
-  type WebhookTransaction,
-  type ParsedTransaction,
-};
-
-
-export function get1mBucket(dateUnix: number) {
-  return new Date(Math.floor(dateUnix / 60) * 60 * 1000);
+export function get1mBucket(unixSeconds: number) {
+  return new Date(Math.floor(unixSeconds / 60) * 60 * 1000);
 }

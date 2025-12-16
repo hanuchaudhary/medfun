@@ -40,15 +40,19 @@ model token {
 model trade {
   id               Int      @id @default(autoincrement())
   type             String
-  price            Float
-  tokenAmount      Float
-  solAmount        Float
+  price            Decimal  @db.Decimal(38, 18)
+  tokenAmount      Decimal  @db.Decimal(38, 18)
+  solAmount        Decimal  @db.Decimal(38, 18)
   traderAddress    String
   signature        String
+  instructionIndex Int?
   timestamp        DateTime
   slot             Int
   tokenMintAddress String
   token            token    @relation(fields: [tokenMintAddress], references: [mintAddress])
+
+  @@unique([signature, tokenMintAddress, instructionIndex])
+  @@index([tokenMintAddress, timestamp])
 }
 
 model kline {
@@ -63,14 +67,16 @@ model kline {
   token            token    @relation(fields: [tokenMintAddress], references: [mintAddress])
 
   @@id([tokenMintAddress, timestamp])
+  @@index([tokenMintAddress, timestamp(sort: Desc)])
 }
 
 model holder {
-  id               Int    @id @default(autoincrement())
+  id               Int      @id @default(autoincrement())
   holderAddress    String
-  amount           Float
+  amount           Decimal  @db.Decimal(38, 18)
   tokenMintAddress String
-  token            token  @relation(fields: [tokenMintAddress], references: [mintAddress])
+  token            token    @relation(fields: [tokenMintAddress], references: [mintAddress])
 
   @@unique([tokenMintAddress, holderAddress])
+  @@index([tokenMintAddress])
 }

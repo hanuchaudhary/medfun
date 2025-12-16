@@ -64,10 +64,10 @@ export function TokenChart({ mintAddress, klines }: TokenChartProps) {
         time: Math.floor(
           new Date(k.timestamp).getTime() / 1000
         ) as UTCTimestamp,
-        open: k.open,
-        high: k.high,
-        low: k.low,
-        close: k.close,
+        open: Number(k.open),
+        high: Number(k.high),
+        low: Number(k.low),
+        close: Number(k.close),
       }));
 
       candleSeries.setData(candleData);
@@ -76,8 +76,8 @@ export function TokenChart({ mintAddress, klines }: TokenChartProps) {
         time: Math.floor(
           new Date(k.timestamp).getTime() / 1000
         ) as UTCTimestamp,
-        value: k.volume,
-        color: k.close >= k.open ? "#22c55e" : "#ef4444",
+        value: Number(k.volume),
+        color: Number(k.close) >= Number(k.open) ? "#22c55e" : "#ef4444",
       }));
 
       volumeSeries.setData(volumeData);
@@ -105,9 +105,7 @@ export function TokenChart({ mintAddress, klines }: TokenChartProps) {
       <div ref={chartContainerRef} className="w-full pb-8" />
       {klines?.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-muted-foreground">
-            No chart data available
-          </div>
+          <div className="text-muted-foreground">No chart data available</div>
         </div>
       )}
     </div>

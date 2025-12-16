@@ -1,0 +1,2 @@
+
+export const TRADE_QUEUE_NAME = "TRADE_QUEUE";
