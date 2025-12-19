@@ -53,7 +53,7 @@ export default function ChartLiveClient({ mintAddress }: ChartLiveClientProps) {
     fetchKlines(mintAddress);
 
     const interval = setInterval(() => {
-      fetchKlines(mintAddress, "5m", true);
+      fetchKlines(mintAddress, "1m", true);
     }, 50000);
 
     return () => clearInterval(interval);

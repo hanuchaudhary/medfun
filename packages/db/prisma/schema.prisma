@@ -8,75 +8,85 @@ datasource db {
 }
 
 model token {
-  mintAddress          String   @id @unique
+  mintAddress          String   @id @map("mint_address")
   name                 String
   symbol               String
   description          String?
-  poolAddress          String   @unique
-  graduatedPoolAddress String?  @unique
+  poolAddress          String   @unique @map("pool_address")
+  graduatedPoolAddress String?  @unique @map("graduated_pool_address")
   website              String?
-  isStreamLive         Boolean  @default(false)
+  isStreamLive         Boolean  @default(false) @map("is_stream_live")
   twitter              String?
   telegram             String?
-  imageUrl             String?
-  metadataUrl          String?
-  creatorAddress       String
-  bondingCurveProgress Float?
+  imageUrl             String?  @map("image_url")
+  metadataUrl          String?  @map("metadata_url")
+  creatorAddress       String   @map("creator_address")
+  bondingCurveProgress Float?   @map("bonding_curve_progress")
   volume               Float?
   liquidity            Float?
-  marketCap            Float?
-  holderCount          Int?
-  stats5m              Json?
-  stats1h              Json?
-  stats6h              Json?
-  stats24h             Json?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-  holders              holder[]
-  klines               kline[]
-  trades               trade[]
+  marketCap            Float?   @map("market_cap")
+  holderCount          Int?     @map("holder_count")
+  stats5m              Json?    @map("stats_5m")
+  stats1h              Json?    @map("stats_1h")
+  stats6h              Json?    @map("stats_6h")
+  stats24h             Json?    @map("stats_24h")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  holders holder[]
+  klines  kline[]
+  trades  trade[]
+
+  @@map("token")
 }
 
 model trade {
-  id               Int      @id @default(autoincrement())
-  type             String
-  price            Decimal  @db.Decimal(38, 18)
-  tokenAmount      Decimal  @db.Decimal(38, 18)
-  solAmount        Decimal  @db.Decimal(38, 18)
-  traderAddress    String
   signature        String
-  instructionIndex Int?
+  tokenMintAddress String   @map("token_mint_address")
+  instructionIndex Int?     @map("instruction_index")
   timestamp        DateTime
-  slot             Int
-  tokenMintAddress String
-  token            token    @relation(fields: [tokenMintAddress], references: [mintAddress])
 
-  @@unique([signature, tokenMintAddress, instructionIndex])
+  type          String
+  price         Decimal @db.Decimal(38, 18)
+  tokenAmount   Decimal @db.Decimal(38, 18) @map("token_amount")
+  solAmount     Decimal @db.Decimal(38, 18) @map("sol_amount")
+  traderAddress String  @map("trader_address")
+  slot          Int
+
+  token token @relation(fields: [tokenMintAddress], references: [mintAddress])
+
+  @@id([signature, tokenMintAddress, timestamp])
   @@index([tokenMintAddress, timestamp])
+  @@map("trade")
 }
 
 model kline {
   timestamp        DateTime
-  open             Decimal  @db.Decimal(38, 18)
-  high             Decimal  @db.Decimal(38, 18)
-  low              Decimal  @db.Decimal(38, 18)
-  close            Decimal  @db.Decimal(38, 18)
-  volume           Decimal  @db.Decimal(38, 18)
+  open             Decimal @db.Decimal(38, 18)
+  high             Decimal @db.Decimal(38, 18)
+  low              Decimal @db.Decimal(38, 18)
+  close            Decimal @db.Decimal(38, 18)
+  volume           Decimal @db.Decimal(38, 18)
   trades           Int
-  tokenMintAddress String
-  token            token    @relation(fields: [tokenMintAddress], references: [mintAddress])
+  tokenMintAddress String @map("token_mint_address")
+
+  token token @relation(fields: [tokenMintAddress], references: [mintAddress])
 
   @@id([tokenMintAddress, timestamp])
   @@index([tokenMintAddress, timestamp(sort: Desc)])
+  @@map("kline")
 }
 
 model holder {
-  id               Int      @id @default(autoincrement())
-  holderAddress    String
-  amount           Decimal  @db.Decimal(38, 18)
-  tokenMintAddress String
-  token            token    @relation(fields: [tokenMintAddress], references: [mintAddress])
+  id               Int     @id @default(autoincrement())
+  holderAddress    String  @map("holder_address")
+  amount           Decimal @db.Decimal(38, 18)
+  tokenMintAddress String  @map("token_mint_address")
+
+  token token @relation(fields: [tokenMintAddress], references: [mintAddress])
 
   @@unique([tokenMintAddress, holderAddress])
   @@index([tokenMintAddress])
+  @@map("holder")
 }
+

@@ -192,7 +192,7 @@ export const useTokenStore = create<TokenStore>((set, get) => ({
   isLoadingKlines: false,
   fetchKlines: async (
     mintAddress: string,
-    interval = "5m",
+    interval = "1m",
     isBackgroundRefresh = false
   ) => {
     try {
@@ -200,9 +200,9 @@ export const useTokenStore = create<TokenStore>((set, get) => ({
         set({ isLoadingKlines: true });
       }
       const res = await axios.get(
-        `/api/coins/${mintAddress}/chart?interval=${interval}`
+        `/api/coins/${mintAddress}/chart?tf=${interval}`
       );
-      if (res.data.success) {
+      if (res.data.klines) {
         set({ klines: res.data.klines, isLoadingKlines: false });
       } else {
         set({ isLoadingKlines: false });

@@ -7,12 +7,12 @@ CREATE TABLE "token" (
     "poolAddress" TEXT NOT NULL,
     "graduatedPoolAddress" TEXT,
     "website" TEXT,
+    "isStreamLive" BOOLEAN NOT NULL DEFAULT false,
     "twitter" TEXT,
     "telegram" TEXT,
     "imageUrl" TEXT,
     "metadataUrl" TEXT,
     "creatorAddress" TEXT NOT NULL,
-    "isStreamLive" BOOLEAN NOT NULL DEFAULT false,
     "bondingCurveProgress" DOUBLE PRECISION,
     "volume" DOUBLE PRECISION,
     "liquidity" DOUBLE PRECISION,
@@ -30,18 +30,18 @@ CREATE TABLE "token" (
 
 -- CreateTable
 CREATE TABLE "trade" (
-    "id" SERIAL NOT NULL,
-    "type" TEXT NOT NULL,
-    "price" DOUBLE PRECISION NOT NULL,
-    "tokenAmount" DOUBLE PRECISION NOT NULL,
-    "solAmount" DOUBLE PRECISION NOT NULL,
-    "traderAddress" TEXT NOT NULL,
     "signature" TEXT NOT NULL,
-    "timestamp" TIMESTAMP(3) NOT NULL,
-    "slot" INTEGER NOT NULL,
     "tokenMintAddress" TEXT NOT NULL,
+    "instructionIndex" INTEGER,
+    "timestamp" TIMESTAMP(3) NOT NULL,
+    "type" TEXT NOT NULL,
+    "price" DECIMAL(38,18) NOT NULL,
+    "tokenAmount" DECIMAL(38,18) NOT NULL,
+    "solAmount" DECIMAL(38,18) NOT NULL,
+    "traderAddress" TEXT NOT NULL,
+    "slot" INTEGER NOT NULL,
 
-    CONSTRAINT "trade_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "trade_pkey" PRIMARY KEY ("signature","tokenMintAddress","timestamp")
 );
 
 -- CreateTable
@@ -62,7 +62,7 @@ CREATE TABLE "kline" (
 CREATE TABLE "holder" (
     "id" SERIAL NOT NULL,
     "holderAddress" TEXT NOT NULL,
-    "amount" DOUBLE PRECISION NOT NULL,
+    "amount" DECIMAL(38,18) NOT NULL,
     "tokenMintAddress" TEXT NOT NULL,
 
     CONSTRAINT "holder_pkey" PRIMARY KEY ("id")
@@ -76,6 +76,15 @@ CREATE UNIQUE INDEX "token_poolAddress_key" ON "token"("poolAddress");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "token_graduatedPoolAddress_key" ON "token"("graduatedPoolAddress");
+
+-- CreateIndex
+CREATE INDEX "trade_tokenMintAddress_timestamp_idx" ON "trade"("tokenMintAddress", "timestamp");
+
+-- CreateIndex
+CREATE INDEX "kline_tokenMintAddress_timestamp_idx" ON "kline"("tokenMintAddress", "timestamp" DESC);
+
+-- CreateIndex
+CREATE INDEX "holder_tokenMintAddress_idx" ON "holder"("tokenMintAddress");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "holder_tokenMintAddress_holderAddress_key" ON "holder"("tokenMintAddress", "holderAddress");

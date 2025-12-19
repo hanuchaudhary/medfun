@@ -11,7 +11,6 @@ const app = new Elysia()
   .post("/webhook", async ({ body, set }) => {
     try {
       const payload = body as WebhookTransaction[];
-
       console.log("WEBHOOK HITTED!");
 
       if (!payload?.length) {
@@ -26,7 +25,7 @@ const app = new Elysia()
         return { success: true };
       }
 
-      await tradeQueue.addBulk(
+      const result = await tradeQueue.addBulk(
         parsedTrades.map((trade) => ({
           name: "PROCESS_TRADE",
           data: trade,
@@ -36,6 +35,8 @@ const app = new Elysia()
           },
         }))
       );
+
+      console.log(`Enqueued ${result.length} trades for processing.`);
 
       return { success: true };
     } catch (e) {
