@@ -109,6 +109,7 @@ export async function POST(req: Request) {
               stats5m: null,
               stats6h: null,
               stats24h: null,
+              isStreamLive: false,
             });
 
             let saveToWebhookUrl = await heliusClient.webhooks.get(WEBHOOK_ID);

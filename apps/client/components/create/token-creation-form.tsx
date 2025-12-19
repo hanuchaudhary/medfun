@@ -225,6 +225,7 @@ export function TokenCreationForm({
       stats24h: null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      isStreamLive: false,
     }),
     [formData, wallet.publicKey]
   );
