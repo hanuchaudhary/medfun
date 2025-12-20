@@ -148,7 +148,7 @@ export default function HolderTradeClient({
         </TabsContent>
 
         <TabsContent value="trades" className="mt-0">
-          <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+          <div className="overflow-x-auto max-h-125 overflow-y-auto">
             {isLoadingTrades ? (
               <div className="space-y-2 p-3">
                 {[...Array(10)].map((_, i) => (

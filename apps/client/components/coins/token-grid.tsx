@@ -152,7 +152,7 @@ export function TokenGrid() {
             Filter
           </span>
           <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="border-0 min-w-[180px]">
+            <SelectTrigger className="border-0 min-w-45">
               <SelectValue placeholder="Sort" />
             </SelectTrigger>
             <SelectContent>
