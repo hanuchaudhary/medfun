@@ -12,7 +12,7 @@ interface TokenCardProps {
 }
 
 export function TokenCard({ token, href }: TokenCardProps) {
-  const progress = token.bondingCurveProgress ?? 0;
+  const progress = token.graduatedPoolAddress ? 100 : token.bondingCurveProgress ?? 0;
 
   return (
     <Link href={href}>

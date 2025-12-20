@@ -47,17 +47,17 @@ export default function ChartLiveClient({ mintAddress }: ChartLiveClientProps) {
   const wallet = useWallet();
   const currentToken = useCurrentToken();
   const isLoadingCurrentToken = !currentToken;
-  const { klines, isLoadingKlines, fetchKlines } = useTokenStore();
+  const {
+    klines,
+    isLoadingKlines,
+    fetchKlines,
+    currentTimeframe,
+    setTimeframe,
+  } = useTokenStore();
 
   React.useEffect(() => {
-    fetchKlines(mintAddress);
-
-    const interval = setInterval(() => {
-      fetchKlines(mintAddress, "1m", true);
-    }, 50000);
-
-    return () => clearInterval(interval);
-  }, [mintAddress, fetchKlines]);
+    fetchKlines(mintAddress, currentTimeframe);
+  }, [mintAddress, currentTimeframe, fetchKlines]);
 
   React.useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {

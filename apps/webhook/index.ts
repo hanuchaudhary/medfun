@@ -1,6 +1,10 @@
 import { Elysia } from "elysia";
 import { parseMeteoraWebhook, type WebhookTransaction } from "./parser";
-import { tradeQueue } from "./config";
+import {
+  tradeQueue,
+  isSignatureProcessed,
+  markSignatureProcessed,
+} from "./config";
 
 const PORT = process.env.PORT || 8000;
 
@@ -11,7 +15,6 @@ const app = new Elysia()
   .post("/webhook", async ({ body, set }) => {
     try {
       const payload = body as WebhookTransaction[];
-      console.log("WEBHOOK HITTED!");
 
       if (!payload?.length) {
         set.status = 400;
@@ -19,14 +22,30 @@ const app = new Elysia()
       }
 
       const parsedTrades = parseMeteoraWebhook(payload);
-      console.log("PARSED TRADES: ",parsedTrades);
-      
+
       if (!parsedTrades.length) {
         return { success: true };
       }
 
+      const newTrades = [];
+      for (const trade of parsedTrades) {
+        const isDuplicate = await isSignatureProcessed(trade.signature);
+        if (!isDuplicate) {
+          await markSignatureProcessed(trade.signature);
+          newTrades.push(trade);
+        } else {
+          console.log(`Skipping duplicate trade: ${trade.signature}`);
+        }
+      }
+
+      if (!newTrades.length) {
+        return { success: true, message: "All trades were duplicates" };
+      }
+
+      console.log("PARSED TRADES:", newTrades);
+
       const result = await tradeQueue.addBulk(
-        parsedTrades.map((trade) => ({
+        newTrades.map((trade) => ({
           name: "PROCESS_TRADE",
           data: trade,
           opts: {

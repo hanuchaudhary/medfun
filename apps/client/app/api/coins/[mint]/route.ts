@@ -1,6 +1,9 @@
 import { prisma } from "@/lib/prisma";
+import { redisCache } from "@/lib/redis";
 import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
+
+const CACHE_TTL = 120;
 
 export async function GET(
   req: NextRequest,
@@ -16,6 +19,13 @@ export async function GET(
       );
     }
 
+    const cacheKey = `token:${mint}`;
+    const cached = await redisCache.get(cacheKey);
+
+    if (cached) {
+      return NextResponse.json({ success: true, token: cached });
+    }
+
     const res = await axios.get(
       `https://lite-api.jup.ag/tokens/v2/search?query=${mint}`
     );
@@ -23,7 +33,7 @@ export async function GET(
     let token;
     if (res.data.length) {
       const jupData = res.data[0];
-      const volume24h = jupData.stats24h 
+      const volume24h = jupData.stats24h
         ? (jupData.stats24h.buyVolume || 0) + (jupData.stats24h.sellVolume || 0)
         : null;
 
@@ -46,6 +56,10 @@ export async function GET(
       token = await prisma.token.findUnique({
         where: { mintAddress: mint },
       });
+    }
+
+    if (token) {
+      await redisCache.set(cacheKey, token, CACHE_TTL);
     }
 
     return NextResponse.json({ success: true, token });

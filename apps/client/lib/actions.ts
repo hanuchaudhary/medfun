@@ -70,3 +70,22 @@ export async function updateStreamLiveStatus(
     };
   }
 }
+
+export async function updateGraduatedPoolAddress(
+  mintAddress: string,
+  graduatedPoolAddress: string
+) {
+  try {
+    const token = await prisma.token.update({
+      where: { mintAddress },
+      data: { graduatedPoolAddress },
+    });
+    return { success: true, token };
+  } catch (error) {
+    console.error("Error updating graduated pool address:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}

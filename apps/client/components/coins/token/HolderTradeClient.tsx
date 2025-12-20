@@ -22,8 +22,14 @@ export default function HolderTradeClient({
   const wallet = useWallet();
   const username = formatAddress(wallet.publicKey?.toString() || "Anonymous");
 
-  const { holders, isLoadingHolders, fetchHolders } = useTokenStore();
-  const { trades, isLoadingTrades, fetchTrades } = useTokenStore();
+  const { 
+    holders, 
+    isLoadingHolders, 
+    fetchHolders, 
+    trades, 
+    isLoadingTrades, 
+    fetchTrades
+  } = useTokenStore();
 
   const handleOnMessage = (messages: ChatMessage[]) => {
     console.log("mes: ", messages);
@@ -33,15 +39,9 @@ export default function HolderTradeClient({
   };
 
   React.useEffect(() => {
+    // Initial fetch - real-time updates come via WebSocket subscription in TokenPageWrapper
     fetchHolders(mintAddress);
     fetchTrades(mintAddress, 50);
-
-    const interval = setInterval(() => {
-      fetchHolders(mintAddress, true);
-      fetchTrades(mintAddress, 50, 0, true);
-    }, 50000);
-
-    return () => clearInterval(interval);
   }, [mintAddress, fetchHolders, fetchTrades]);
 
   return (

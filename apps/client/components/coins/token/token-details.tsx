@@ -21,12 +21,6 @@ export function TokenDetails({ tokenMint }: TokenDetailsProps) {
   React.useEffect(() => {
     if (!contextToken) {
       fetchTokenDetails(tokenMint);
-
-      const interval = setInterval(() => {
-        fetchTokenDetails(tokenMint, true);
-      }, 30000);
-
-      return () => clearInterval(interval);
     }
   }, [tokenMint, contextToken, fetchTokenDetails]);
 
@@ -54,7 +48,9 @@ export function TokenDetails({ tokenMint }: TokenDetailsProps) {
     );
   }
 
-  const progress = token.bondingCurveProgress ?? 0;
+  const progress = token.graduatedPoolAddress
+    ? 100
+    : (token.bondingCurveProgress ?? 0);
 
   return (
     <div className="p-4">
@@ -118,7 +114,7 @@ export function TokenDetails({ tokenMint }: TokenDetailsProps) {
             <span
               className={cn(
                 "font-medium font-mono text-primary",
-                token.bondingCurveProgress ? "text-yellow-400" : ""
+                progress === 100 ? "text-yellow-400" : ""
               )}
             >
               {progress.toFixed(2)}%

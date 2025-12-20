@@ -31,3 +31,20 @@ connection.on("reconnecting", () => {
 export const tradeQueue = new Queue(TRADE_QUEUE_NAME, {
   connection,
 });
+
+export const redisConnection = connection;
+
+const DEDUP_TTL = 300;
+
+export async function isSignatureProcessed(
+  signature: string
+): Promise<boolean> {
+  const key = `dedup:${signature}`;
+  const exists = await connection.exists(key);
+  return exists === 1;
+}
+
+export async function markSignatureProcessed(signature: string): Promise<void> {
+  const key = `dedup:${signature}`;
+  await connection.setex(key, DEDUP_TTL, "1");
+}

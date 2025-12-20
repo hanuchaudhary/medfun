@@ -1,12 +1,6 @@
-import IORedis from "ioredis";
+import { RedisManager, get1mBucket } from "@repo/config";
 
-export const publisher = new IORedis(process.env.REDIS_URL!);
-
-const REDIS_URL = process.env.REDIS_URL!;
-export const connection = new IORedis(REDIS_URL, {
-  maxRetriesPerRequest: null,
-});
-
-export function get1mBucket(unixSeconds: number) {
-  return new Date(Math.floor(unixSeconds / 60) * 60 * 1000);
-}
+const redisManager = RedisManager.getInstance();
+export const connection = redisManager.getBullConnection();
+export const redisPublisher = redisManager.getPublisher();
+export { get1mBucket };
