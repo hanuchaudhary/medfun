@@ -1,33 +1,3 @@
-/*
-  Warnings:
-
-  - You are about to drop the `Holder` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Kline` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Token` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Trade` table. If the table is not empty, all the data it contains will be lost.
-
-*/
--- DropForeignKey
-ALTER TABLE "Holder" DROP CONSTRAINT "Holder_tokenMintAddress_fkey";
-
--- DropForeignKey
-ALTER TABLE "Kline" DROP CONSTRAINT "Kline_tokenMintAddress_fkey";
-
--- DropForeignKey
-ALTER TABLE "Trade" DROP CONSTRAINT "Trade_tokenMintAddress_fkey";
-
--- DropTable
-DROP TABLE "Holder";
-
--- DropTable
-DROP TABLE "Kline";
-
--- DropTable
-DROP TABLE "Token";
-
--- DropTable
-DROP TABLE "Trade";
-
 -- CreateTable
 CREATE TABLE "token" (
     "mintAddress" TEXT NOT NULL,
@@ -37,6 +7,7 @@ CREATE TABLE "token" (
     "poolAddress" TEXT NOT NULL,
     "graduatedPoolAddress" TEXT,
     "website" TEXT,
+    "isStreamLive" BOOLEAN NOT NULL DEFAULT false,
     "twitter" TEXT,
     "telegram" TEXT,
     "imageUrl" TEXT,
@@ -59,40 +30,39 @@ CREATE TABLE "token" (
 
 -- CreateTable
 CREATE TABLE "trade" (
-    "id" SERIAL NOT NULL,
-    "type" TEXT NOT NULL,
-    "price" DOUBLE PRECISION NOT NULL,
-    "tokenAmount" DOUBLE PRECISION NOT NULL,
-    "solAmount" DOUBLE PRECISION NOT NULL,
-    "traderAddress" TEXT NOT NULL,
     "signature" TEXT NOT NULL,
-    "timestamp" TIMESTAMP(3) NOT NULL,
-    "slot" INTEGER NOT NULL,
     "tokenMintAddress" TEXT NOT NULL,
+    "instructionIndex" INTEGER,
+    "timestamp" TIMESTAMP(3) NOT NULL,
+    "type" TEXT NOT NULL,
+    "price" DECIMAL(38,18) NOT NULL,
+    "tokenAmount" DECIMAL(38,18) NOT NULL,
+    "solAmount" DECIMAL(38,18) NOT NULL,
+    "traderAddress" TEXT NOT NULL,
+    "slot" INTEGER NOT NULL,
 
-    CONSTRAINT "trade_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "trade_pkey" PRIMARY KEY ("signature","tokenMintAddress","timestamp")
 );
 
 -- CreateTable
 CREATE TABLE "kline" (
-    "id" SERIAL NOT NULL,
     "timestamp" TIMESTAMP(3) NOT NULL,
-    "open" DOUBLE PRECISION NOT NULL,
-    "high" DOUBLE PRECISION NOT NULL,
-    "low" DOUBLE PRECISION NOT NULL,
-    "close" DOUBLE PRECISION NOT NULL,
-    "volume" DOUBLE PRECISION NOT NULL,
+    "open" DECIMAL(38,18) NOT NULL,
+    "high" DECIMAL(38,18) NOT NULL,
+    "low" DECIMAL(38,18) NOT NULL,
+    "close" DECIMAL(38,18) NOT NULL,
+    "volume" DECIMAL(38,18) NOT NULL,
     "trades" INTEGER NOT NULL,
     "tokenMintAddress" TEXT NOT NULL,
 
-    CONSTRAINT "kline_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "kline_pkey" PRIMARY KEY ("tokenMintAddress","timestamp")
 );
 
 -- CreateTable
 CREATE TABLE "holder" (
     "id" SERIAL NOT NULL,
     "holderAddress" TEXT NOT NULL,
-    "amount" DOUBLE PRECISION NOT NULL,
+    "amount" DECIMAL(38,18) NOT NULL,
     "tokenMintAddress" TEXT NOT NULL,
 
     CONSTRAINT "holder_pkey" PRIMARY KEY ("id")
@@ -108,7 +78,13 @@ CREATE UNIQUE INDEX "token_poolAddress_key" ON "token"("poolAddress");
 CREATE UNIQUE INDEX "token_graduatedPoolAddress_key" ON "token"("graduatedPoolAddress");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "kline_tokenMintAddress_timestamp_key" ON "kline"("tokenMintAddress", "timestamp");
+CREATE INDEX "trade_tokenMintAddress_timestamp_idx" ON "trade"("tokenMintAddress", "timestamp");
+
+-- CreateIndex
+CREATE INDEX "kline_tokenMintAddress_timestamp_idx" ON "kline"("tokenMintAddress", "timestamp" DESC);
+
+-- CreateIndex
+CREATE INDEX "holder_tokenMintAddress_idx" ON "holder"("tokenMintAddress");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "holder_tokenMintAddress_holderAddress_key" ON "holder"("tokenMintAddress", "holderAddress");

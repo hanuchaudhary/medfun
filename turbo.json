@@ -1,6 +1,14 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
+  "globalEnv": [
+    "DATABASE_URL",
+    "REDIS_URL"
+  ],
+  "globalPassThroughEnv": [
+    "NEXT_PUBLIC_*",
+    "PUBLIC_*"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

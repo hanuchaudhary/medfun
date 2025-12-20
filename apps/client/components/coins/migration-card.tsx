@@ -37,9 +37,10 @@ import {
 import { BN } from "bn.js";
 import PoolState from "./pool-state";
 import { useCurrentToken } from "./token/token-page-wrapper";
+import { useSearchParams } from "next/navigation";
 
 interface MigrationCardProps {
-  tokenId: string;
+  tokenMint: string;
   tokenName: string;
   tokenSymbol: string;
   poolAddress: string;
@@ -47,12 +48,16 @@ interface MigrationCardProps {
 }
 
 export function MigrationCard({
-  tokenId,
+  tokenMint,
   tokenName,
   tokenSymbol,
   poolAddress,
   configAddress,
 }: MigrationCardProps) {
+  const params = useSearchParams();
+  const poolAddressParam = params.get("pool");
+  console.log("oo ", poolAddressParam);
+  
   const currentToken = useCurrentToken();
   const [showDialog, setShowDialog] = useState(false);
   const [isMigrating, setIsMigrating] = useState(false);
@@ -73,7 +78,7 @@ export function MigrationCard({
     return walletsSolana.find((w) => w.address === wallet.wallet?.address);
   };
 
-  const TOKEN_POOL_ADDRESS = new PublicKey(poolAddress);
+  const TOKEN_POOL_ADDRESS = new PublicKey(poolAddressParam!);
   const POOL_CONFIG_KEY = new PublicKey(configAddress);
 
   React.useEffect(() => {
@@ -333,7 +338,7 @@ export function MigrationCard({
           </Button>
           {migrationComplete && (
             <PoolState
-              TOKEN_MINT_ADDRESS={new PublicKey(tokenId)}
+              TOKEN_MINT_ADDRESS={new PublicKey(tokenMint)}
               TOKEN_POOL_ADDRESS={TOKEN_POOL_ADDRESS}
             />
           )}

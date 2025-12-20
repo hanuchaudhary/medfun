@@ -24,7 +24,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useTokensPolling } from "@/hooks/use-token-polling";
+import { useTokenStore } from "@/store/tokenStore";
+import { formatNumber, getTimeSince } from "@/lib/utils";
 
 export function TokenGrid() {
   const [search, setSearch] = React.useState("");
@@ -33,33 +34,22 @@ export function TokenGrid() {
   const router = useRouter();
   const view = searchParams.get("view") || "grid";
 
-  const { tokens, isLoading: isLoadingTokens } = useTokensPolling();
+  const { tokens, isLoadingTokens, fetchTokens } = useTokenStore();
+
+  useEffect(() => {
+    fetchTokens();
+
+    const interval = setInterval(() => {
+      fetchTokens(true);
+    }, 7000);
+
+    return () => clearInterval(interval);
+  }, [fetchTokens]);
 
   const toggleView = (newView: string) => {
     const params = new URLSearchParams(searchParams);
     params.set("view", newView);
     router.push(`?${params.toString()}`);
-  };
-
-  const formatNumber = (num: number | null) => {
-    if (num === null || num === undefined) return "-";
-    if (num >= 1000000) {
-      return `$${(num / 1000000).toFixed(2)}M`;
-    } else if (num >= 1000) {
-      return `$${(num / 1000).toFixed(2)}K`;
-    }
-    return `$${num.toFixed(2)}`;
-  };
-
-  const formatTimeAgo = (date: Date | string) => {
-    const now = new Date();
-    const past = new Date(date);
-    const diffInSeconds = Math.floor((now.getTime() - past.getTime()) / 1000);
-
-    if (diffInSeconds < 60) return `${diffInSeconds}s`;
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h`;
-    return `${Math.floor(diffInSeconds / 86400)}d`;
   };
 
   const filteredAndSorted = React.useMemo(() => {
@@ -193,7 +183,7 @@ export function TokenGrid() {
               {[...Array(8)].map((_, i) => (
                 <div
                   key={i}
-                  className="border rounded-lg p-0 bg-card animate-pulse h-80"
+                  className="border-0 rounded-lg p-0 bg-card animate-pulse h-40"
                 />
               ))}
             </>
@@ -253,7 +243,7 @@ export function TokenGrid() {
                         href={`/coins/${token.mintAddress}`}
                         className="flex items-center gap-3 hover:opacity-80"
                       >
-                        <div className="relative w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                        <div className="relative w-8 h-8 rounded-full overflow-hidden shrink-0">
                           <Image
                             unoptimized
                             src={
@@ -287,7 +277,7 @@ export function TokenGrid() {
                       -
                     </TableCell>
                     <TableCell className="text-right text-muted-foreground">
-                      {token.createdAt ? formatTimeAgo(token.createdAt) : "-"}
+                      {token.createdAt ? getTimeSince(token.createdAt) : "-"}
                     </TableCell>
                     <TableCell className="text-right text-muted-foreground">
                       -

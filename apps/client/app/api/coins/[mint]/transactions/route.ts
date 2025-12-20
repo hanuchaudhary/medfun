@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
-import axios from "axios";
+import { redisCache } from "@/lib/redis";
 import { NextRequest, NextResponse } from "next/server";
+
+const CACHE_TTL = 120;
 
 export async function GET(
   req: NextRequest,
@@ -8,7 +10,7 @@ export async function GET(
 ) {
   try {
     const { mint } = await params;
-    const { searchParams } = new URL(req.url);
+    const { searchParams } = new URL(req.nextUrl);
     const limit = parseInt(searchParams.get("limit") || "50");
     const offset = parseInt(searchParams.get("offset") || "0");
 
@@ -17,6 +19,13 @@ export async function GET(
         { success: false, error: "Token mint address is required" },
         { status: 400 }
       );
+    }
+
+    const cacheKey = `transactions:${mint}:${limit}:${offset}`;
+    const cached = await redisCache.get(cacheKey);
+
+    if (cached) {
+      return NextResponse.json({ success: true, transactions: cached });
     }
 
     const token = await prisma.token.findUnique({
@@ -37,11 +46,19 @@ export async function GET(
       take: limit,
     });
 
+    const formattedTransactions = transactions.map((trade) => ({
+      ...trade,
+      price: Number(trade.price),
+      tokenAmount: Number(trade.tokenAmount),
+      solAmount: Number(trade.solAmount),
+    }));
+
+    await redisCache.set(cacheKey, formattedTransactions, CACHE_TTL);
+
     return NextResponse.json({
       success: true,
-      transactions,
+      transactions: formattedTransactions,
     });
-   
   } catch (error) {
     console.error("Error fetching transactions:", error);
     return NextResponse.json(

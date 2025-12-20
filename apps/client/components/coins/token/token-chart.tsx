@@ -1,15 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import {
-  createChart,
-  ColorType,
-  CrosshairMode,
-  UTCTimestamp,
-  CandlestickSeries,
-  HistogramSeries,
-} from "lightweight-charts";
+import { useEffect, useRef } from "react";
 import { Kline } from "@/types/token";
+import { cn } from "@/lib/utils";
+import { ChartManager } from "@/lib/chart-manager";
+import { useTokenStore } from "@/store/tokenStore";
+
+const TIMEFRAMES = [
+  { label: "1m", value: "1m" },
+  { label: "5m", value: "5m" },
+  { label: "24h", value: "24h" },
+  { label: "1w", value: "1w" },
+] as const;
 
 interface TokenChartProps {
   mintAddress: string;
@@ -18,96 +20,90 @@ interface TokenChartProps {
 
 export function TokenChart({ mintAddress, klines }: TokenChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
+  const chartManagerRef = useRef<ChartManager | null>(null);
+  const previousTimeframeRef = useRef<string | null>(null);
+  const { currentTimeframe, setTimeframe } = useTokenStore();
 
   useEffect(() => {
-    if (!chartContainerRef.current) return;
+    const saved = localStorage.getItem("chart-timeframe");
+    if (saved && saved !== currentTimeframe) {
+      setTimeframe(saved);
+    }
+  }, []);
 
-    const chart = createChart(chartContainerRef.current, {
-      autoSize: true,
-      height: 450,
-      layout: {
-        background: { type: ColorType.Solid, color: "transparent" },
-        textColor: "#e5e7eb",
-      },
-      grid: {
-        vertLines: { color: "#1f2937" },
-        horzLines: { color: "#1f2937" },
-      },
-      crosshair: {
-        mode: CrosshairMode.Normal,
-      },
-      rightPriceScale: {
-        borderVisible: false,
-      },
-      timeScale: {
-        borderVisible: false,
-        timeVisible: true,
-      },
-    });
+  const handleTimeframeChange = (tf: string) => {
+    localStorage.setItem("chart-timeframe", tf);
+    setTimeframe(tf);
+  };
 
-    const candleSeries = chart.addSeries(CandlestickSeries, {
-      upColor: "#30b561",
-      wickUpColor: "#22c55e",
-      borderUpColor: "#22c55e",
-      downColor: "#ef4444",
-      wickDownColor: "#ef4444",
-      borderDownColor: "#ef4444",
-    });
+  // Handle chart creation and updates
+  useEffect(() => {
+    if (!chartContainerRef.current || !klines || klines.length === 0) return;
 
-    const volumeSeries = chart.addSeries(HistogramSeries, {
-      priceFormat: { type: "volume" },
-      priceScaleId: "",
-    });
+    const chartData = klines.map((k) => ({
+      timestamp: new Date(k.timestamp).getTime(),
+      open: Number(k.open),
+      high: Number(k.high),
+      low: Number(k.low),
+      close: Number(k.close),
+      volume: Number(k.volume),
+    }));
 
-    if (klines && klines.length > 0) {
-      const candleData = klines.map((k) => ({
-        time: Math.floor(
-          new Date(k.timestamp).getTime() / 1000
-        ) as UTCTimestamp,
-        open: k.open,
-        high: k.high,
-        low: k.low,
-        close: k.close,
-      }));
+    const timeframeChanged =
+      previousTimeframeRef.current !== null &&
+      previousTimeframeRef.current !== currentTimeframe;
 
-      candleSeries.setData(candleData);
+    if (!chartManagerRef.current || timeframeChanged) {
+      if (chartManagerRef.current) {
+        chartManagerRef.current.destroy();
+      }
 
-      const volumeData = klines.map((k) => ({
-        time: Math.floor(
-          new Date(k.timestamp).getTime() / 1000
-        ) as UTCTimestamp,
-        value: k.volume,
-        color: k.close >= k.open ? "#22c55e" : "#ef4444",
-      }));
-
-      volumeSeries.setData(volumeData);
+      chartManagerRef.current = new ChartManager(
+        chartContainerRef.current,
+        chartData,
+        { background: "transparent", color: "#e5e7eb" }
+      );
+    } else {
+      chartManagerRef.current.setData(chartData);
     }
 
-    chart.timeScale().fitContent();
+    previousTimeframeRef.current = currentTimeframe;
+  }, [klines, currentTimeframe]);
 
-    const handleResize = () => {
-      if (!chartContainerRef.current) return;
-      chart.applyOptions({
-        width: chartContainerRef.current.clientWidth,
-      });
-    };
-
-    window.addEventListener("resize", handleResize);
-
+  // Cleanup on unmount
+  useEffect(() => {
     return () => {
-      window.removeEventListener("resize", handleResize);
-      chart.remove();
+      if (chartManagerRef.current) {
+        chartManagerRef.current.destroy();
+        chartManagerRef.current = null;
+      }
     };
-  }, [klines]);
+  }, []);
 
   return (
     <div className="relative w-full">
-      <div ref={chartContainerRef} className="w-full rounded-xl pb-8" />
-      {klines?.length === 0 && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-muted-foreground">
-            No chart data available
-          </div>
+      <div className="flex items-center gap-1 py-2 ml-24 relative z-10">
+        {TIMEFRAMES.map((tf) => (
+          <button
+            key={tf.value}
+            type="button"
+            onClick={() => handleTimeframeChange(tf.value)}
+            className={cn(
+              "px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer",
+              currentTimeframe === tf.value
+                ? "bg-primary text-background"
+                : "bg-muted text-muted-foreground hover:bg-muted/80"
+            )}
+          >
+            {tf.label}
+          </button>
+        ))}
+      </div>
+
+      <div ref={chartContainerRef} className="w-full h-[450px] pb-8" />
+      {(!klines || klines.length === 0) && (
+        <div className="absolute inset-0 flex items-center justify-center pt-10">
+          <div className="text-muted-foreground">No chart data available</div>
         </div>
       )}
     </div>

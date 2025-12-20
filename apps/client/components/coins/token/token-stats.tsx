@@ -100,7 +100,7 @@ export default function TokenStats() {
   ];
 
   return (
-    <div className="border rounded-md my-4">
+    <div className="border-t border-dashed my-4">
       <h4 className="text-sm font-medium text-muted-foreground my-4 px-4">
         Token Statistics
       </h4>
@@ -129,7 +129,7 @@ export default function TokenStats() {
                 {timeFrame.label}
               </div>
               <div
-                className={`text-sm font-medium ${
+                className={`text-xs font-medium font-mono ${
                   isDisabled
                     ? "text-muted-foreground"
                     : (stats?.priceChange || 0) >= 0
@@ -148,7 +148,7 @@ export default function TokenStats() {
         {volumeStats.map((stat) => (
           <div key={stat.label} className="space-y-1">
             <div className="text-xs text-muted-foreground">{stat.label}</div>
-            <div className="font-medium">{stat.value}</div>
+            <div className="text-sm font-mono font-semibold">{stat.value}</div>
           </div>
         ))}
       </div>
@@ -157,37 +157,42 @@ export default function TokenStats() {
         {tradingStats.map((stat) => (
           <div key={stat.label} className="space-y-1">
             <div className="text-xs text-muted-foreground">{stat.label}</div>
-            <div className="font-medium">{stat.value}</div>
+            <div className="text-sm font-mono font-semibold">{stat.value}</div>
           </div>
         ))}
       </div>
 
       <div className="space-y-2 mb-4">
-        <div className="flex items-center justify-between px-4">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-primary">
-              {buyPercent.toFixed(0)}% Buy
-            </span>
+        <div className="flex px-4 gap-2 flex-col">
+          <div className="relative">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-primary">
+                {buyPercent.toFixed(0)}% Buy
+              </span>
+            </div>
+            <div
+              className="bg-primary transition-all h-3 w-full rounded-full"
+              style={{ width: `${buyPercent}%` }}
+            />
+            <div className="bg-primary/10 rounded-full h-5 w-full absolute left-1/2 -translate-x-1/2 -bottom-0.5 blur-xs"></div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-red-500">
-              {sellPercent.toFixed(0)}% Sell
-            </span>
+          <div className="relative">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-[#F23674]">
+                {sellPercent.toFixed(0)}% Sell
+              </span>
+            </div>
+            <div
+              className="bg-[#F23674] transition-all h-3 w-full rounded-full "
+              style={{ width: `${sellPercent}%` }}
+            >
+              <div className="bg-[#F23674]/10 rounded-full h-5 w-full absolute left-1/2 -translate-x-1/2 -bottom-0.5 blur-xs"></div>
+            </div>
           </div>
-        </div>
-        <div className="h-3 bg-red-500/20 overflow-hidden flex">
-          <div
-            className="h-full bg-primary transition-all"
-            style={{ width: `${buyPercent}%` }}
-          />
-          <div
-            className="h-full bg-red-500 transition-all"
-            style={{ width: `${sellPercent}%` }}
-          />
         </div>
       </div>
 
-      <div className="grid grid-cols-3 divide-x">
+      <div className="grid grid-cols-3 divide-x divide-dashed">
         {changeStats.map((stat) => (
           <div key={stat.label} className="text-center p-2">
             <div className="text-xs text-muted-foreground mb-1">

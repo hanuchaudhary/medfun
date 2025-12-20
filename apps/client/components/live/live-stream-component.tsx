@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { generateToken, generateUidFromPublicKey } from "@/lib/stream";
+import { updateStreamLiveStatus } from "@/lib/actions";
+import { IconMicrophoneFilled, IconVideoFilled } from "@tabler/icons-react";
 
 export interface LiveStreamHandle {
   leaveChannel: () => Promise<void>;
@@ -241,6 +243,8 @@ const LiveStreamComponent = React.forwardRef<LiveStreamHandle, LiveStreamProps>(
         setLoadingMessage("Publishing stream...");
         await clientRef.current.publish([audioTrack, videoTrack]);
 
+        await updateStreamLiveStatus(channelId, true);
+
         setIsJoined(true);
         setRole("host");
         setTotalUserCount(1);
@@ -313,6 +317,8 @@ const LiveStreamComponent = React.forwardRef<LiveStreamHandle, LiveStreamProps>(
 
     async function leaveChannel() {
       try {
+        const wasHost = role === "host";
+
         if (localAudioTrack) {
           localAudioTrack.close();
           setLocalAudioTrack(null);
@@ -328,6 +334,10 @@ const LiveStreamComponent = React.forwardRef<LiveStreamHandle, LiveStreamProps>(
 
         if (clientRef.current) {
           await clientRef.current.leave();
+        }
+
+        if (wasHost) {
+          await updateStreamLiveStatus(channelId, false);
         }
 
         setRemoteUsers(new Map());
@@ -418,7 +428,7 @@ const LiveStreamComponent = React.forwardRef<LiveStreamHandle, LiveStreamProps>(
       <div className="relative">
         <div
           className={`flex items-center justify-center w-full ${
-            isJoined ? "hidden" : "h-96"
+            isJoined ? "hidden" : "h-118"
           }`}
         >
           <div className="flex gap-4 flex-wrap">
@@ -496,7 +506,7 @@ const LiveStreamComponent = React.forwardRef<LiveStreamHandle, LiveStreamProps>(
                     <div className="absolute inset-0 flex items-end justify-center pointer-events-none">
                       <div
                         className={cn(
-                          "bg-black bg-opacity-50 flex items-center pointer-events-auto transition-opacity border divide-x",
+                          "bg-background flex items-center pointer-events-auto transition-opacity divide-x",
                           showControls ? "opacity-100" : "opacity-0"
                         )}
                       >
@@ -507,7 +517,7 @@ const LiveStreamComponent = React.forwardRef<LiveStreamHandle, LiveStreamProps>(
                           {isAudioMuted ? (
                             <MicOff className="w-4 h-4 text-destructive" />
                           ) : (
-                            <Mic className="w-4 h-4" />
+                            <IconMicrophoneFilled className="size-4 text-primary" />
                           )}
                         </button>
 
@@ -518,7 +528,7 @@ const LiveStreamComponent = React.forwardRef<LiveStreamHandle, LiveStreamProps>(
                           {isVideoOff ? (
                             <VideoOff className="w-4 h-4 text-destructive" />
                           ) : (
-                            <VideoIcon className="w-4 h-4" />
+                            <IconVideoFilled className="size-4 text-primary" />
                           )}
                         </button>
 
@@ -529,12 +539,12 @@ const LiveStreamComponent = React.forwardRef<LiveStreamHandle, LiveStreamProps>(
                           {isScreenSharing ? (
                             <MonitorStop className="w-4 h-4 text-destructive" />
                           ) : (
-                            <MonitorUp className="w-4 h-4" />
+                            <MonitorUp className="w-4 h-4 text-primary" />
                           )}
                         </button>
 
                         <button
-                          className="px-5 py-2 cursor-pointer bg-destructive text-red-50 backdrop-blur-sm "
+                          className="px-5 py-2 cursor-pointer bg-destructive backdrop-blur-sm font-semibold text-red-950"
                           onClick={leaveChannel}
                         >
                           Stop

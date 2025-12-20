@@ -81,12 +81,12 @@ export function RecentlyOpened({
   if (recentTokens.length === 0) return null;
 
   return (
-    <div className="bg-background border-t absolute bottom-0 left-0 w-full">
+    <div className="bg-background border-t border-dashed fixed bottom-0 right-0 w-[calc(100vw-15rem)]">
       <div className="flex items-center gap-2 px-2">
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 flex-shrink-0"
+          className="h-8 w-8 shrink-0"
           onClick={() => scroll("left")}
         >
           <ChevronLeft className="h-4 w-4" />
@@ -96,16 +96,16 @@ export function RecentlyOpened({
           ref={scrollContainerRef}
           className="flex-1 overflow-x-auto hide-scrollbar"
         >
-          <div className="flex divide-x">
+          <div className="flex divide-x divide-dashed">
             {recentTokens.map((token) => (
-              <div key={token.id} className="relative group flex-shrink-0">
+              <div key={token.id} className="relative group shrink-0">
                 <Link
                   href={`/tokens/${token.id}`}
-                  className={`flex items-center gap-2 px-3 py-1.5 flex-shrink-0 hover:bg-accent transition-colors ${
-                    currentTokenId === token.id ? "bg-accent" : ""
+                  className={`flex items-center gap-2 px-3 py-1.5 shrink-0 hover:bg-accent transition-colors ${
+                    currentTokenId === token.id ? "bg-accent text-primary" : ""
                   }`}
                 >
-                  <div className="relative w-6 h-6 flex-shrink-0">
+                  <div className="relative w-6 h-6 shrink-0">
                     <Image
                       unoptimized
                       src={token.image}
@@ -115,7 +115,9 @@ export function RecentlyOpened({
                     />
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium  ">
+                    <span className={`text-xs font-medium ${
+                      currentTokenId === token.id ? "text-primary font-semibold" : ""
+                    }`}>
                       {token.symbol}
                     </span>
                     <span className="text-xs text-muted-foreground">
@@ -139,7 +141,7 @@ export function RecentlyOpened({
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 flex-shrink-0"
+          className="h-8 w-8 shrink-0"
           onClick={() => scroll("right")}
         >
           <ChevronRight className="h-4 w-4" />

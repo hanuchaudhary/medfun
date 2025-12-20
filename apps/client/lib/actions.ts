@@ -9,8 +9,6 @@ export async function updateTokenWithJupiterData(mintAddress: string) {
       `https://lite-api.jup.ag/tokens/v2/search?query=${mintAddress}`
     );
 
-    // console.log(res.data);
-
     let token;
     if (res.data.length) {
       const jupData = res.data[0];
@@ -47,6 +45,44 @@ export async function updateTokenWithJupiterData(mintAddress: string) {
     return { success: true, token };
   } catch (error) {
     console.error("Error updating token with Jupiter data:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+export async function updateStreamLiveStatus(
+  mintAddress: string,
+  isLive: boolean
+) {
+  try {
+    const token = await prisma.token.update({
+      where: { mintAddress },
+      data: { isStreamLive: isLive },
+    });
+    return { success: true, token };
+  } catch (error) {
+    console.error("Error updating stream live status:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+export async function updateGraduatedPoolAddress(
+  mintAddress: string,
+  graduatedPoolAddress: string
+) {
+  try {
+    const token = await prisma.token.update({
+      where: { mintAddress },
+      data: { graduatedPoolAddress },
+    });
+    return { success: true, token };
+  } catch (error) {
+    console.error("Error updating graduated pool address:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",

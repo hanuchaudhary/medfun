@@ -7,13 +7,16 @@ import { Connection, PublicKey } from "@solana/web3.js";
 import React from "react";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
+import { updateGraduatedPoolAddress } from "@/lib/actions";
 
 export default function PoolState({
   TOKEN_MINT_ADDRESS,
   TOKEN_POOL_ADDRESS,
+  currentGraduatedPool,
 }: {
   TOKEN_MINT_ADDRESS: PublicKey;
   TOKEN_POOL_ADDRESS: PublicKey;
+  currentGraduatedPool?: string | null;
 }) {
   const connection = new Connection(
     process.env.NEXT_PUBLIC_RPC_URL!,
@@ -42,9 +45,34 @@ export default function PoolState({
         TOKEN_MINT_ADDRESS,
         new PublicKey("So11111111111111111111111111111111111111112") // token program
       );
-      console.log("Damm V2 Pool Address:", dammV2PoolAddress.toString());
-      toast.success("Pool state fetched! Check console for details.");
-      toast.success(`Damm V2 Pool Address: ${dammV2PoolAddress.toString()}`);
+
+      const derivedPoolAddressStr = dammV2PoolAddress.toString();
+      console.log("Damm V2 Pool Address:", derivedPoolAddressStr);
+
+      // Check if derived pool differs from current graduated pool in DB
+      if (derivedPoolAddressStr !== currentGraduatedPool) {
+        console.log("Graduated pool mismatch! Updating DB...");
+        console.log("Current in DB:", currentGraduatedPool);
+        console.log("Derived:", derivedPoolAddressStr);
+
+        // Update the graduated pool address in DB
+        const result = await updateGraduatedPoolAddress(
+          TOKEN_MINT_ADDRESS.toString(),
+          derivedPoolAddressStr
+        );
+
+        if (result.success) {
+          toast.success("Graduated pool address updated in database!");
+        } else {
+          toast.error("Failed to update graduated pool address");
+          console.error("Update error:", result.error);
+        }
+      } else {
+        toast.success("Pool state is up to date!");
+      }
+
+      toast.success(`Damm V2 Pool Address: ${derivedPoolAddressStr}`);
+
       const dammV2PoolState = await client.state.getPool(dammV2PoolAddress);
       if (!dammV2PoolState) {
         console.error("Damm V2 Pool doesn't exist yet!");

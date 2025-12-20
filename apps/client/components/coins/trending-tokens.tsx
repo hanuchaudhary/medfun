@@ -1,11 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { TokenCard } from "./token-card";
 import { Button } from "@/components/ui/button";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
-import { useTrendingTokensPolling } from "@/hooks/use-token-polling";
+import { useTokenStore } from "@/store/tokenStore";
 
 interface TrendingTokensProps {
   limit?: number;
@@ -17,8 +17,18 @@ export function TrendingTokens({
   showViewAllButton = true,
 }: TrendingTokensProps) {
   const router = useRouter();
-  const { tokens: trendingTokens, isLoading: isLoadingTrendingTokens } =
-    useTrendingTokensPolling(limit);
+  const { trendingTokens, isLoadingTrendingTokens, fetchTrendingTokens } =
+    useTokenStore();
+
+  useEffect(() => {
+    fetchTrendingTokens(limit);
+
+    const interval = setInterval(() => {
+      fetchTrendingTokens(limit, true);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [limit, fetchTrendingTokens]);
 
   return (
     <div className="flex flex-col">

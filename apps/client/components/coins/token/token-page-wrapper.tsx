@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect, createContext, useContext } from "react";
+import React, { useEffect, createContext, useContext, useRef } from "react";
 import { addRecentToken } from "./recently-opened";
-import { useTokenPolling } from "@/hooks/use-token-polling";
+import { useTokenStore } from "@/store/tokenStore";
 import { Token } from "@/types/token";
 
 interface TokenPageWrapperProps {
@@ -25,7 +25,67 @@ export function TokenPageWrapper({
   tokenMint,
   children,
 }: TokenPageWrapperProps) {
-  const { token: currentToken } = useTokenPolling(tokenMint);
+  const {
+    currentToken,
+    fetchTokenDetails,
+    fetchHolders,
+    fetchKlines,
+    subscribeToToken,
+    unsubscribeFromToken,
+    currentTimeframe,
+    lastViewedMint,
+    clearTokenState,
+  } = useTokenStore();
+
+  const holdersIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const tokenDetailsIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const klinesIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (lastViewedMint && lastViewedMint !== tokenMint) {
+      clearTokenState();
+    }
+
+    fetchTokenDetails(tokenMint);
+    fetchHolders(tokenMint);
+    fetchKlines(tokenMint, currentTimeframe);
+    subscribeToToken(tokenMint);
+
+    holdersIntervalRef.current = setInterval(() => {
+      fetchHolders(tokenMint, true);
+    }, 10000);
+
+    tokenDetailsIntervalRef.current = setInterval(() => {
+      fetchTokenDetails(tokenMint, true);
+    }, 10000);
+
+    return () => {
+      unsubscribeFromToken(tokenMint);
+      if (holdersIntervalRef.current) clearInterval(holdersIntervalRef.current);
+      if (tokenDetailsIntervalRef.current)
+        clearInterval(tokenDetailsIntervalRef.current);
+    };
+  }, [
+    tokenMint,
+    fetchTokenDetails,
+    fetchHolders,
+    fetchKlines,
+    subscribeToToken,
+    unsubscribeFromToken,
+    currentTimeframe,
+  ]);
+
+  useEffect(() => {
+    if (klinesIntervalRef.current) clearInterval(klinesIntervalRef.current);
+
+    klinesIntervalRef.current = setInterval(() => {
+      fetchKlines(tokenMint, currentTimeframe, true);
+    }, 8000);
+
+    return () => {
+      if (klinesIntervalRef.current) clearInterval(klinesIntervalRef.current);
+    };
+  }, [tokenMint, fetchKlines, currentTimeframe]);
 
   useEffect(() => {
     if (currentToken) {
@@ -33,9 +93,7 @@ export function TokenPageWrapper({
         id: tokenMint,
         name: currentToken.name || "Unknown Token",
         symbol: currentToken.symbol || "???",
-        image:
-          currentToken.imageUrl ||
-          "https://i.pinimg.com/1200x/b7/8f/02/b78f023aa1bca7bdada28db1c30d1fe5.jpg",
+        image: currentToken.imageUrl || "/medfun-logo-circle.png",
         price: formatPrice(currentToken.marketCap),
       });
     }

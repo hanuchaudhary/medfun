@@ -6,6 +6,7 @@ export interface Token {
   mintAddress: string;
   graduatedPoolAddress: string | null;
   poolAddress: string;
+  isStreamLive: boolean;
   website: string | null;
   twitter: string | null;
   telegram: string | null;

@@ -1,0 +1,25 @@
+{
+  "name": "@repo/worker",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "bun run index.ts",
+    "dev": "bun run --watch index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@repo/config": "workspace:*",
+    "@repo/db": "workspace:*",
+    "@types/pg": "^8.16.0",
+    "bullmq": "^5.66.0",
+    "ioredis": "^5.8.2",
+    "pg": "^8.16.3",
+    "redis": "^5.10.0"
+  }
+}

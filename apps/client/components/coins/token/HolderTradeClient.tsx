@@ -4,90 +4,45 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
-import { supabaseClient } from "@/lib/supabaseClient";
 import { formatAddress, formatNumber, getTimeSince } from "@/lib/utils";
 import React from "react";
-import { Holder, Trade } from "@/types/token";
-import { subscribeToTableChanges } from "@/lib/realtime";
+import { RealtimeChat } from "@/components/realtime-chat";
+import { useWallet } from "@/hooks/use-wallet";
+import { useTokenStore } from "@/store/tokenStore";
+import { ChatMessage } from "@/hooks/use-realtime-chat";
 
 interface HolderTradeClientProps {
   mintAddress: string;
-  holders: Holder[];
-  trades: Trade[];
 }
 
 export default function HolderTradeClient({
   mintAddress,
-  holders,
-  trades,
 }: HolderTradeClientProps) {
   const TOTAL_SUPPLY = 1000000000;
-  const isLoadingHolders = false;
-  const isLoadingTrades = false;
+  const wallet = useWallet();
+  const username = formatAddress(wallet.publicKey?.toString() || "Anonymous");
 
-  const [tradesState, setTradesState] = React.useState<Trade[]>(trades);
-  const [holdersState, setHoldersState] = React.useState<Holder[]>(holders);
+  const { 
+    holders, 
+    isLoadingHolders, 
+    fetchHolders, 
+    trades, 
+    isLoadingTrades, 
+    fetchTrades
+  } = useTokenStore();
 
-  React.useEffect(() => {
-    const channel = subscribeToTableChanges({
-      table: "holder",
-      mintAddress,
-      callback: (payload: any) => {
-        console.log("HOLDER CHANGE:", payload);
-        if (payload.eventType === "UPDATE") {
-          setHoldersState((prevHolderState) => {
-            const index = prevHolderState.findIndex(
-              (holder) => holder.id === payload.new.id
-            );
-            if (index !== -1) {
-              const updatedHolders = [...prevHolderState];
-              updatedHolders[index] = payload.new;
-              return updatedHolders;
-            }
-            return prevHolderState;
-          });
-        } else if (payload.eventType === "INSERT") {
-          setHoldersState((prevHolderState) => [
-            ...prevHolderState,
-            payload.new,
-          ]);
-        }
-      },
-    });
-
-    return () => {
-      supabaseClient.removeChannel(channel);
-    };
-  }, [mintAddress]);
+  const handleOnMessage = (messages: ChatMessage[]) => {
+    console.log("mes: ", messages);
+    if (messages.length > 0) {
+      console.log("last: ", messages[messages.length - 1]);
+    }
+  };
 
   React.useEffect(() => {
-    const channel = subscribeToTableChanges({
-      table: "trade",
-      mintAddress,
-      callback: (payload: any) => {
-        console.log("TRADE CHANGE:", payload);
-        if (payload.eventType === "UPDATE") {
-          setTradesState((prevTradeState) => {
-            const index = prevTradeState.findIndex(
-              (trade) => trade.id === payload.new.id
-            );
-            if (index !== -1) {
-              const updatedTrades = [...prevTradeState];
-              updatedTrades[index] = payload.new;
-              return updatedTrades;
-            }
-            return prevTradeState;
-          });
-        } else if (payload.eventType === "INSERT") {
-          setTradesState((prevTradeState) => [payload.new, ...prevTradeState]);
-        }
-      },
-    });
-
-    return () => {
-      supabaseClient.removeChannel(channel);
-    };
-  }, [mintAddress]);
+    // Initial fetch - real-time updates come via WebSocket subscription in TokenPageWrapper
+    fetchHolders(mintAddress);
+    fetchTrades(mintAddress, 50);
+  }, [mintAddress, fetchHolders, fetchTrades]);
 
   return (
     <div className="w-full">
@@ -95,16 +50,25 @@ export default function HolderTradeClient({
         <div className="flex items-center justify-between">
           <TabsList className="">
             <TabsTrigger value="trades">
-              Recent Trades({tradesState?.length})
+              Recent Trades({trades?.length || 0})
             </TabsTrigger>
             <TabsTrigger value="holders">
-              Top Holders({holdersState?.length})
+              Top Holders({holders?.length || 0})
             </TabsTrigger>
+            <TabsTrigger value="chat">Chat</TabsTrigger>
           </TabsList>
         </div>
 
+        <TabsContent value="chat" className="mt-0 h-full">
+          <RealtimeChat
+            roomName={`token-${mintAddress}`}
+            username={username}
+            onMessage={handleOnMessage}
+          />
+        </TabsContent>
+
         <TabsContent value="holders" className="mt-0">
-          <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+          <div className="overflow-x-auto max-h-125 overflow-y-auto">
             {isLoadingHolders ? (
               <div className="space-y-2 p-3">
                 {[...Array(8)].map((_, i) => (
@@ -113,17 +77,25 @@ export default function HolderTradeClient({
               </div>
             ) : (
               <table className="w-full text-sm">
-                <thead className="border-b">
+                <thead className="border-b border-dashed">
                   <tr className="text-muted-foreground">
-                    <th className="text-left p-3 font-medium">#</th>
-                    <th className="text-left p-3 font-medium">Address</th>
-                    <th className="text-right p-3 font-medium">% Owned</th>
-                    <th className="text-right p-3 font-medium">SOL Bal</th>
-                    <th className="text-right p-3 font-medium">Amount</th>
+                    <th className="text-left p-2 font-medium text-[13px]">#</th>
+                    <th className="text-left p-2 font-medium text-[13px]">
+                      Address
+                    </th>
+                    <th className="text-right p-2 font-medium text-[13px]">
+                      % Owned
+                    </th>
+                    <th className="text-right p-2 font-medium text-[13px]">
+                      SOL Bal
+                    </th>
+                    <th className="text-right p-2 font-medium text-[13px]">
+                      Amount
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {holdersState.length === 0 ? (
+                  {holders?.length === 0 ? (
                     <tr>
                       <td
                         colSpan={5}
@@ -133,7 +105,7 @@ export default function HolderTradeClient({
                       </td>
                     </tr>
                   ) : (
-                    holdersState.slice(0, 20).map((holder, index) => {
+                    holders?.slice(0, 20).map((holder, index) => {
                       const percentage = (
                         (holder.amount / TOTAL_SUPPLY) *
                         100
@@ -143,10 +115,10 @@ export default function HolderTradeClient({
                           key={holder.id}
                           className="border-b hover:bg-accent/50 transition-colors"
                         >
-                          <td className="p-3 text-muted-foreground">
+                          <td className="p-2 text-muted-foreground">
                             #{index + 1}
                           </td>
-                          <td className="p-3">
+                          <td className="p-2">
                             <div className="flex items-center gap-2">
                               <Link
                                 href={`https://solscan.io/account/${holder.holderAddress}?cluster=devnet`}
@@ -158,11 +130,11 @@ export default function HolderTradeClient({
                               </Link>
                             </div>
                           </td>
-                          <td className="p-3 text-right font-medium text-xs">
+                          <td className="p-2 text-right font-medium text-xs font-mono">
                             {percentage}%
                           </td>
-                          <td className="p-3 text-right font-medium">-</td>
-                          <td className="p-3 text-right font-medium">
+                          <td className="p-2 text-right font-medium">-</td>
+                          <td className="p-2 text-right font-medium font-mono text-xs">
                             {formatNumber(holder.amount)}
                           </td>
                         </tr>
@@ -185,18 +157,28 @@ export default function HolderTradeClient({
               </div>
             ) : (
               <table className="w-full text-sm">
-                <thead className="border-b">
+                <thead className="border-b border-dashed">
                   <tr className="text-muted-foreground">
-                    <th className="text-left p-3 font-medium">Date/Age</th>
-                    <th className="text-left p-3 font-medium">Type</th>
-                    <th className="text-right p-3 font-medium">Price (SOL)</th>
-                    <th className="text-right p-3 font-medium">Token Amount</th>
-                    <th className="text-right p-3 font-medium">SOL Amount</th>
-                    <th className="text-right p-3 font-medium">Trader</th>
+                    <th className="text-left p-2 font-medium text-xs">
+                      Date/Age
+                    </th>
+                    <th className="text-left p-2 font-medium text-xs">Type</th>
+                    <th className="text-right p-2 font-medium text-xs">
+                      Price (SOL)
+                    </th>
+                    <th className="text-right p-2 font-medium text-xs">
+                      Token Amount
+                    </th>
+                    <th className="text-right p-2 font-medium text-xs">
+                      SOL Amount
+                    </th>
+                    <th className="text-right p-2 font-medium text-xs">
+                      Trader
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="h-30">
-                  {tradesState.length === 0 ? (
+                  {trades?.length === 0 ? (
                     <tr>
                       <td
                         colSpan={6}
@@ -206,19 +188,19 @@ export default function HolderTradeClient({
                       </td>
                     </tr>
                   ) : (
-                    tradesState.map((trade) => {
+                    trades?.map((trade) => {
                       const isBuy = trade.type === "BUY";
                       return (
                         <tr
                           key={trade.id}
                           className="border-b hover:bg-accent/50 transition-colors"
                         >
-                          <td className="p-3">
+                          <td className="p-2">
                             <span className="lowercase text-xs">
                               {getTimeSince(trade.timestamp)}
                             </span>
                           </td>
-                          <td className="p-3">
+                          <td className="p-2">
                             <span
                               className={`text-xs py-1 px-2 rounded capitalize ${
                                 isBuy
@@ -229,16 +211,16 @@ export default function HolderTradeClient({
                               {trade.type}
                             </span>
                           </td>
-                          <td className="p-3 text-right font-medium">
-                            {trade.price.toFixed(10)}
+                          <td className="p-2 text-right font-medium text-xs font-mono">
+                            {Number(trade.price).toFixed(10)}
                           </td>
-                          <td className="p-3 text-right font-medium">
+                          <td className="p-2 text-right font-medium text-xs font-mono">
                             {formatNumber(trade.tokenAmount)}
                           </td>
-                          <td className="p-3 text-right font-medium">
+                          <td className="p-2 text-right font-medium text-xs font-mono">
                             {trade.solAmount.toFixed(6)}
                           </td>
-                          <td className="p-3 text-right normal-case">
+                          <td className="p-2 text-right normal-case">
                             <Link
                               href={`https://solscan.io/tx/${trade.signature}?cluster=devnet`}
                               target="_blank"
