@@ -489,7 +489,7 @@ export function GraduatedSwapSection({
                 ? "Connect Wallet"
                 : isLoading
                   ? "Processing..."
-                  : `Buy ${TOKEN_SYMBOL}`}
+                  : `Buy ${TOKEN_SYMBOL}`} 🔥
             </Button>
           </TabsContent>
 

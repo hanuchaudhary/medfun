@@ -12,7 +12,9 @@ interface TokenCardProps {
 }
 
 export function TokenCard({ token, href }: TokenCardProps) {
-  const progress = token.graduatedPoolAddress ? 100 : token.bondingCurveProgress ?? 0;
+  const progress = token.graduatedPoolAddress
+    ? 100
+    : (token.bondingCurveProgress ?? 0);
 
   return (
     <Link href={href}>
@@ -30,7 +32,7 @@ export function TokenCard({ token, href }: TokenCardProps) {
           />
           {token.isStreamLive && (
             <div className="absolute top-2 left-2 z-10">
-              <IconVideoFilled className="text-primary animate-pulse" />
+              <IconVideoFilled className={`text-primary animate-pulse`} />
             </div>
           )}
         </div>
@@ -43,7 +45,11 @@ export function TokenCard({ token, href }: TokenCardProps) {
               </h3>
               <Badge
                 variant="secondary"
-                className="text-xs text-primary rounded-md shrink-0"
+                className={`text-xs  rounded-md shrink-0 ${
+                  progress == 100
+                    ? "text-yellow-400 border-yellow-400/50"
+                    : "text-primary"
+                }`}
               >
                 {token.symbol}
               </Badge>
@@ -72,7 +78,9 @@ export function TokenCard({ token, href }: TokenCardProps) {
           <div className="space-y-1">
             <div className="flex justify-between text-xs">
               <span className="text-muted-foreground">Bonding Progress</span>
-              <span className="font-semibold">{progress.toFixed(1)}%</span>
+              <span className={`font-semibold ${
+                progress == 100 ? "text-yellow-400" : "text-primary"
+              }`}>{progress.toFixed(1)}%</span>
             </div>
             <Progress
               isGraduated={progress >= 100}

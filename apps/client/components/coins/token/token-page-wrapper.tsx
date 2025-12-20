@@ -33,6 +33,8 @@ export function TokenPageWrapper({
     subscribeToToken,
     unsubscribeFromToken,
     currentTimeframe,
+    lastViewedMint,
+    clearTokenState,
   } = useTokenStore();
 
   const holdersIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -40,6 +42,10 @@ export function TokenPageWrapper({
   const klinesIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    if (lastViewedMint && lastViewedMint !== tokenMint) {
+      clearTokenState();
+    }
+
     fetchTokenDetails(tokenMint);
     fetchHolders(tokenMint);
     fetchKlines(tokenMint, currentTimeframe);
@@ -47,7 +53,7 @@ export function TokenPageWrapper({
 
     holdersIntervalRef.current = setInterval(() => {
       fetchHolders(tokenMint, true);
-    }, 5000);
+    }, 10000);
 
     tokenDetailsIntervalRef.current = setInterval(() => {
       fetchTokenDetails(tokenMint, true);
@@ -74,7 +80,7 @@ export function TokenPageWrapper({
 
     klinesIntervalRef.current = setInterval(() => {
       fetchKlines(tokenMint, currentTimeframe, true);
-    }, 5000);
+    }, 8000);
 
     return () => {
       if (klinesIntervalRef.current) clearInterval(klinesIntervalRef.current);

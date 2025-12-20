@@ -36,6 +36,8 @@ interface TokenStore {
 
   currentToken: Token | null;
   isLoadingCurrentToken: boolean;
+  lastViewedMint: string | null;
+  clearTokenState: () => void;
   fetchTokenDetails: (
     mintAddress: string,
     isBackgroundRefresh?: boolean
@@ -143,6 +145,14 @@ export const useTokenStore = create<TokenStore>((set, get) => ({
 
   currentToken: null,
   isLoadingCurrentToken: false,
+  lastViewedMint: null,
+  clearTokenState: () =>
+    set({
+      currentToken: null,
+      holders: [],
+      trades: [],
+      klines: [],
+    }),
   fetchTokenDetails: async (
     mintAddress: string,
     isBackgroundRefresh = false
@@ -154,7 +164,11 @@ export const useTokenStore = create<TokenStore>((set, get) => ({
       const res = await axios.get(`/api/coins/${mintAddress}`);
 
       if (res.data.success && res.data.token) {
-        set({ currentToken: res.data.token, isLoadingCurrentToken: false });
+        set({
+          currentToken: res.data.token,
+          isLoadingCurrentToken: false,
+          lastViewedMint: mintAddress,
+        });
       } else {
         set({ isLoadingCurrentToken: false });
         console.error("Error fetching token details:", res.data.error);
@@ -214,16 +228,8 @@ export const useTokenStore = create<TokenStore>((set, get) => ({
 
   klines: [],
   isLoadingKlines: false,
-  currentTimeframe:
-    typeof window !== "undefined"
-      ? localStorage.getItem("chart-timeframe") || "1m"
-      : "1m",
-  setTimeframe: (timeframe: string) => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("chart-timeframe", timeframe);
-    }
-    set({ currentTimeframe: timeframe });
-  },
+  currentTimeframe: "1m",
+  setTimeframe: (timeframe: string) => set({ currentTimeframe: timeframe }),
   fetchKlines: async (
     mintAddress: string,
     interval = "1m",

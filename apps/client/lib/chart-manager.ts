@@ -159,6 +159,34 @@ export class ChartManager {
     chart.timeScale().fitContent();
   }
 
+  public setData(data: KlineData[]) {
+    if (this.isDisposed || !this.chart) {
+      console.warn("Attempted to update a disposed chart");
+      return;
+    }
+
+    const candleData = data.map((d) => ({
+      time: Math.floor(d.timestamp / 1000) as UTCTimestamp,
+      open: d.open,
+      high: d.high,
+      low: d.low,
+      close: d.close,
+    }));
+
+    const volumeData = data.map((d) => ({
+      time: Math.floor(d.timestamp / 1000) as UTCTimestamp,
+      value: d.volume,
+      color:
+        d.close >= d.open
+          ? "rgba(38, 166, 154, 0.5)"
+          : "rgba(239, 83, 80, 0.5)",
+    }));
+
+    // setData preserves the current visible range
+    this.candleSeries.setData(candleData);
+    this.volumeSeries.setData(volumeData);
+  }
+
   public update(updatedData: KlineData & { newCandleInitiated?: boolean }) {
     if (this.isDisposed || !this.chart) {
       console.warn("Attempted to update a disposed chart");

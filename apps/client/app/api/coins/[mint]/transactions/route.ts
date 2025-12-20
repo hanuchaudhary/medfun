@@ -10,7 +10,7 @@ export async function GET(
 ) {
   try {
     const { mint } = await params;
-    const { searchParams } = new URL(req.url);
+    const { searchParams } = new URL(req.nextUrl);
     const limit = parseInt(searchParams.get("limit") || "50");
     const offset = parseInt(searchParams.get("offset") || "0");
 

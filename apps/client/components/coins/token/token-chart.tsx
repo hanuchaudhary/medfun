@@ -21,14 +21,24 @@ interface TokenChartProps {
 export function TokenChart({ mintAddress, klines }: TokenChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartManagerRef = useRef<ChartManager | null>(null);
+  const previousTimeframeRef = useRef<string | null>(null);
   const { currentTimeframe, setTimeframe } = useTokenStore();
 
   useEffect(() => {
-    if (!chartContainerRef.current || !klines || klines.length === 0) return;
-
-    if (chartManagerRef.current) {
-      chartManagerRef.current.destroy();
+    const saved = localStorage.getItem("chart-timeframe");
+    if (saved && saved !== currentTimeframe) {
+      setTimeframe(saved);
     }
+  }, []);
+
+  const handleTimeframeChange = (tf: string) => {
+    localStorage.setItem("chart-timeframe", tf);
+    setTimeframe(tf);
+  };
+
+  // Handle chart creation and updates
+  useEffect(() => {
+    if (!chartContainerRef.current || !klines || klines.length === 0) return;
 
     const chartData = klines.map((k) => ({
       timestamp: new Date(k.timestamp).getTime(),
@@ -39,29 +49,47 @@ export function TokenChart({ mintAddress, klines }: TokenChartProps) {
       volume: Number(k.volume),
     }));
 
-    chartManagerRef.current = new ChartManager(
-      chartContainerRef.current,
-      chartData,
-      { background: "transparent", color: "#e5e7eb" }
-    );
+    const timeframeChanged =
+      previousTimeframeRef.current !== null &&
+      previousTimeframeRef.current !== currentTimeframe;
 
+    if (!chartManagerRef.current || timeframeChanged) {
+      if (chartManagerRef.current) {
+        chartManagerRef.current.destroy();
+      }
+
+      chartManagerRef.current = new ChartManager(
+        chartContainerRef.current,
+        chartData,
+        { background: "transparent", color: "#e5e7eb" }
+      );
+    } else {
+      chartManagerRef.current.setData(chartData);
+    }
+
+    previousTimeframeRef.current = currentTimeframe;
+  }, [klines, currentTimeframe]);
+
+  // Cleanup on unmount
+  useEffect(() => {
     return () => {
       if (chartManagerRef.current) {
         chartManagerRef.current.destroy();
         chartManagerRef.current = null;
       }
     };
-  }, [klines]);
+  }, []);
 
   return (
     <div className="relative w-full">
-      <div className="flex items-center gap-1 py-2 ml-24">
+      <div className="flex items-center gap-1 py-2 ml-24 relative z-10">
         {TIMEFRAMES.map((tf) => (
           <button
             key={tf.value}
-            onClick={() => setTimeframe(tf.value)}
+            type="button"
+            onClick={() => handleTimeframeChange(tf.value)}
             className={cn(
-              "px-3 py-1.5 text-xs font-medium rounded-md transition-colors",
+              "px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer",
               currentTimeframe === tf.value
                 ? "bg-primary text-background"
                 : "bg-muted text-muted-foreground hover:bg-muted/80"
