@@ -14,6 +14,7 @@ const app = new Elysia()
   }))
   .post("/webhook", async ({ body, set }) => {
     try {
+      console.log("webhook hit!");
       const payload = body as WebhookTransaction[];
 
       if (!payload?.length) {
