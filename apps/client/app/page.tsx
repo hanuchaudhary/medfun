@@ -1,5 +1,17 @@
 import { TokenGrid } from "@/components/coins/token-grid";
 import { Suspense } from "react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Explore Tokens",
+  description:
+    "Discover and trade the hottest tokens on Solana. Browse trending meme coins, new launches, and top performers on med.fun.",
+  openGraph: {
+    title: "Explore Tokens | med.fun",
+    description:
+      "Discover and trade the hottest tokens on Solana. Browse trending meme coins, new launches, and top performers.",
+  },
+};
 
 export default function TokensPage() {
   return (

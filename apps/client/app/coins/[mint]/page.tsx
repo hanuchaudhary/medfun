@@ -12,6 +12,23 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ mint: string }>;
+}): Promise<Metadata> {
+  const { mint } = await params;
+  return {
+    title: `Token ${mint.slice(0, 8)}...`,
+    description: `Trade and view details for token ${mint} on med.fun - the ultimate Solana token launchpad.`,
+    openGraph: {
+      title: `Token Details | med.fun`,
+      description: `Trade and view details for this token on med.fun - the ultimate Solana token launchpad.`,
+    },
+  };
+}
 
 export default async function TokenDetailPage({
   params,
