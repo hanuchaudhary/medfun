@@ -26,6 +26,34 @@ import {
 } from "@/components/ui/table";
 import { useTokenStore } from "@/store/tokenStore";
 import { formatNumber, getTimeSince } from "@/lib/utils";
+import { MiniChart, generateChartData } from "./mini-chart";
+
+function formatPriceChange(stats: Token["stats24h"]): {
+  value: string;
+  isPositive: boolean;
+} {
+  if (!stats) return { value: "-", isPositive: true };
+  if (stats.priceChange !== null && stats.priceChange !== undefined) {
+    const change = stats.priceChange;
+    return {
+      value: `${change >= 0 ? "+" : ""}${change.toFixed(1)}%`,
+      isPositive: change >= 0,
+    };
+  }
+
+  const buyVol = stats.buyVolume ?? 0;
+  const sellVol = stats.sellVolume ?? 0;
+  const total = buyVol + sellVol;
+
+  if (total === 0) return { value: "-", isPositive: true };
+
+  const netPercentage = ((buyVol - sellVol) / total) * 100;
+
+  return {
+    value: `${netPercentage >= 0 ? "+" : ""}${netPercentage.toFixed(1)}%`,
+    isPositive: netPercentage >= 0,
+  };
+}
 
 export function TokenGrid() {
   const [search, setSearch] = React.useState("");
@@ -41,7 +69,7 @@ export function TokenGrid() {
 
     const interval = setInterval(() => {
       fetchTokens(true);
-    }, 7000);
+    }, 8000);
 
     return () => clearInterval(interval);
   }, [fetchTokens]);
@@ -233,69 +261,111 @@ export function TokenGrid() {
                 </>
               )}
               {!isLoadingTokens &&
-                filteredAndSorted.map((token, index) => (
-                  <TableRow key={token.id} className="py-0">
-                    <TableCell className="text-muted-foreground">
-                      #{index + 1}
-                    </TableCell>
-                    <TableCell>
-                      <Link
-                        href={`/coins/${token.mintAddress}`}
-                        className="flex items-center gap-3 hover:opacity-80"
+                filteredAndSorted.map((token, index) => {
+                  const chartData = generateChartData(token);
+                  const isChartPositive =
+                    chartData.length >= 2
+                      ? (chartData[chartData.length - 1] ?? 0) >=
+                        (chartData[0] ?? 0)
+                      : true;
+
+                  const stats5m = formatPriceChange(token.stats5m);
+                  const stats1h = formatPriceChange(token.stats1h);
+                  const stats6h = formatPriceChange(token.stats6h);
+                  const stats24h = formatPriceChange(token.stats24h);
+
+                  const volume24h = token.stats24h
+                    ? (token.stats24h.buyVolume ?? 0) +
+                      (token.stats24h.sellVolume ?? 0)
+                    : (token.volume ?? 0);
+
+                  const traders24h = token.stats24h?.numTraders ?? "-";
+
+                  return (
+                    <TableRow key={token.id} className="py-0">
+                      <TableCell className="text-muted-foreground">
+                        #{index + 1}
+                      </TableCell>
+                      <TableCell>
+                        <Link
+                          href={`/coins/${token.mintAddress}`}
+                          className="flex items-center gap-3 hover:opacity-80"
+                        >
+                          <div className="relative w-8 h-8 rounded-full overflow-hidden shrink-0">
+                            <Image
+                              unoptimized
+                              src={
+                                token.imageUrl ||
+                                "https://i.pinimg.com/1200x/b7/8f/02/b78f023aa1bca7bdada28db1c30d1fe5.jpg"
+                              }
+                              alt={token.name || "Token"}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="font-semibold text-xs truncate uppercase">
+                              {token.name || "-"}
+                            </div>
+                            <div className="text-[10px] text-muted-foreground uppercase">
+                              {token.symbol || "-"}
+                            </div>
+                          </div>
+                        </Link>
+                      </TableCell>
+                      <TableCell>
+                        <MiniChart
+                          data={chartData}
+                          width={96}
+                          height={40}
+                          isPositive={isChartPositive}
+                        />
+                      </TableCell>
+                      <TableCell className="text-right font-semibold">
+                        {formatNumber(token.marketCap)}
+                      </TableCell>
+                      <TableCell className="text-right text-muted-foreground">
+                        {volume24h > 0 ? formatNumber(volume24h) : "-"}
+                      </TableCell>
+                      <TableCell className="text-right text-muted-foreground">
+                        {token.createdAt ? getTimeSince(token.createdAt) : "-"}
+                      </TableCell>
+                      <TableCell className="text-right text-muted-foreground">
+                        {traders24h}
+                      </TableCell>
+                      <TableCell
+                        className={`text-right font-medium ${
+                          stats5m.isPositive ? "text-green-500" : "text-red-500"
+                        }`}
                       >
-                        <div className="relative w-8 h-8 rounded-full overflow-hidden shrink-0">
-                          <Image
-                            unoptimized
-                            src={
-                              token.imageUrl ||
-                              "https://i.pinimg.com/1200x/b7/8f/02/b78f023aa1bca7bdada28db1c30d1fe5.jpg"
-                            }
-                            alt={token.name || "Token"}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="font-semibold text-xs truncate uppercase">
-                            {token.name || "-"}
-                          </div>
-                          <div className="text-[10px] text-muted-foreground uppercase">
-                            {token.symbol || "-"}
-                          </div>
-                        </div>
-                      </Link>
-                    </TableCell>
-                    <TableCell>
-                      <div className="w-24 h-10 bg-muted/30 rounded flex items-center justify-center text-xs text-muted-foreground">
-                        Chart
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right font-semibold">
-                      {formatNumber(token.marketCap)}
-                    </TableCell>
-                    <TableCell className="text-right text-muted-foreground">
-                      -
-                    </TableCell>
-                    <TableCell className="text-right text-muted-foreground">
-                      {token.createdAt ? getTimeSince(token.createdAt) : "-"}
-                    </TableCell>
-                    <TableCell className="text-right text-muted-foreground">
-                      -
-                    </TableCell>
-                    <TableCell className="text-right text-muted-foreground">
-                      -
-                    </TableCell>
-                    <TableCell className="text-right text-muted-foreground">
-                      -
-                    </TableCell>
-                    <TableCell className="text-right text-muted-foreground">
-                      -
-                    </TableCell>
-                    <TableCell className="text-right text-muted-foreground">
-                      -
-                    </TableCell>
-                  </TableRow>
-                ))}
+                        {stats5m.value}
+                      </TableCell>
+                      <TableCell
+                        className={`text-right font-medium ${
+                          stats1h.isPositive ? "text-green-500" : "text-red-500"
+                        }`}
+                      >
+                        {stats1h.value}
+                      </TableCell>
+                      <TableCell
+                        className={`text-right font-medium ${
+                          stats6h.isPositive ? "text-green-500" : "text-red-500"
+                        }`}
+                      >
+                        {stats6h.value}
+                      </TableCell>
+                      <TableCell
+                        className={`text-right font-medium ${
+                          stats24h.isPositive
+                            ? "text-green-500"
+                            : "text-red-500"
+                        }`}
+                      >
+                        {stats24h.value}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               {!isLoadingTokens && filteredAndSorted.length === 0 && (
                 <TableRow>
                   <TableCell

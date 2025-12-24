@@ -1,8 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { redisCache } from "@/lib/redis";
 import { NextRequest, NextResponse } from "next/server";
-
-const CACHE_TTL = 120;
 
 export async function GET(
   req: NextRequest,
@@ -19,13 +16,6 @@ export async function GET(
         { success: false, error: "Token mint address is required" },
         { status: 400 }
       );
-    }
-
-    const cacheKey = `transactions:${mint}:${limit}:${offset}`;
-    const cached = await redisCache.get(cacheKey);
-
-    if (cached) {
-      return NextResponse.json({ success: true, transactions: cached });
     }
 
     const token = await prisma.token.findUnique({
@@ -52,8 +42,6 @@ export async function GET(
       tokenAmount: Number(trade.tokenAmount),
       solAmount: Number(trade.solAmount),
     }));
-
-    await redisCache.set(cacheKey, formattedTransactions, CACHE_TTL);
 
     return NextResponse.json({
       success: true,

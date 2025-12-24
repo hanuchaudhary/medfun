@@ -53,11 +53,11 @@ export function TokenPageWrapper({
 
     holdersIntervalRef.current = setInterval(() => {
       fetchHolders(tokenMint, true);
-    }, 10000);
+    }, 15000);
 
     tokenDetailsIntervalRef.current = setInterval(() => {
       fetchTokenDetails(tokenMint, true);
-    }, 10000);
+    }, 20000);
 
     return () => {
       unsubscribeFromToken(tokenMint);
@@ -80,7 +80,7 @@ export function TokenPageWrapper({
 
     klinesIntervalRef.current = setInterval(() => {
       fetchKlines(tokenMint, currentTimeframe, true);
-    }, 8000);
+    }, 10000);
 
     return () => {
       if (klinesIntervalRef.current) clearInterval(klinesIntervalRef.current);
