@@ -2,7 +2,6 @@ import { Address } from "@solana/kit";
 import { createHelius } from "helius-sdk";
 
 const apiKey = process.env.NEXT_PUBLIC_HELIUS_API_KEY!;
-console.log("API Key, as loaded in helius.ts:", apiKey);
 export const heliusClient = createHelius({ apiKey });
 
 export async function getTokenBalance(
@@ -19,7 +18,7 @@ export async function getTokenBalance(
       encoding: "jsonParsed",
     }
   );
-  console.log("result: ", result);
+  // console.log("result: ", result);
 
   const account = result.value[0]?.account.data;
   const amount = (account as any)?.parsed?.info.tokenAmount.uiAmount;

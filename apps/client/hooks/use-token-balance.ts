@@ -28,7 +28,7 @@ export function useTokenBalance({ owner, mint }: UseTokenBalanceProps = {}) {
         owner as Address,
         mint as Address
       );
-      console.log("Token balance received:", tokenBalance);
+      // console.log("Token balance received:", tokenBalance);
       setBalance(tokenBalance);
     } catch (err) {
       console.error("Error fetching token balance:", err);

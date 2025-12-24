@@ -5,14 +5,16 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatNumber(num: number | null | undefined): string {
+export function formatNumber(num: number | string | null | undefined): string {
   if (num === null || num === undefined) return "$0";
-  if (num >= 1000000) {
-    return `$${(num / 1000000).toFixed(2)}M`;
-  } else if (num >= 1000) {
-    return `$${(num / 1000).toFixed(2)}K`;
+  const n = typeof num === "string" ? parseFloat(num) : num;
+  if (isNaN(n)) return "$0";
+  if (n >= 1000000) {
+    return `$${(n / 1000000).toFixed(2)}M`;
+  } else if (n >= 1000) {
+    return `$${(n / 1000).toFixed(2)}K`;
   }
-  return `$${num.toFixed(2)}`;
+  return `$${n.toFixed(2)}`;
 }
 
 export function formatPercentage(num: number | null | undefined): string {

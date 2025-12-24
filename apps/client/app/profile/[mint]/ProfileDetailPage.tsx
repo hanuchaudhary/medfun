@@ -5,7 +5,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import BackButton from "@/components/BackButton";
 import { useWallet } from "@/hooks/use-wallet";
 import {
@@ -19,6 +18,7 @@ import {
 } from "@meteora-ag/dynamic-bonding-curve-sdk";
 import { toast } from "sonner";
 import BN from "bn.js";
+import bs58 from "bs58";
 import { Token } from "@/types/token";
 import axios from "axios";
 import Link from "next/link";
@@ -181,7 +181,7 @@ export default function ProfileDetailPage({
         transaction: Buffer.from(txBase64, "base64"),
         wallet: privyWallet,
       });
-      const txSig = result.signature;
+      const txSig = bs58.encode(result.signature);
       toast.success(`Fees claimed! Tx: ${txSig}`);
     } catch (err) {
       console.error("Claim fees error:", err);
@@ -213,6 +213,27 @@ export default function ProfileDetailPage({
       <div className="relative max-w-7xl border rounded-lg mx-auto">
         <div className="p-8">
           <p className="text-destructive">Token not found</p>
+        </div>
+      </div>
+    );
+  }
+
+  const isCreator = wallet.wallet?.address === token.creatorAddress;
+
+  if (wallet.connected && !isCreator) {
+    return (
+      <div className="relative max-w-7xl border rounded-lg mx-auto">
+        <BackButton />
+        <div className="p-8 text-center space-y-4">
+          <p className="text-destructive font-medium">
+            You are not the creator of this token
+          </p>
+          <p className="text-muted-foreground text-sm">
+            Only the token creator can access this page and claim fees.
+          </p>
+          <Button onClick={() => router.push("/profile")} className="mt-4">
+            Go to Profile
+          </Button>
         </div>
       </div>
     );

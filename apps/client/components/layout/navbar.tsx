@@ -37,7 +37,6 @@ export function Navbar() {
   }, [publicKey]);
 
   useEffect(() => {
-    console.log(publicKey);
     if (connected && isManualConnection && !hasShownInitialModal) {
       setShowWalletModal(true);
       setHasShownInitialModal(true);

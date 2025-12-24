@@ -3,7 +3,7 @@ import { redisCache } from "@/lib/redis";
 import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
 
-const CACHE_TTL = 120;
+const CACHE_TTL = 60;
 
 export async function GET(
   req: NextRequest,

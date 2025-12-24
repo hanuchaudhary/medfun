@@ -48,14 +48,10 @@ export function SwapContainer({ mint }: SwapContainerProps) {
           connection,
           "confirmed"
         );
-        console.log("POOL: ", ct.poolAddress);
-
         const state = await dbcClient.state.getPool(
           new PublicKey(ct.poolAddress)
         );
-        const poolStatus = (state as any)?.isMigrated;
-        console.log("Pool state", poolStatus);
-
+      const poolStatus = (state as any)?.isMigrated;
         if (!cancelled) {
           setIsGraduated(!!poolStatus);
         }

@@ -74,7 +74,7 @@ export function SwapSection({ tokenmint }: SwapSectionProps) {
         poolConfigState.activationType
       );
 
-      const decimals = isBuy ? 9 : 6;
+      const decimals = 9;
       const amountIn = new BN(Math.floor(amount * Math.pow(10, decimals)));
 
       const quote = await client.pool.swapQuote({
@@ -91,7 +91,7 @@ export function SwapSection({ tokenmint }: SwapSectionProps) {
         quote,
         outputAmount:
           parseFloat(quote.outputAmount.toString()) /
-          Math.pow(10, isBuy ? 6 : 9),
+          Math.pow(10, 9),
       };
     },
     [POOL_ADDRESS, connection]
@@ -237,7 +237,7 @@ export function SwapSection({ tokenmint }: SwapSectionProps) {
       const { quote } = await getSwapQuote(parseFloat(sellInput.amount), false);
 
       const swapParam = {
-        amountIn: new BN(parseFloat(sellInput.amount) * 1e6),
+        amountIn: new BN(parseFloat(sellInput.amount) * 1e9),
         minimumAmountOut: quote.minimumAmountOut,
         swapBaseForQuote: true,
         owner: wallet.publicKey!,
@@ -276,7 +276,7 @@ export function SwapSection({ tokenmint }: SwapSectionProps) {
   };
 
   return (
-    <Card className="bg-background gap-0 p-4">
+    <Card className="bg-background gap-0 p-4 border-0 rounded-none border-b">
       <CardContent className="p-0 gap-0 relative">
         <Tabs defaultValue="buy" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
@@ -415,7 +415,7 @@ export function SwapSection({ tokenmint }: SwapSectionProps) {
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                   <Image
                     priority
-                    className="w-auto h-auto"
+                    className="w-auto h-auto rounded-sm"
                     src={currentToken?.imageUrl!}
                     alt={currentToken?.name || "Token Image"}
                     width={32}
@@ -490,7 +490,7 @@ export function SwapSection({ tokenmint }: SwapSectionProps) {
 
             <Button
               onClick={handleSell}
-              className="w-full text-background"
+              className="w-full font-semibold"
               size="lg"
               variant="destructive"
               disabled={

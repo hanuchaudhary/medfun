@@ -144,7 +144,7 @@ export function GraduatedSwapSection({
         const blockTime = await connection.getBlockTime(currentSlot);
         if (blockTime === null) return null;
 
-        const amountIn = new BN(Math.floor(amount * (isBuy ? 1e9 : 1e6)));
+        const amountIn = new BN(Math.floor(amount * (1e9)));
         const inputMint = isBuy ? poolState.tokenAMint : poolState.tokenBMint;
 
         const quote = await cpAmm.getQuote({
@@ -155,14 +155,14 @@ export function GraduatedSwapSection({
           currentTime: blockTime,
           currentSlot,
           tokenADecimal: 9,
-          tokenBDecimal: 6,
+          tokenBDecimal: 9,
         });
 
         return {
           quote,
           poolState,
           outputAmount:
-            parseFloat(quote.swapOutAmount.toString()) / (isBuy ? 1e6 : 1e9),
+            parseFloat(quote.swapOutAmount.toString()) / (1e9),
         };
       } catch (error) {
         console.error("Failed to fetch quote:", error);
@@ -323,7 +323,7 @@ export function GraduatedSwapSection({
       }
 
       const { quote, poolState } = result;
-      const amountIn = new BN(Math.floor(parseFloat(sellInput.amount) * 1e6));
+      const amountIn = new BN(Math.floor(parseFloat(sellInput.amount) * 1e9));
 
       toast.loading("Creating swap transaction...", { id: toastId });
 
@@ -591,7 +591,7 @@ export function GraduatedSwapSection({
 
             <Button
               onClick={handleSell}
-              className="w-full text-background"
+              className="w-full font-semibold"
               size="lg"
               variant="destructive"
               disabled={

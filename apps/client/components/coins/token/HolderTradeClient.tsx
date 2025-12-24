@@ -135,7 +135,7 @@ export default function HolderTradeClient({
                           </td>
                           <td className="p-2 text-right font-medium">-</td>
                           <td className="p-2 text-right font-medium font-mono text-xs">
-                            {formatNumber(holder.amount)}
+                            {holder.amount}
                           </td>
                         </tr>
                       );
@@ -192,7 +192,7 @@ export default function HolderTradeClient({
                       const isBuy = trade.type === "BUY";
                       return (
                         <tr
-                          key={trade.id}
+                          key={trade.signature}
                           className="border-b hover:bg-accent/50 transition-colors"
                         >
                           <td className="p-2">
@@ -215,7 +215,7 @@ export default function HolderTradeClient({
                             {Number(trade.price).toFixed(10)}
                           </td>
                           <td className="p-2 text-right font-medium text-xs font-mono">
-                            {formatNumber(trade.tokenAmount)}
+                            {trade.tokenAmount.toFixed(2)}
                           </td>
                           <td className="p-2 text-right font-medium text-xs font-mono">
                             {trade.solAmount.toFixed(6)}

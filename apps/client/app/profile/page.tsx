@@ -2,7 +2,6 @@
 
 import React, { useMemo } from "react";
 import { useWallet } from "@/hooks/use-wallet";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Token } from "@/types/token";
 import { TokenCard } from "@/components/coins/token-card";
 
@@ -53,7 +52,7 @@ export default function ProfilePage() {
           {!isLoading &&
             creatorTokens?.map((t) => (
               <TokenCard
-                key={t.id}
+                key={t.mintAddress}
                 token={t}
                 href={`/profile/${t.mintAddress}`}
               />
