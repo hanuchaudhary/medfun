@@ -19,7 +19,7 @@ export function TokenCard({ token, href }: TokenCardProps) {
   return (
     <Link href={href}>
       <div className="flex gap-3 rounded-lg transition-all cursor-pointer group hover:scale-[1.03]">
-        <div className="relative w-40 h-40 shrink-0 rounded-lg overflow-hidden">
+        <div className="relative md:size-40 size-30 shrink-0 rounded-lg overflow-hidden">
           <Image
             unoptimized
             src={

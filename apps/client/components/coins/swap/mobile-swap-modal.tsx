@@ -82,14 +82,15 @@ export function MobileSwapModal({ tokenId, tokenName }: MobileSwapModalProps) {
       <SheetTrigger asChild>
         <Button
           size="lg"
-          className="fixed bottom-4   left-4 right-4 z-40 md:hidden rounded-full shadow-lg h-14"
+          className="fixed bottom-20 font-semibold right-4 z-40 md:hidden rounded-full shadow-lg h-14"
         >
-          Buy {tokenName || "Token"}
+          <ArrowUpDown className="" />
+          {tokenName ? `Swap ${tokenName}` : "Swap"}
         </Button>
       </SheetTrigger>
       <SheetContent
         side="bottom"
-        className="h-[75vh] rounded-t-3xl overflow-hidden"
+        className="h-[75vh] border-dashed overflow-hidden"
       >
         <div className="overflow-y-auto h-[calc(85vh-80px)]">
           {isGraduated ? (

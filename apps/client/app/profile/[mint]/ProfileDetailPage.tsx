@@ -241,7 +241,7 @@ export default function ProfileDetailPage({
 
   return (
     <div className="relative max-w-7xl mx-auto md:px-0 px-4 overflow-hidden">
-      <div className="border-b border-dashed p-8">
+      <div className="md:border-b border border-dashed md:p-8 p-6">
         <div className="flex items-start gap-6">
           <div className="relative w-24 h-24 shrink-0">
             <Image
@@ -299,7 +299,7 @@ export default function ProfileDetailPage({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 divide-y divide-dashed lg:divide-y-0 lg:divide-x">
+      <div className="grid grid-cols-1 lg:grid-cols-3 md:divide-y divide-dashed lg:divide-y-0 lg:divide-x border border-dashed md:border-0">
         <div className="">
           <div className="">
             {feeMetrics && (

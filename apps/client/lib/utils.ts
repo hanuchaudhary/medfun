@@ -42,3 +42,38 @@ export const getTimeSince = (timestamp: string | Date) => {
   if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
   return `${Math.floor(seconds / 86400)}d`;
 };
+
+// Subscript digits for formatting small numbers
+const subscriptDigits: Record<string, string> = {
+  "0": "₀",
+  "1": "₁",
+  "2": "₂",
+  "3": "₃",
+  "4": "₄",
+  "5": "₅",
+  "6": "₆",
+  "7": "₇",
+  "8": "₈",
+  "9": "₉",
+};
+
+export const formatSmallPrice = (price: number | string): string => {
+  const num = typeof price === "string" ? parseFloat(price) : price;
+  if (isNaN(num) || num === 0) return "0";
+  if (num >= 0.01) return num.toFixed(4);
+
+  const str = num.toFixed(20);
+  const match = str.match(/^0\.(0+)([1-9]\d*)/);
+
+  if (!match) return num.toFixed(10);
+
+  const zeroCount = match[1]?.length;
+  const significantDigits = match[2]?.slice(0, 4); // Keep 4 significant digits
+
+  const subscript = zeroCount!
+    .toString()
+    .split("")
+    .map((d) => subscriptDigits[d])
+    .join("");
+  return `0.0${subscript}${significantDigits}`;
+};

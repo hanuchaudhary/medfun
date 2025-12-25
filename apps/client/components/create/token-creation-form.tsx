@@ -198,7 +198,6 @@ export function TokenCreationForm({
     setFormData({ ...formData, socialLinks });
   };
 
-  // Create preview token data
   const previewToken: Token = useMemo(
     () => ({
       name: formData.name || "Your Token Name",
@@ -232,12 +231,12 @@ export function TokenCreationForm({
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="max-w-6xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-8 p-6">
+      <form onSubmit={handleSubmit} className="md:max-w-6xl mx-auto mb-16 md:mb-0">
+        <div className="grid md:grid-cols-2 gap-8 md:p-6">
           <div className="space-y-6">
             <div>
               <h2 className="text-2xl font-bold mb-2">Create new coin</h2>
-              <div className="space-y-1">
+              <div className="space-y-1 md:block hidden">
                 <p className="text-sm font-medium">Coin details</p>
                 <p className="text-sm text-muted-foreground">
                   Choose carefully, these can't be changed once the coin is

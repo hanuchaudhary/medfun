@@ -1,5 +1,3 @@
-"use client";
-
 import HolderTradeClient from "./HolderTradeClient";
 
 export function HoldersTradesTable({ mintAddress }: { mintAddress: string }) {

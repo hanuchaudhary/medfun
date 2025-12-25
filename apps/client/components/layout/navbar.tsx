@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import { Plus } from "lucide-react";
+import Image from "next/image";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -141,26 +142,40 @@ export function Navbar() {
               </Link>
             </nav>
 
-            <div className="flex md:hidden items-center gap-2 mr-4">
-              <ThemeToggle />
-              <motion.button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2 hover:bg-accent transition-colors z-50"
-                aria-label="Toggle menu"
-              >
-                <div className="flex flex-col gap-2 z-50">
-                  <motion.span
-                    className={`w-6 h-0.5 bg-primary transition-transform duration-200 ${
-                      isMobileMenuOpen ? "rotate-45 translate-y-1.5" : ""
-                    }`}
-                  />
-                  <motion.span
-                    className={`w-6 h-0.5 bg-primary transition-transform duration-200 ${
-                      isMobileMenuOpen ? "rotate-135 -translate-y-1" : ""
-                    }`}
-                  />
-                </div>
-              </motion.button>
+            <div className="flex md:hidden justify-between items-center gap-2 w-full">
+              <Link href={"/"} className="flex items-center justify-center gap-2">
+                <Image
+                  src={"/medfun-favicon.png"}
+                  alt="Logo"
+                  width={25}
+                  height={25}
+                />
+                <h4 className="font-semibold ">
+                  <span className="text-primary">Med</span>
+                  Fun
+                </h4>
+              </Link>
+              <div className="flex items-center">
+                <ThemeToggle />
+                <motion.button
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  className="p-2 hover:bg-accent transition-colors z-50"
+                  aria-label="Toggle menu"
+                >
+                  <div className="flex flex-col gap-2 z-50">
+                    <motion.span
+                      className={`w-6 h-0.5 bg-primary transition-transform duration-200 ${
+                        isMobileMenuOpen ? "rotate-45 translate-y-1.5" : ""
+                      }`}
+                    />
+                    <motion.span
+                      className={`w-6 h-0.5 bg-primary transition-transform duration-200 ${
+                        isMobileMenuOpen ? "rotate-135 -translate-y-1" : ""
+                      }`}
+                    />
+                  </div>
+                </motion.button>
+              </div>
             </div>
           </div>
         </div>

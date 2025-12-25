@@ -70,7 +70,7 @@ export function TokenDetails({ tokenMint }: TokenDetailsProps) {
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-semibold">{token.name}</h1>
+              <h1 className="text-lg font-semibold leading-none">{token.name}</h1>
               <Badge variant="secondary" className="rounded-sm text-primary">
                 {token.symbol}
               </Badge>

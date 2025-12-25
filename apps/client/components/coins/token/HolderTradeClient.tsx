@@ -4,7 +4,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatAddress, formatNumber, getTimeSince } from "@/lib/utils";
+import {
+  formatAddress,
+  formatNumber,
+  getTimeSince,
+  formatSmallPrice,
+  cn,
+} from "@/lib/utils";
 import React from "react";
 import { RealtimeChat } from "@/components/realtime-chat";
 import { useWallet } from "@/hooks/use-wallet";
@@ -22,27 +28,14 @@ export default function HolderTradeClient({
   const wallet = useWallet();
   const username = formatAddress(wallet.publicKey?.toString() || "Anonymous");
 
-  const { 
-    holders, 
-    isLoadingHolders, 
-    fetchHolders, 
-    trades, 
-    isLoadingTrades, 
-    fetchTrades
-  } = useTokenStore();
+  const { holders, isLoadingHolders, trades, isLoadingTrades } =
+    useTokenStore();
 
   const handleOnMessage = (messages: ChatMessage[]) => {
-    console.log("mes: ", messages);
     if (messages.length > 0) {
       console.log("last: ", messages[messages.length - 1]);
     }
   };
-
-  React.useEffect(() => {
-    // Initial fetch - real-time updates come via WebSocket subscription in TokenPageWrapper
-    fetchHolders(mintAddress);
-    fetchTrades(mintAddress, 50);
-  }, [mintAddress, fetchHolders, fetchTrades]);
 
   return (
     <div className="w-full">
@@ -169,7 +162,7 @@ export default function HolderTradeClient({
                     <th className="text-right p-2 font-medium text-xs">
                       Token Amount
                     </th>
-                    <th className="text-right p-2 font-medium text-xs">
+                    <th className="text-right p-2 font-medium text-xs sm:block hidden">
                       SOL Amount
                     </th>
                     <th className="text-right p-2 font-medium text-xs">
@@ -196,28 +189,49 @@ export default function HolderTradeClient({
                           className="border-b hover:bg-accent/50 transition-colors"
                         >
                           <td className="p-2">
-                            <span className="lowercase text-xs">
+                            <span
+                              className={cn(
+                                "lowercase text-xs",
+                                isBuy ? "text-primary" : "text-[#F10D11]"
+                              )}
+                            >
                               {getTimeSince(trade.timestamp)}
                             </span>
                           </td>
                           <td className="p-2">
                             <span
-                              className={`text-xs py-1 px-2 rounded capitalize ${
+                              className={cn(
+                                "text-xs py-1 px-2 rounded capitalize",
                                 isBuy
                                   ? "bg-primary/10 text-primary"
                                   : "bg-[#F10D11]/10 text-[#F10D11]"
-                              }`}
+                              )}
                             >
                               {trade.type}
                             </span>
                           </td>
-                          <td className="p-2 text-right font-medium text-xs font-mono">
-                            {Number(trade.price).toFixed(10)}
+                          <td
+                            className={cn(
+                              "p-2 text-right font-medium text-xs font-mono",
+                              isBuy ? "text-primary" : "text-[#F10D11]"
+                            )}
+                          >
+                            {formatSmallPrice(trade.price)}
                           </td>
-                          <td className="p-2 text-right font-medium text-xs font-mono">
+                          <td
+                            className={cn(
+                              "p-2 text-right font-medium text-xs font-mono",
+                              isBuy ? "text-primary" : "text-[#F10D11]"
+                            )}
+                          >
                             {trade.tokenAmount.toFixed(2)}
                           </td>
-                          <td className="p-2 text-right font-medium text-xs font-mono">
+                          <td
+                            className={cn(
+                              "p-2 text-right font-medium text-xs font-mono sm:block hidden",
+                              isBuy ? "text-primary" : "text-[#F10D11]"
+                            )}
+                          >
                             {trade.solAmount.toFixed(6)}
                           </td>
                           <td className="p-2 text-right normal-case">

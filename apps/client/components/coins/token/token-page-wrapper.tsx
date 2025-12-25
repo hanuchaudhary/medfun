@@ -31,6 +31,7 @@ export function TokenPageWrapper({
     fetchHolders,
     fetchKlines,
     subscribeToToken,
+    fetchTrades,
     unsubscribeFromToken,
     currentTimeframe,
     lastViewedMint,
@@ -40,6 +41,7 @@ export function TokenPageWrapper({
   const holdersIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const tokenDetailsIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const klinesIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const tradesIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (lastViewedMint && lastViewedMint !== tokenMint) {
@@ -48,7 +50,9 @@ export function TokenPageWrapper({
 
     fetchTokenDetails(tokenMint);
     fetchHolders(tokenMint);
+    fetchTrades(tokenMint, 50);
     fetchKlines(tokenMint, currentTimeframe);
+
     subscribeToToken(tokenMint);
 
     holdersIntervalRef.current = setInterval(() => {
@@ -59,11 +63,16 @@ export function TokenPageWrapper({
       fetchTokenDetails(tokenMint, true);
     }, 20000);
 
+    tradesIntervalRef.current = setInterval(() => {
+      fetchTrades(tokenMint, 50, undefined, true);
+    }, 35000);
+
     return () => {
       unsubscribeFromToken(tokenMint);
       if (holdersIntervalRef.current) clearInterval(holdersIntervalRef.current);
       if (tokenDetailsIntervalRef.current)
         clearInterval(tokenDetailsIntervalRef.current);
+      if (tradesIntervalRef.current) clearInterval(tradesIntervalRef.current);
     };
   }, [
     tokenMint,
