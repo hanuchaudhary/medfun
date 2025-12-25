@@ -1,4 +1,3 @@
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import Decimal from "decimal.js";
 
 interface RawTokenAmount {
@@ -85,16 +84,35 @@ function parseMeteoraWebhook(
         Math.abs(a.tokenAmount) > Math.abs(b.tokenAmount) ? a : b
       );
 
+      // const isBuy = solLeg.fromUserAccount === feePayer;
+      // const tokenAmount = new Decimal(tokenLeg.tokenAmount);
+      // const solAmount = new Decimal(solLeg.tokenAmount);
+      // if (tokenAmount.lte(0) || solAmount.lte(0)) continue;
+      // const price = solAmount.div(tokenAmount);
+
       const isBuy = solLeg.fromUserAccount === feePayer;
+      const tokenAmount = new Decimal(Math.abs(tokenLeg.tokenAmount));
+      const solAmount = new Decimal(Math.abs(solLeg.tokenAmount));
+      if (tokenAmount.lte(0) || solAmount.lte(0)) continue;
+      const price = solAmount.div(tokenAmount);
 
       const type: "BUY" | "SELL" = isBuy ? "BUY" : "SELL";
 
-      const tokenAmount = new Decimal(tokenLeg.tokenAmount);
-      const solAmount = new Decimal(solLeg.tokenAmount);
-
-      if (tokenAmount.lte(0) || solAmount.lte(0)) continue;
-
-      const price = solAmount.div(tokenAmount);
+      console.log({
+        signature,
+        feePayer,
+        solTransfer: {
+          from: solLeg.fromUserAccount,
+          to: solLeg.toUserAccount,
+          amount: solLeg.tokenAmount,
+        },
+        tokenTransfer: {
+          from: tokenLeg.fromUserAccount,
+          to: tokenLeg.toUserAccount,
+          amount: tokenLeg.tokenAmount,
+        },
+        isBuy,
+      });
 
       results.push({
         type,

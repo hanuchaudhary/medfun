@@ -34,7 +34,7 @@ export function Sidebar() {
             src="/medfun-favicon.png"
             alt="Logo"
             fill
-            className="object-contain scale-130"
+            className="object-contain scale-115"
             priority
           />
         </div>

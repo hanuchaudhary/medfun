@@ -81,11 +81,11 @@ export function TokenPageWrapper({
     fetchKlines,
     subscribeToToken,
     unsubscribeFromToken,
-    currentTimeframe,
   ]);
 
   useEffect(() => {
     if (klinesIntervalRef.current) clearInterval(klinesIntervalRef.current);
+    fetchKlines(tokenMint, currentTimeframe);
 
     klinesIntervalRef.current = setInterval(() => {
       fetchKlines(tokenMint, currentTimeframe, true);
