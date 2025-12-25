@@ -24,7 +24,7 @@ export function TokenCard({ token, href }: TokenCardProps) {
             unoptimized
             src={
               token.imageUrl ||
-              "https://i.pinimg.com/1200x/b7/8f/02/b78f023aa1bca7bdada28db1c30d1fe5.jpg"
+              "/medfun-favicon.png"
             }
             alt={token.name || "Token"}
             fill
