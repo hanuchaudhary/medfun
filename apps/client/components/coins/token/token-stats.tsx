@@ -4,6 +4,14 @@ import { formatCount, formatNumber, formatPercentage } from "@/lib/utils";
 import { useCurrentToken } from "./token-page-wrapper";
 import type { TokenStats as StatType } from "@/types/token";
 import React from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { Tooltip } from "@radix-ui/react-tooltip";
+import {
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type TimeFrame = "5m" | "1h" | "6h" | "24h";
 
@@ -100,7 +108,7 @@ export default function TokenStats() {
   ];
 
   return (
-    <div className="border-t border-dashed my-4">
+    <div className="border-y border-dashed my-4">
       <h4 className="text-sm font-medium text-muted-foreground my-4 px-4">
         Token Statistics
       </h4>
@@ -192,7 +200,7 @@ export default function TokenStats() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 divide-x divide-dashed">
+      <div className="grid grid-cols-3 divide-x divide-dashed border-y border-dashed">
         {changeStats.map((stat) => (
           <div key={stat.label} className="text-center p-2">
             <div className="text-xs text-muted-foreground mb-1">
@@ -207,6 +215,50 @@ export default function TokenStats() {
             </div>
           </div>
         ))}
+      </div>
+      <div className="p-4 flex items-center gap-2">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <Link
+                href={`https://app.meteora.ag/pools/${currentToken.mintAddress}`}
+                target="_blank"
+              >
+                <Image
+                  src="/meteora.png"
+                  alt="Meteora Logo"
+                  width={30}
+                  height={30}
+                  className="inline-block"
+                />
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent>
+              <span className="text-xs">Trade on Meteora</span>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <Link
+                href={`https://jup.ag/tokens/${currentToken.mintAddress}`}
+                target="_blank"
+              >
+                <Image
+                  src="/jup.png"
+                  alt="Meteora Logo"
+                  width={30}
+                  height={30}
+                  className="inline-block"
+                />
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent>
+              <span className="text-xs">Trade on Jupiter</span>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
     </div>
   );
