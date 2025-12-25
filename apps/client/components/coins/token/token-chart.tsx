@@ -1,17 +1,22 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Kline } from "@/types/token";
 import { cn } from "@/lib/utils";
 import { ChartManager } from "@/lib/chart-manager";
 import { useTokenStore } from "@/store/tokenStore";
+import { ChevronRight } from "lucide-react";
 
 const TIMEFRAMES = [
   { label: "1m", value: "1m" },
   { label: "5m", value: "5m" },
+  { label: "1h", value: "1h" },
+  { label: "6h", value: "6h" },
   { label: "24h", value: "24h" },
   { label: "1w", value: "1w" },
 ] as const;
+
+const VISIBLE_COUNT = 3;
 
 interface TokenChartProps {
   mintAddress: string;
@@ -23,6 +28,11 @@ export function TokenChart({ mintAddress, klines }: TokenChartProps) {
   const chartManagerRef = useRef<ChartManager | null>(null);
   const previousTimeframeRef = useRef<string | null>(null);
   const { currentTimeframe, setTimeframe } = useTokenStore();
+  const [showAllTimeframes, setShowAllTimeframes] = useState(false);
+
+  const visibleTimeframes = showAllTimeframes
+    ? TIMEFRAMES
+    : TIMEFRAMES.slice(0, VISIBLE_COUNT);
 
   useEffect(() => {
     const saved = localStorage.getItem("chart-timeframe");
@@ -36,7 +46,6 @@ export function TokenChart({ mintAddress, klines }: TokenChartProps) {
     setTimeframe(tf);
   };
 
-  // Handle chart creation and updates
   useEffect(() => {
     if (!chartContainerRef.current || !klines || klines.length === 0) return;
 
@@ -70,7 +79,6 @@ export function TokenChart({ mintAddress, klines }: TokenChartProps) {
     previousTimeframeRef.current = currentTimeframe;
   }, [klines, currentTimeframe]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (chartManagerRef.current) {
@@ -83,7 +91,7 @@ export function TokenChart({ mintAddress, klines }: TokenChartProps) {
   return (
     <div className="relative w-full">
       <div className="flex items-center gap-1 py-2 ml-24 relative z-10">
-        {TIMEFRAMES.map((tf) => (
+        {visibleTimeframes.map((tf) => (
           <button
             key={tf.value}
             type="button"
@@ -98,6 +106,24 @@ export function TokenChart({ mintAddress, klines }: TokenChartProps) {
             {tf.label}
           </button>
         ))}
+        {TIMEFRAMES.length > VISIBLE_COUNT && (
+          <button
+            type="button"
+            onClick={() => setShowAllTimeframes(!showAllTimeframes)}
+            className={cn(
+              "p-1.5 text-xs font-medium rounded-md transition-all cursor-pointer",
+              "bg-muted text-muted-foreground hover:bg-muted/80"
+            )}
+            title={showAllTimeframes ? "Show less" : "Show more timeframes"}
+          >
+            <ChevronRight
+              className={cn(
+                "w-4 h-4 transition-transform duration-200",
+                showAllTimeframes && "rotate-180"
+              )}
+            />
+          </button>
+        )}
       </div>
 
       <div ref={chartContainerRef} className="w-full h-[450px] pb-8" />
