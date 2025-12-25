@@ -142,7 +142,7 @@ export function Navbar() {
               </Link>
             </nav>
 
-            <div className="flex md:hidden justify-between items-center gap-2 w-full">
+            <div className="flex md:hidden py-3 justify-between items-center gap-2 w-full">
               <Link href={"/"} className="flex items-center justify-center gap-2">
                 <Image
                   src={"/medfun-favicon.png"}
